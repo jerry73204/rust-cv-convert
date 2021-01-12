@@ -1,0 +1,28 @@
+[package]
+name = "cv-convert"
+version = "0.1.0"
+authors = ["jerry73204 <jerry73204@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.38"
+image = { version = "0.23.12", optional = true }
+nalgebra = { version = "0.24.0", optional = true }
+opencv = { version = "0.47.0", default-features = false, optional = true }
+tch = { version = "0.3.1", optional = true }
+
+[features]
+default = ["image", "opencv-4", "opencv-buildtime-bindgen", "tch", "nalgebra"]
+docs-only = ["opencv-4", "opencv-contrib", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra"]
+opencv-4 = ["opencv", "opencv/opencv-4"]
+opencv-34 = ["opencv", "opencv/opencv-34"]
+opencv-32 = ["opencv", "opencv/opencv-32"]
+opencv-contrib = ["opencv", "opencv/contrib"]
+opencv-buildtime-bindgen = ["opencv", "opencv/buildtime-bindgen"]
+
+
+[package.metadata.docs.rs]
+no-default-features = true
+features = ["docs-only"]
