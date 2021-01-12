@@ -184,7 +184,7 @@ mod with_opencv_nalgebra {
                     core::Mat::from_slice(&[x, y, z])?
                 };
                 let mut rotation_mat = core::Mat::zeros(3, 3, core::CV_64FC1)?.to_mat()?;
-                calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut opencv::core::no_array()?)?;
+                calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut core::no_array()?)?;
                 let rotation_matrix: na::Matrix3<f64> = TryFromCv::try_from_cv(rotation_mat)?;
                 geo::UnitQuaternion::from_matrix(&rotation_matrix)
             };
@@ -305,11 +305,7 @@ mod with_opencv_nalgebra {
                 let rotation_mat: Mat =
                     TryFromCv::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
                 let mut rvec_mat = core::Mat::zeros(3, 1, core::CV_64FC1)?.to_mat()?;
-                opencv::calib3d::rodrigues(
-                    &rotation_mat,
-                    &mut rvec_mat,
-                    &mut opencv::core::no_array()?,
-                )?;
+                calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core::no_array()?)?;
                 rvec_mat
             };
             let tvec = core::Mat::from_slice(&[translation.x, translation.y, translation.z])?;
