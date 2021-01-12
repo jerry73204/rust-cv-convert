@@ -4,7 +4,7 @@ pub use from::*;
 pub use try_from::*;
 
 mod try_from {
-    pub trait CvTryFrom<T>
+    pub trait TryFromCv<T>
     where
         Self: Sized,
     {
@@ -13,17 +13,17 @@ mod try_from {
         fn try_from_cv(from: T) -> Result<Self, Self::Error>;
     }
 
-    pub trait CvTryInto<T> {
+    pub trait TryIntoCv<T> {
         type Error;
 
         fn try_into_cv(self) -> Result<T, Self::Error>;
     }
 
-    impl<T, U> CvTryInto<U> for T
+    impl<T, U> TryIntoCv<U> for T
     where
-        U: CvTryFrom<T>,
+        U: TryFromCv<T>,
     {
-        type Error = <U as CvTryFrom<T>>::Error;
+        type Error = <U as TryFromCv<T>>::Error;
 
         fn try_into_cv(self) -> Result<U, Self::Error> {
             U::try_from_cv(self)
@@ -32,17 +32,17 @@ mod try_from {
 }
 
 mod from {
-    pub trait CvFrom<T> {
+    pub trait FromCv<T> {
         fn from_cv(from: T) -> Self;
     }
 
-    pub trait CvInto<T> {
+    pub trait IntoCv<T> {
         fn into_cv(self) -> T;
     }
 
-    impl<T, U> CvInto<U> for T
+    impl<T, U> IntoCv<U> for T
     where
-        U: CvFrom<T>,
+        U: FromCv<T>,
     {
         fn into_cv(self) -> U {
             U::from_cv(self)
@@ -55,7 +55,7 @@ mod with_opencv {
     use super::*;
     use opencv::{core, prelude::*};
 
-    impl<T> CvTryFrom<&core::Mat> for core::Point_<T>
+    impl<T> TryFromCv<&core::Mat> for core::Point_<T>
     where
         T: core::DataType + core::ValidPointType,
     {
@@ -72,18 +72,18 @@ mod with_opencv {
         }
     }
 
-    impl<T> CvTryFrom<core::Mat> for core::Point_<T>
+    impl<T> TryFromCv<core::Mat> for core::Point_<T>
     where
         T: core::DataType + core::ValidPointType,
     {
         type Error = Error;
 
         fn try_from_cv(from: core::Mat) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<T> CvTryFrom<&core::Mat> for core::Point3_<T>
+    impl<T> TryFromCv<&core::Mat> for core::Point3_<T>
     where
         T: core::DataType + core::ValidPoint3Type,
     {
@@ -101,18 +101,18 @@ mod with_opencv {
         }
     }
 
-    impl<T> CvTryFrom<core::Mat> for core::Point3_<T>
+    impl<T> TryFromCv<core::Mat> for core::Point3_<T>
     where
         T: core::DataType + core::ValidPoint3Type,
     {
         type Error = Error;
 
         fn try_from_cv(from: core::Mat) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<T> CvTryFrom<&core::Point_<T>> for core::Mat
+    impl<T> TryFromCv<&core::Point_<T>> for core::Mat
     where
         T: core::DataType + core::ValidPointType,
     {
@@ -125,18 +125,18 @@ mod with_opencv {
         }
     }
 
-    impl<T> CvTryFrom<core::Point_<T>> for core::Mat
+    impl<T> TryFromCv<core::Point_<T>> for core::Mat
     where
         T: core::DataType + core::ValidPointType,
     {
         type Error = Error;
 
         fn try_from_cv(from: core::Point_<T>) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<T> CvTryFrom<&core::Point3_<T>> for core::Mat
+    impl<T> TryFromCv<&core::Point3_<T>> for core::Mat
     where
         T: core::DataType + core::ValidPoint3Type,
     {
@@ -149,14 +149,14 @@ mod with_opencv {
         }
     }
 
-    impl<T> CvTryFrom<core::Point3_<T>> for core::Mat
+    impl<T> TryFromCv<core::Point3_<T>> for core::Mat
     where
         T: core::DataType + core::ValidPoint3Type,
     {
         type Error = Error;
 
         fn try_from_cv(from: core::Point3_<T>) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 }
@@ -173,7 +173,7 @@ mod with_opencv_nalgebra {
         pub tvec: T,
     }
 
-    impl CvTryFrom<OpenCvPose<&core::Point3d>> for geo::Isometry3<f64> {
+    impl TryFromCv<OpenCvPose<&core::Point3d>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(pose: OpenCvPose<&core::Point3d>) -> Result<Self> {
@@ -185,7 +185,7 @@ mod with_opencv_nalgebra {
                 };
                 let mut rotation_mat = core::Mat::zeros(3, 3, core::CV_64FC1)?.to_mat()?;
                 calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut opencv::core::no_array()?)?;
-                let rotation_matrix: na::Matrix3<f64> = CvTryFrom::try_from_cv(rotation_mat)?;
+                let rotation_matrix: na::Matrix3<f64> = TryFromCv::try_from_cv(rotation_mat)?;
                 geo::UnitQuaternion::from_matrix(&rotation_matrix)
             };
 
@@ -199,24 +199,24 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl CvTryFrom<&OpenCvPose<core::Point3d>> for geo::Isometry3<f64> {
+    impl TryFromCv<&OpenCvPose<core::Point3d>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(from: &OpenCvPose<core::Point3d>) -> Result<Self> {
             let OpenCvPose { rvec, tvec } = from;
-            CvTryFrom::try_from_cv(OpenCvPose { rvec, tvec })
+            TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
         }
     }
 
-    impl CvTryFrom<OpenCvPose<core::Point3d>> for geo::Isometry3<f64> {
+    impl TryFromCv<OpenCvPose<core::Point3d>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(from: OpenCvPose<core::Point3d>) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl CvTryFrom<OpenCvPose<&core::Mat>> for geo::Isometry3<f64> {
+    impl TryFromCv<OpenCvPose<&core::Mat>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(from: OpenCvPose<&core::Mat>) -> Result<Self> {
@@ -226,30 +226,30 @@ mod with_opencv_nalgebra {
             } = from;
             let rvec = core::Point3d::try_from_cv(rvec_mat)?;
             let tvec = core::Point3d::try_from_cv(tvec_mat)?;
-            let isometry = CvTryFrom::try_from_cv(OpenCvPose { rvec, tvec })?;
+            let isometry = TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })?;
             Ok(isometry)
         }
     }
 
-    impl CvTryFrom<&OpenCvPose<core::Mat>> for geo::Isometry3<f64> {
+    impl TryFromCv<&OpenCvPose<core::Mat>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(from: &OpenCvPose<core::Mat>) -> Result<Self> {
             let OpenCvPose { rvec, tvec } = from;
-            CvTryFrom::try_from_cv(OpenCvPose { rvec, tvec })
+            TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
         }
     }
 
-    impl CvTryFrom<OpenCvPose<core::Mat>> for geo::Isometry3<f64> {
+    impl TryFromCv<OpenCvPose<core::Mat>> for geo::Isometry3<f64> {
         type Error = Error;
 
         fn try_from_cv(from: OpenCvPose<core::Mat>) -> Result<Self> {
             let OpenCvPose { rvec, tvec } = &from;
-            CvTryFrom::try_from_cv(OpenCvPose { rvec, tvec })
+            TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
         }
     }
 
-    impl<T> CvTryFrom<&geo::Isometry3<T>> for OpenCvPose<core::Point3_<T>>
+    impl<T> TryFromCv<&geo::Isometry3<T>> for OpenCvPose<core::Point3_<T>>
     where
         T: core::DataType + core::ValidPoint3Type + na::RealField,
     {
@@ -280,18 +280,18 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<T> CvTryFrom<geo::Isometry3<T>> for OpenCvPose<core::Point3_<T>>
+    impl<T> TryFromCv<geo::Isometry3<T>> for OpenCvPose<core::Point3_<T>>
     where
         T: core::DataType + core::ValidPoint3Type + na::RealField,
     {
         type Error = Error;
 
         fn try_from_cv(from: geo::Isometry3<T>) -> Result<OpenCvPose<core::Point3_<T>>> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl CvTryFrom<&geo::Isometry3<f64>> for OpenCvPose<core::Mat> {
+    impl TryFromCv<&geo::Isometry3<f64>> for OpenCvPose<core::Mat> {
         type Error = Error;
 
         fn try_from_cv(from: &geo::Isometry3<f64>) -> Result<OpenCvPose<core::Mat>> {
@@ -303,7 +303,7 @@ mod with_opencv_nalgebra {
 
             let rvec = {
                 let rotation_mat: Mat =
-                    CvTryFrom::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
+                    TryFromCv::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
                 let mut rvec_mat = core::Mat::zeros(3, 1, core::CV_64FC1)?.to_mat()?;
                 opencv::calib3d::rodrigues(
                     &rotation_mat,
@@ -318,15 +318,15 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl CvTryFrom<geo::Isometry3<f64>> for OpenCvPose<core::Mat> {
+    impl TryFromCv<geo::Isometry3<f64>> for OpenCvPose<core::Mat> {
         type Error = Error;
 
         fn try_from_cv(from: geo::Isometry3<f64>) -> Result<OpenCvPose<core::Mat>> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl CvTryFrom<&geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
+    impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
         type Error = Error;
 
         fn try_from_cv(from: &geo::Isometry3<f32>) -> Result<OpenCvPose<core::Mat>> {
@@ -348,15 +348,15 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl CvTryFrom<geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
+    impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
         type Error = Error;
 
         fn try_from_cv(from: geo::Isometry3<f32>) -> Result<OpenCvPose<core::Mat>> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<N, R, C> CvTryFrom<&core::Mat> for na::MatrixMN<N, R, C>
+    impl<N, R, C> TryFromCv<&core::Mat> for na::MatrixMN<N, R, C>
     where
         N: na::Scalar + core::DataType,
         R: na::Dim + na::DimName,
@@ -381,7 +381,7 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<N, R, C> CvTryFrom<core::Mat> for na::MatrixMN<N, R, C>
+    impl<N, R, C> TryFromCv<core::Mat> for na::MatrixMN<N, R, C>
     where
         N: na::Scalar + core::DataType,
         R: na::Dim + na::DimName,
@@ -391,11 +391,11 @@ mod with_opencv_nalgebra {
         type Error = Error;
 
         fn try_from_cv(from: core::Mat) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<N, R, C, S> CvTryFrom<&na::Matrix<N, R, C, S>> for core::Mat
+    impl<N, R, C, S> TryFromCv<&na::Matrix<N, R, C, S>> for core::Mat
     where
         N: na::Scalar + core::DataType,
         R: na::Dim + na::DimName,
@@ -413,7 +413,7 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<N, R, C, S> CvTryFrom<na::Matrix<N, R, C, S>> for core::Mat
+    impl<N, R, C, S> TryFromCv<na::Matrix<N, R, C, S>> for core::Mat
     where
         N: na::Scalar + core::DataType,
         R: na::Dim + na::DimName,
@@ -424,11 +424,11 @@ mod with_opencv_nalgebra {
         type Error = Error;
 
         fn try_from_cv(from: na::Matrix<N, R, C, S>) -> Result<Self> {
-            CvTryFrom::try_from_cv(&from)
+            TryFromCv::try_from_cv(&from)
         }
     }
 
-    impl<T> CvFrom<&na::Point2<T>> for core::Point_<T>
+    impl<T> FromCv<&na::Point2<T>> for core::Point_<T>
     where
         T: na::Scalar + core::ValidPointType,
     {
@@ -437,16 +437,16 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<T> CvFrom<na::Point2<T>> for core::Point_<T>
+    impl<T> FromCv<na::Point2<T>> for core::Point_<T>
     where
         T: na::Scalar + core::ValidPointType,
     {
         fn from_cv(from: na::Point2<T>) -> Self {
-            CvFrom::from_cv(&from)
+            FromCv::from_cv(&from)
         }
     }
 
-    impl<T> CvFrom<&core::Point_<T>> for na::Point2<T>
+    impl<T> FromCv<&core::Point_<T>> for na::Point2<T>
     where
         T: na::Scalar + core::ValidPointType,
     {
@@ -455,16 +455,16 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<T> CvFrom<core::Point_<T>> for na::Point2<T>
+    impl<T> FromCv<core::Point_<T>> for na::Point2<T>
     where
         T: na::Scalar + core::ValidPointType,
     {
         fn from_cv(from: core::Point_<T>) -> Self {
-            CvFrom::from_cv(&from)
+            FromCv::from_cv(&from)
         }
     }
 
-    impl<T> CvFrom<&na::Point3<T>> for core::Point3_<T>
+    impl<T> FromCv<&na::Point3<T>> for core::Point3_<T>
     where
         T: na::Scalar + core::ValidPoint3Type,
     {
@@ -473,16 +473,16 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<T> CvFrom<na::Point3<T>> for core::Point3_<T>
+    impl<T> FromCv<na::Point3<T>> for core::Point3_<T>
     where
         T: na::Scalar + core::ValidPoint3Type,
     {
         fn from_cv(from: na::Point3<T>) -> Self {
-            CvFrom::from_cv(&from)
+            FromCv::from_cv(&from)
         }
     }
 
-    impl<T> CvFrom<&core::Point3_<T>> for na::Point3<T>
+    impl<T> FromCv<&core::Point3_<T>> for na::Point3<T>
     where
         T: na::Scalar + core::ValidPoint3Type,
     {
@@ -491,16 +491,16 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<T> CvFrom<core::Point3_<T>> for na::Point3<T>
+    impl<T> FromCv<core::Point3_<T>> for na::Point3<T>
     where
         T: na::Scalar + core::ValidPoint3Type,
     {
         fn from_cv(from: core::Point3_<T>) -> Self {
-            CvFrom::from_cv(&from)
+            FromCv::from_cv(&from)
         }
     }
 
-    impl<N, D> CvTryFrom<&geo::Translation<N, D>> for core::Mat
+    impl<N, D> TryFromCv<&geo::Translation<N, D>> for core::Mat
     where
         N: na::Scalar + core::DataType,
         D: na::DimName,
@@ -514,7 +514,7 @@ mod with_opencv_nalgebra {
         }
     }
 
-    impl<N, D> CvTryFrom<geo::Translation<N, D>> for core::Mat
+    impl<N, D> TryFromCv<geo::Translation<N, D>> for core::Mat
     where
         N: na::Scalar + core::DataType,
         D: na::DimName,
@@ -523,7 +523,7 @@ mod with_opencv_nalgebra {
         type Error = Error;
 
         fn try_from_cv(translation: geo::Translation<N, D>) -> Result<Self> {
-            CvTryFrom::try_from_cv(&translation)
+            TryFromCv::try_from_cv(&translation)
         }
     }
 }
@@ -533,7 +533,7 @@ mod with_tch_image {
     use super::*;
     use std::ops::Deref;
 
-    impl<P, Container> CvFrom<&image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for tch::Tensor
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -569,7 +569,7 @@ mod with_tch_image {
         }
     }
 
-    impl<P, Container> CvFrom<image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<image::ImageBuffer<P, Container>> for tch::Tensor
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -580,7 +580,7 @@ mod with_tch_image {
         }
     }
 
-    impl CvTryFrom<&image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<&image::DynamicImage> for tch::Tensor {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
@@ -599,7 +599,7 @@ mod with_tch_image {
         }
     }
 
-    impl CvTryFrom<image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<image::DynamicImage> for tch::Tensor {
         type Error = Error;
 
         fn try_from_cv(from: image::DynamicImage) -> Result<Self, Self::Error> {
