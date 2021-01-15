@@ -1,6 +1,9 @@
 mod common;
+#[cfg(feature = "opencv")]
 mod with_opencv;
+#[cfg(all(feature = "opencv", feature = "nalgebra"))]
 mod with_opencv_nalgebra;
+#[cfg(all(feature = "tch", feature = "image"))]
 mod with_tch_image;
 
 pub use from::*;
