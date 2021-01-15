@@ -189,8 +189,8 @@ impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
 impl<N, R, C> TryFromCv<&core::Mat> for na::MatrixMN<N, R, C>
 where
     N: na::Scalar + core::DataType,
-    R: na::DimName,
-    C: na::DimName,
+    R: na::Dim,
+    C: na::Dim,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, R, C>,
 {
     type Error = Error;
@@ -207,15 +207,19 @@ where
 
         // ensure!(size.height == R::value() as i32 && size.width == R::value() as i32);
         let values = from.to_vec_2d()?.into_iter().flatten().collect::<Vec<N>>();
-        Ok(Self::from_row_slice(&values))
+        Ok(Self::from_row_slice_generic(
+            R::from_usize(shape.height as usize),
+            C::from_usize(shape.width as usize),
+            &values,
+        ))
     }
 }
 
 impl<N, R, C> TryFromCv<core::Mat> for na::MatrixMN<N, R, C>
 where
     N: na::Scalar + core::DataType,
-    R: na::DimName,
-    C: na::DimName,
+    R: na::Dim,
+    C: na::Dim,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, R, C>,
 {
     type Error = Error;
