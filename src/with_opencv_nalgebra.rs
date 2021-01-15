@@ -189,8 +189,8 @@ impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
 impl<N, R, C> TryFromCv<&core::Mat> for na::MatrixMN<N, R, C>
 where
     N: na::Scalar + core::DataType,
-    R: na::Dim + na::DimName,
-    C: na::Dim + na::DimName,
+    R: na::DimName,
+    C: na::DimName,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, R, C>,
 {
     type Error = Error;
@@ -214,8 +214,8 @@ where
 impl<N, R, C> TryFromCv<core::Mat> for na::MatrixMN<N, R, C>
 where
     N: na::Scalar + core::DataType,
-    R: na::Dim + na::DimName,
-    C: na::Dim + na::DimName,
+    R: na::DimName,
+    C: na::DimName,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, R, C>,
 {
     type Error = Error;
@@ -228,8 +228,8 @@ where
 impl<N, R, C, S> TryFromCv<&na::Matrix<N, R, C, S>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    R: na::Dim + na::DimName,
-    C: na::Dim + na::DimName,
+    R: na::Dim,
+    C: na::Dim,
     S: na::base::storage::Storage<N, R, C>,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, C, R>,
 {
@@ -245,8 +245,8 @@ where
 impl<N, R, C, S> TryFromCv<na::Matrix<N, R, C, S>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    R: na::Dim + na::DimName,
-    C: na::Dim + na::DimName,
+    R: na::Dim,
+    C: na::Dim,
     S: na::base::storage::Storage<N, R, C>,
     na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, C, R>,
 {
