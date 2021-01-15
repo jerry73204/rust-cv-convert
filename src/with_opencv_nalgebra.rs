@@ -355,3 +355,32 @@ where
         TryFromCv::try_from_cv(&translation)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn convert_opencv_nalgebra() -> Result<()> {
+        use crate::{IntoCv, TryIntoCv};
+        use opencv as cv;
+
+        // FromCv
+        let cv_point = cv::core::Point2d::new(1.0, 3.0);
+        let _na_points = na::Point2::<f64>::from_cv(&cv_point);
+
+        // IntoCv
+        let cv_point = cv::core::Point2d::new(1.0, 3.0);
+        let _na_points: na::Point2<f64> = cv_point.into_cv();
+
+        // TryFromCv
+        let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        let _cv_mat = cv::core::Mat::try_from_cv(&na_mat)?;
+
+        // TryIntoCv
+        let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        let _cv_mat: cv::core::Mat = na_mat.try_into_cv()?;
+
+        Ok(())
+    }
+}
