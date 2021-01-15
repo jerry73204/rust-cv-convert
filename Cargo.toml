@@ -1,8 +1,14 @@
 [package]
 name = "cv-convert"
+description = "Type conversions among famous Rust computer vision libraries"
 version = "0.1.0"
 authors = ["jerry73204 <jerry73204@gmail.com>"]
 edition = "2018"
+documentation = "https://docs.rs/cv-convert/"
+repository = "https://github.com/jerry73204/rust-cv-convert.git"
+homepage = "https://github.com/jerry73204/rust-cv-convert/"
+readme = "README.md"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
