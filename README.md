@@ -14,14 +14,12 @@ Add cv-convert to `Cargo.toml` to import most conversions by default.
 ```toml
 [dependencies.cv-convert]
 version = "0.1"
-git = "https://github.com/jerry73204/rust-cv-convert.git"
 ```
 
 You can manually choose supported libraries to avoid bloating.
 
 ```toml
 version = "0.1"
-git = "https://github.com/jerry73204/rust-cv-convert.git"
 default-features = false
 features = ["opencv-4", "opencv-buildtime-bindgen", "nalgebra"]
 ```
