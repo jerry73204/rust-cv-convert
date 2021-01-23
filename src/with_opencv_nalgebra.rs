@@ -2,6 +2,7 @@ use crate::{common::*, FromCv, TryFromCv};
 use nalgebra::{self as na, geometry as geo};
 use opencv::{calib3d, core, prelude::*};
 
+/// A pair of rvec and tvec from OpenCV, standing for rotation and translation.
 #[derive(Debug, Clone)]
 pub struct OpenCvPose<T> {
     pub rvec: T,
