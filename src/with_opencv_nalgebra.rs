@@ -364,28 +364,145 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{IntoCv, TryIntoCv};
+    use anyhow::Result;
+    use approx::abs_diff_eq;
+    use nalgebra::{U2, U3};
+    use opencv::core;
+    use rand::prelude::*;
+    use std::f64;
 
     #[test]
     fn convert_opencv_nalgebra() -> Result<()> {
-        use crate::{IntoCv, TryIntoCv};
-        use opencv as cv;
+        let mut rng = rand::thread_rng();
 
-        // FromCv
-        let cv_point = cv::core::Point2d::new(1.0, 3.0);
-        let _na_points = na::Point2::<f64>::from_cv(&cv_point);
+        for _ in 0..5000 {
+            // FromCv
+            {
+                let cv_point = core::Point2d::new(rng.gen(), rng.gen());
+                let na_point = na::Point2::<f64>::from_cv(&cv_point);
+                ensure!(
+                    abs_diff_eq!(cv_point.x, na_point.x) && abs_diff_eq!(cv_point.y, na_point.y),
+                    "point conversion failed"
+                );
+            }
 
-        // IntoCv
-        let cv_point = cv::core::Point2d::new(1.0, 3.0);
-        let _na_points: na::Point2<f64> = cv_point.into_cv();
+            // IntoCv
+            {
+                let cv_point = core::Point2d::new(rng.gen(), rng.gen());
+                let na_point: na::Point2<f64> = cv_point.into_cv();
+                ensure!(
+                    abs_diff_eq!(cv_point.x, na_point.x) && abs_diff_eq!(cv_point.y, na_point.y),
+                    "point conversion failed"
+                );
+            }
 
-        // TryFromCv
-        let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-        let _cv_mat = cv::core::Mat::try_from_cv(&na_mat)?;
+            // TryFromCv
+            {
+                let na_mat = na::DMatrix::<f64>::from_vec(
+                    2,
+                    3,
+                    vec![
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                    ],
+                );
+                let cv_mat = core::Mat::try_from_cv(&na_mat)?;
+                ensure!(
+                    abs_diff_eq!(cv_mat.at_2d(0, 0)?, na_mat.get((0, 0)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(0, 1)?, na_mat.get((0, 1)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(0, 2)?, na_mat.get((0, 2)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 0)?, na_mat.get((1, 0)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 1)?, na_mat.get((1, 1)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 2)?, na_mat.get((1, 2)).unwrap()),
+                    "matrix conversion failed"
+                );
+            }
 
-        // TryIntoCv
-        let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-        let _cv_mat: cv::core::Mat = na_mat.try_into_cv()?;
+            // TryIntoCv
+            {
+                let na_mat = na::DMatrix::<f64>::from_vec(
+                    2,
+                    3,
+                    vec![
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                    ],
+                );
+                let cv_mat: core::Mat = (&na_mat).try_into_cv()?;
+                ensure!(
+                    abs_diff_eq!(cv_mat.at_2d(0, 0)?, na_mat.get((0, 0)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(0, 1)?, na_mat.get((0, 1)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(0, 2)?, na_mat.get((0, 2)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 0)?, na_mat.get((1, 0)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 1)?, na_mat.get((1, 1)).unwrap())
+                        && abs_diff_eq!(cv_mat.at_2d(1, 2)?, na_mat.get((1, 2)).unwrap()),
+                    "matrix conversion failed"
+                );
+            }
+        }
+        Ok(())
+    }
 
+    #[test]
+    fn matrix_opencv_to_nalgebra_test() -> Result<()> {
+        let input = na::MatrixMN::<i32, U3, U2>::from_row_slice(&[1, 2, 3, 4, 5, 6]);
+        let (nrows, ncols) = input.shape();
+        let output = core::Mat::try_from_cv(input)?;
+        let output_shape = output.size()?;
+        ensure!(
+            output.channels()? == 1
+                && nrows == output_shape.height as usize
+                && ncols == output_shape.width as usize,
+            "the shape does not match"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn matrix_nalgebra_to_opencv_test() -> Result<()> {
+        let input = Mat::from_slice_2d(&[&[1, 2, 3], &[4, 5, 6]])?;
+        let input_shape = input.size()?;
+        let output = na::MatrixMN::<i32, U2, U3>::try_from_cv(input)?;
+        ensure!(
+            output.nrows() == input_shape.height as usize
+                && output.ncols() == input_shape.width as usize,
+            "the shape does not match"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn rvec_tvec_conversion() -> Result<()> {
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..5000 {
+            let orig_isometry = {
+                let rotation = na::UnitQuaternion::from_euler_angles(
+                    rng.gen_range(0.0..(f64::consts::PI * 2.0)),
+                    rng.gen_range(0.0..(f64::consts::PI * 2.0)),
+                    rng.gen_range(0.0..(f64::consts::PI * 2.0)),
+                );
+                let translation = na::Translation3::new(rng.gen(), rng.gen(), rng.gen());
+                na::Isometry3::from_parts(translation, rotation)
+            };
+            let pose = OpenCvPose::<Mat>::try_from_cv(orig_isometry)?;
+            let recovered_isometry = na::Isometry3::<f64>::try_from_cv(pose)?;
+
+            ensure!(
+                (orig_isometry.to_homogeneous() - recovered_isometry.to_homogeneous()).norm()
+                    <= 1e-8,
+                "the recovered isometry is not consistent the original isometry"
+            );
+        }
         Ok(())
     }
 }

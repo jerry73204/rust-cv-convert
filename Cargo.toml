@@ -19,6 +19,10 @@ nalgebra = { version = "0.24.0", optional = true }
 opencv = { version = "0.48.0", default-features = false, optional = true }
 tch = { version = "0.3.1", optional = true }
 
+[dev-dependencies]
+approx = "0.4.0"
+rand = "0.8.2"
+
 [features]
 default = ["image", "opencv-4", "opencv-buildtime-bindgen", "tch", "nalgebra"]
 ## due to issue on opencv-rust, disable opencv in docs-only for now
