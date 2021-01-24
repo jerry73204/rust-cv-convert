@@ -8,6 +8,7 @@ pub use tensor_from_mat::*;
 mod tensor_as_image {
     use super::*;
 
+    /// A tensor with image shape convention that is used to convert to [Tensor](tch::Tensor).
     #[derive(Debug)]
     pub struct TensorAsImage<T>
     where
@@ -17,6 +18,7 @@ mod tensor_as_image {
         pub(crate) convention: ShapeConvention,
     }
 
+    /// Describes the image channel order of a [Tensor](tch::Tensor).
     #[derive(Debug, Clone, Copy)]
     pub enum ShapeConvention {
         Whc,
@@ -93,6 +95,8 @@ mod mat_ext {
 mod tensor_from_mat {
     use super::*;
 
+    /// A [Tensor](tch::Tensor) which data reference borrows from a [Mat](core::Mat). It can be dereferenced to a [Tensor](tch::Tensor).
+    #[derive(Debug)]
     pub struct TensorFromMat {
         pub(super) tensor: ManuallyDrop<tch::Tensor>,
         pub(super) mat: ManuallyDrop<core::Mat>,
