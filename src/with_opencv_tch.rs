@@ -2,10 +2,10 @@ use crate::{common::*, TryFromCv, TryIntoCv};
 use opencv::{core, platform_types, prelude::*};
 
 use mat_ext::*;
-pub use tensor_as_image::*;
 pub use tensor_from_mat::*;
+pub use tensor_with_convention::*;
 
-mod tensor_as_image {
+mod tensor_with_convention {
     use super::*;
 
     /// A tensor with image shape convention that is used to convert to [Tensor](tch::Tensor).
@@ -50,11 +50,12 @@ mod mat_ext {
     use super::*;
 
     pub trait MatExt {
-        fn tch_kind_shape(&self) -> Result<(tch::Kind, [i64; 3])>;
+        fn tch_kind_shape_2d(&self) -> Result<(tch::Kind, [i64; 3])>;
+        fn tch_kind_shape_nd(&self) -> Result<(tch::Kind, Vec<i64>)>;
     }
 
     impl MatExt for core::Mat {
-        fn tch_kind_shape(&self) -> Result<(tch::Kind, [i64; 3])> {
+        fn tch_kind_shape_2d(&self) -> Result<(tch::Kind, [i64; 3])> {
             let core::Size { height, width } = self.size()?;
             let (kind, n_channels) = match self.typ()? {
                 core::CV_8UC1 => (tch::Kind::Uint8, 1),
@@ -89,6 +90,49 @@ mod mat_ext {
             };
             Ok((kind, [width as i64, height as i64, n_channels as i64]))
         }
+
+        fn tch_kind_shape_nd(&self) -> Result<(tch::Kind, Vec<i64>)> {
+            let size: Vec<_> = self
+                .mat_size()
+                .iter()
+                .cloned()
+                .map(|dim| dim as i64)
+                .chain(iter::once(self.channels()? as i64))
+                .collect();
+
+            let kind = match self.typ()? {
+                core::CV_8UC1 => tch::Kind::Uint8,
+                core::CV_8UC2 => tch::Kind::Uint8,
+                core::CV_8UC3 => tch::Kind::Uint8,
+                core::CV_8UC4 => tch::Kind::Uint8,
+                core::CV_8SC1 => tch::Kind::Int8,
+                core::CV_8SC2 => tch::Kind::Int8,
+                core::CV_8SC3 => tch::Kind::Int8,
+                core::CV_8SC4 => tch::Kind::Int8,
+                core::CV_16SC1 => tch::Kind::Int16,
+                core::CV_16SC2 => tch::Kind::Int16,
+                core::CV_16SC3 => tch::Kind::Int16,
+                core::CV_16SC4 => tch::Kind::Int16,
+                core::CV_16FC1 => tch::Kind::Half,
+                core::CV_16FC2 => tch::Kind::Half,
+                core::CV_16FC3 => tch::Kind::Half,
+                core::CV_16FC4 => tch::Kind::Half,
+                core::CV_32FC1 => tch::Kind::Float,
+                core::CV_32FC2 => tch::Kind::Float,
+                core::CV_32FC3 => tch::Kind::Float,
+                core::CV_32FC4 => tch::Kind::Float,
+                core::CV_32SC1 => tch::Kind::Int,
+                core::CV_32SC2 => tch::Kind::Int,
+                core::CV_32SC3 => tch::Kind::Int,
+                core::CV_32SC4 => tch::Kind::Int,
+                core::CV_64FC1 => tch::Kind::Double,
+                core::CV_64FC2 => tch::Kind::Double,
+                core::CV_64FC3 => tch::Kind::Double,
+                core::CV_64FC4 => tch::Kind::Double,
+                other => bail!("unsupported Mat type {}", other),
+            };
+            Ok((kind, size))
+        }
     }
 }
 
@@ -100,6 +144,12 @@ mod tensor_from_mat {
     pub struct TensorFromMat {
         pub(super) tensor: ManuallyDrop<tch::Tensor>,
         pub(super) mat: ManuallyDrop<core::Mat>,
+    }
+
+    impl TensorFromMat {
+        pub fn tensor(&self) -> &tch::Tensor {
+            &self.tensor
+        }
     }
 
     impl Drop for TensorFromMat {
@@ -130,13 +180,28 @@ impl TryFromCv<core::Mat> for TensorFromMat {
     type Error = Error;
 
     fn try_from_cv(from: core::Mat) -> Result<Self, Self::Error> {
-        ensure!(from.is_continuous()?, "input Mat memory is not continuous");
+        ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
 
-        let (kind, shape) = from.tch_kind_shape()?;
+        let (kind, shape) = from.tch_kind_shape_nd()?;
+        let strides = {
+            let mut strides: Vec<_> = shape
+                .iter()
+                .rev()
+                .cloned()
+                .scan(1, |prev, dim| {
+                    let stride = *prev;
+                    *prev *= dim;
+                    Some(stride)
+                })
+                .collect();
+            strides.reverse();
+            strides
+        };
+        // let stride = vec![12, 3, 1];
 
         let tensor = unsafe {
-            let ptr = from.ptr(0)? as *const u8 as *mut u8;
-            tch::Tensor::f_of_blob(ptr, shape.as_ref(), &[0, 0, 0], kind, tch::Device::Cpu)?
+            let ptr = from.ptr(0)? as *const u8;
+            tch::Tensor::f_of_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
         };
 
         Ok(Self {
@@ -150,29 +215,15 @@ impl TryFromCv<&core::Mat> for tch::Tensor {
     type Error = Error;
 
     fn try_from_cv(from: &core::Mat) -> Result<Self, Self::Error> {
-        let (kind, shape) = from.tch_kind_shape()?;
-        let [w, h, c] = shape;
+        ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
+        let (kind, shape) = from.tch_kind_shape_nd()?;
 
         let tensor = unsafe {
-            if from.is_continuous()? {
-                let ptr = from.ptr(0)? as *const u8;
-                let slice_size = (w * h * c) as usize * kind.elt_size_in_bytes();
-                let slice = slice::from_raw_parts(ptr, slice_size);
-                tch::Tensor::f_of_data_size(slice, shape.as_ref(), kind)?
-            } else {
-                let bytes: Vec<_> = (0..(w as i32))
-                    .map(|row_index| -> Result<_> {
-                        let ptr = from.ptr(row_index)? as *const u8;
-                        let slice_size = (h * c) as usize * kind.elt_size_in_bytes();
-                        let slice = slice::from_raw_parts(ptr, slice_size);
-                        Ok(slice)
-                    })
-                    .collect::<Result<Vec<_>>>()?
-                    .into_iter()
-                    .flat_map(|row| row.iter().cloned())
-                    .collect();
-                tch::Tensor::f_of_data_size(&bytes, shape.as_ref(), kind)?
-            }
+            let ptr = from.ptr(0)? as *const u8;
+            let slice_size =
+                shape.iter().cloned().product::<i64>() as usize * kind.elt_size_in_bytes();
+            let slice = slice::from_raw_parts(ptr, slice_size);
+            tch::Tensor::f_of_data_size(slice, shape.as_ref(), kind)?
         };
 
         Ok(tensor)
@@ -199,20 +250,21 @@ where
             convention,
         } = *from;
         let tensor = tensor.borrow();
-        let (tensor, [channels, cols, rows]) = match (tensor.size().as_slice(), convention) {
-            (&[w, h], ShapeConvention::Whc) => (tensor.shallow_clone(), [1, h, w]),
-            (&[h, w], ShapeConvention::Hwc) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
-            (&[w, h], ShapeConvention::Cwh) => (tensor.shallow_clone(), [1, h, w]),
-            (&[h, w], ShapeConvention::Chw) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
-            (&[w, h, c], ShapeConvention::Whc) => (tensor.shallow_clone(), [c, h, w]),
-            (&[h, w, c], ShapeConvention::Hwc) => (tensor.f_permute(&[1, 0, 2])?, [c, h, w]),
-            (&[c, w, h], ShapeConvention::Cwh) => (tensor.f_permute(&[1, 2, 0])?, [c, h, w]),
-            (&[c, h, w], ShapeConvention::Chw) => (tensor.f_permute(&[2, 1, 0])?, [c, h, w]),
+        let (tensor, [channels, rows, cols]) = match (tensor.size().as_slice(), convention) {
+            (&[w, h], ShapeConvention::Whc) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
+            (&[h, w], ShapeConvention::Hwc) => (tensor.shallow_clone(), [1, h, w]),
+            (&[w, h], ShapeConvention::Cwh) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
+            (&[h, w], ShapeConvention::Chw) => (tensor.shallow_clone(), [1, h, w]),
+            (&[w, h, c], ShapeConvention::Whc) => (tensor.f_permute(&[1, 0, 2])?, [c, h, w]),
+            (&[h, w, c], ShapeConvention::Hwc) => (tensor.shallow_clone(), [c, h, w]),
+            (&[c, w, h], ShapeConvention::Cwh) => (tensor.f_permute(&[2, 1, 0])?, [c, h, w]),
+            (&[c, h, w], ShapeConvention::Chw) => (tensor.f_permute(&[1, 2, 0])?, [c, h, w]),
             (shape, _convention) => bail!("unsupported tensor shape {:?}", shape),
         };
         let tensor = tensor.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
 
-        let typ = match (tensor.f_kind()?, channels) {
+        let kind = tensor.f_kind()?;
+        let typ = match (kind, channels) {
             (tch::Kind::Uint8, 1) => core::CV_8UC1,
             (tch::Kind::Uint8, 2) => core::CV_8UC2,
             (tch::Kind::Uint8, 3) => core::CV_8UC3,
@@ -254,8 +306,10 @@ where
                 cols as i32,
                 typ,
                 tensor.data_ptr(),
-                (cols as usize * kind.elt_size_in_bytes()) as platform_types::size_t,
+                /* step = */
+                core::Mat_AUTO_STEP,
             )?
+            .try_clone()?
         };
 
         Ok(mat)
@@ -280,17 +334,23 @@ impl TryFromCv<&tch::Tensor> for core::Mat {
         let tensor = from.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
         let size: Vec<_> = tensor.size().into_iter().map(|dim| dim as i32).collect();
         let typ = match tensor.f_kind()? {
-            tch::Kind::Uint8 => core::CV_8U,
-            tch::Kind::Int8 => core::CV_8S,
-            tch::Kind::Int16 => core::CV_16S,
-            tch::Kind::Half => core::CV_16F,
-            tch::Kind::Int => core::CV_32S,
-            tch::Kind::Float => core::CV_32F,
-            tch::Kind::Double => core::CV_64F,
+            tch::Kind::Uint8 => core::CV_8UC1,
+            tch::Kind::Int8 => core::CV_8SC1,
+            tch::Kind::Int16 => core::CV_16SC1,
+            tch::Kind::Half => core::CV_16FC1,
+            tch::Kind::Int => core::CV_32SC1,
+            tch::Kind::Float => core::CV_32FC1,
+            tch::Kind::Double => core::CV_64FC1,
             kind => bail!("unsupported tensor kind {:?}", kind),
         };
 
-        let mat = unsafe { core::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), 0)? };
+        let mat = unsafe {
+            // the step argument has &size_t type, so we need a workaround to pass null pointer.
+            // https://github.com/twistedfall/opencv-rust/issues/201
+            use platform_types::size_t;
+            let step: &size_t = mem::transmute(ptr::null() as *const size_t);
+            core::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), step)?
+        };
         Ok(mat)
     }
 }
@@ -306,9 +366,130 @@ impl TryFromCv<tch::Tensor> for core::Mat {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tch::IndexOp;
+
+    // const EPSILON: f64 = 1e-8;
+    const ROUNDS: usize = 1000;
 
     #[test]
-    fn tensor_ref() -> Result<()> {
+    fn tensor_mat_conv() -> Result<()> {
+        let size = [2, 3, 4, 5];
+
+        for _ in 0..ROUNDS {
+            let before = tch::Tensor::randn(size.as_ref(), tch::kind::FLOAT_CPU);
+            let mat = core::Mat::try_from_cv(&before)?;
+            let after = tch::Tensor::try_from_cv(&mat)?.f_view(size)?;
+
+            // compare Tensor and Mat values
+            {
+                fn enumerate_reversed_index(dims: &[i64]) -> Vec<Vec<i64>> {
+                    match dims {
+                        [] => vec![vec![]],
+                        [dim, remaining @ ..] => {
+                            let dim = *dim;
+                            let indexes: Vec<_> = (0..dim)
+                                .flat_map(move |val| {
+                                    enumerate_reversed_index(remaining).into_iter().map(
+                                        move |mut tail| {
+                                            tail.push(val);
+                                            tail
+                                        },
+                                    )
+                                })
+                                .collect();
+                            indexes
+                        }
+                    }
+                }
+
+                enumerate_reversed_index(&before.size())
+                    .into_iter()
+                    .map(|mut index| {
+                        index.reverse();
+                        index
+                    })
+                    .try_for_each(|tch_index| -> Result<_> {
+                        let cv_index: Vec<_> =
+                            tch_index.iter().cloned().map(|val| val as i32).collect();
+                        let tch_index: Vec<_> = tch_index
+                            .iter()
+                            .cloned()
+                            .map(|val| tch::Tensor::from(val))
+                            .collect();
+                        let tch_val: f32 = before.f_index(&tch_index)?.into();
+                        let mat_val: f32 = *mat.at_nd(&cv_index)?;
+                        ensure!(tch_val == mat_val, "value mismatch");
+                        Ok(())
+                    })?;
+            }
+
+            // compare original and recovered Tensor values
+            ensure!(before == after, "value mismatch",);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn tensor_as_image_and_mat_conv() -> Result<()> {
+        for _ in 0..ROUNDS {
+            let c = 3;
+            let h = 16;
+            let w = 8;
+
+            let before = tch::Tensor::randn(&[c, h, w], tch::kind::FLOAT_CPU);
+            let mat: core::Mat =
+                TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
+            let after = tch::Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
+
+            // compare Tensor and Mat values
+            for row in 0..h {
+                for col in 0..w {
+                    let pixel: &core::Vec3f = mat.at_2d(row as i32, col as i32)?;
+                    let [r, g, b] = **pixel;
+                    ensure!(f32::from(before.i((0, row, col))) == r, "value mismatch");
+                    ensure!(f32::from(before.i((1, row, col))) == g, "value mismatch");
+                    ensure!(f32::from(before.i((2, row, col))) == b, "value mismatch");
+                }
+            }
+
+            // compare original and recovered Tensor values
+            {
+                let before_size = before.size();
+                let after_size = after.size();
+                ensure!(
+                    before_size == after_size,
+                    "size mismatch: {:?} vs. {:?}",
+                    before_size,
+                    after_size
+                );
+                ensure!(before == after, "value mismatch");
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn tensor_from_mat_conv() -> Result<()> {
+        for _ in 0..ROUNDS {
+            let c = 3;
+            let h = 16;
+            let w = 8;
+
+            let before = tch::Tensor::randn(&[c, h, w], tch::kind::FLOAT_CPU);
+            let mat: core::Mat =
+                TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
+            let after = TensorFromMat::try_from_cv(mat)?; // in hwc
+
+            // compare original and recovered Tensor values
+            {
+                ensure!(&after.size() == &[h, w, c], "size mismatch",);
+                ensure!(
+                    &before.f_permute(&[1, 2, 0])? == after.tensor(),
+                    "value mismatch"
+                );
+            }
+        }
         Ok(())
     }
 }
