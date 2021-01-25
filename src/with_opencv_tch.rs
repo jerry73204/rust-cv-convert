@@ -345,7 +345,11 @@ impl TryFromCv<&tch::Tensor> for core::Mat {
         };
 
         let mat = unsafe {
-            // the step argument has &size_t type, so we need a workaround to pass null pointer.
+            // The step argument has &size_t type, Here it transmutes a pointer
+            // to reference to work around. It works in debug build, but killed
+            // by SIGILL in release build.
+            //
+            // issue link
             // https://github.com/twistedfall/opencv-rust/issues/201
             use platform_types::size_t;
             let step: &size_t = mem::transmute(ptr::null() as *const size_t);
