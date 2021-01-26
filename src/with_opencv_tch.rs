@@ -1,5 +1,5 @@
 use crate::{common::*, TryFromCv, TryIntoCv};
-use opencv::{core, platform_types, prelude::*};
+use opencv::{core, prelude::*};
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
@@ -344,17 +344,7 @@ impl TryFromCv<&tch::Tensor> for core::Mat {
             kind => bail!("unsupported tensor kind {:?}", kind),
         };
 
-        let mat = unsafe {
-            // The step argument has &size_t type, Here it transmutes a pointer
-            // to reference to work around. It works in debug build, but killed
-            // by SIGILL in release build.
-            //
-            // issue link
-            // https://github.com/twistedfall/opencv-rust/issues/201
-            use platform_types::size_t;
-            let step: &size_t = mem::transmute(ptr::null() as *const size_t);
-            core::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), step)?
-        };
+        let mat = unsafe { core::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), None)? };
         Ok(mat)
     }
 }
