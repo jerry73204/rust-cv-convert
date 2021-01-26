@@ -17,14 +17,16 @@ anyhow = "1.0.38"
 image = { version = "0.23.12", optional = true }
 nalgebra = { version = "0.24.0", optional = true }
 opencv = { version = "0.48.0", default-features = false, optional = true }
+ndarray = { version = "0.14.0", optional = true }
 tch = { version = "0.3.1", optional = true }
 
 [dev-dependencies]
 approx = "0.4.0"
+itertools = "0.10.0"
 rand = "0.8.2"
 
 [features]
-default = ["image", "opencv-4", "opencv-buildtime-bindgen", "tch", "nalgebra"]
+default = ["image", "opencv-4", "opencv-buildtime-bindgen", "tch", "nalgebra", "ndarray"]
 ## due to issue on opencv-rust, disable opencv in docs-only for now
 ## https://github.com/twistedfall/opencv-rust/issues/199
 # docs-only = ["opencv-4", "opencv-contrib", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra"]
