@@ -1,4 +1,4 @@
-use crate::{common::*, TryFromCv};
+use crate::{common::*, FromCv, TryFromCv};
 use ndarray as nd;
 
 use to_ndarray_shape::*;
@@ -172,14 +172,46 @@ where
     }
 }
 
+impl<A, S, D> FromCv<&nd::ArrayBase<S, D>> for tch::Tensor
+where
+    A: tch::kind::Element + Clone,
+    S: nd::RawData<Elem = A> + nd::Data,
+    D: nd::Dimension,
+{
+    fn from_cv(from: &nd::ArrayBase<S, D>) -> Self {
+        let shape: Vec<_> = from.shape().iter().map(|&s| s as i64).collect();
+
+        match from.as_slice() {
+            Some(slice) => tch::Tensor::of_slice(slice).view(shape.as_slice()),
+            None => {
+                let elems: Vec<_> = from.iter().cloned().collect();
+                tch::Tensor::of_slice(&elems).view(shape.as_slice())
+            }
+        }
+    }
+}
+
+impl<A, S, D> FromCv<nd::ArrayBase<S, D>> for tch::Tensor
+where
+    A: tch::kind::Element + Clone,
+    S: nd::RawData<Elem = A> + nd::Data,
+    D: nd::Dimension,
+{
+    fn from_cv(from: nd::ArrayBase<S, D>) -> Self {
+        Self::from_cv(&from)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::TryIntoCv;
+    use itertools::{iproduct, izip};
+    use rand::prelude::*;
     use tch::IndexOp;
 
     #[test]
-    fn tch_ndarray_conv() -> Result<()> {
+    fn tensor_to_ndarray_conversion() -> Result<()> {
         // ArrayD
         {
             let s0 = 3;
@@ -305,7 +337,7 @@ mod tests {
             ensure!(is_correct, "value mismatch");
         }
 
-        // Array4
+        // Array6
         {
             let s0 = 3;
             let s1 = 5;
@@ -334,6 +366,35 @@ mod tests {
 
             ensure!(is_correct, "value mismatch");
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn ndarray_to_tensor_conversion() -> Result<()> {
+        let mut rng = rand::thread_rng();
+
+        let s0 = 2;
+        let s1 = 3;
+        let s2 = 4;
+
+        let array = nd::Array3::<f32>::from_shape_simple_fn([s0, s1, s2], || rng.gen());
+        let array = array.reversed_axes();
+
+        let tensor = tch::Tensor::from_cv(&array);
+
+        let is_shape_correct = array.shape().len() == tensor.size().len()
+            && izip!(array.shape().iter().cloned(), tensor.size().iter().cloned())
+                .all(|(lhs, rhs)| lhs == rhs as usize);
+
+        ensure!(is_shape_correct, "shape mismatch");
+
+        let is_value_correct = iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
+            let lhs = array[(i2, i1, i0)];
+            let rhs = f32::from(tensor.i((i2 as i64, i1 as i64, i0 as i64)));
+            lhs == rhs
+        });
+        ensure!(is_value_correct, "value mismatch");
 
         Ok(())
     }
