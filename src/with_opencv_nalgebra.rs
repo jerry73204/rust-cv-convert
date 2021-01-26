@@ -499,7 +499,7 @@ mod tests {
 
             ensure!(
                 (orig_isometry.to_homogeneous() - recovered_isometry.to_homogeneous()).norm()
-                    <= 1e-8,
+                    <= 1e-6,
                 "the recovered isometry is not consistent the original isometry"
             );
         }
