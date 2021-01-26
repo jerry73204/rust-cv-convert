@@ -27,10 +27,7 @@ rand = "0.8.3"
 
 [features]
 default = ["image", "opencv-4", "opencv-buildtime-bindgen", "tch", "nalgebra", "ndarray"]
-## due to issue on opencv-rust, disable opencv in docs-only for now
-## https://github.com/twistedfall/opencv-rust/issues/199
-# docs-only = ["opencv-4", "opencv-contrib", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra"]
-docs-only = ["tch", "tch/doc-only", "image", "nalgebra"]
+docs-only = ["opencv-4", "opencv-contrib", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra", "ndarray"]
 opencv-4 = ["opencv", "opencv/opencv-4"]
 opencv-34 = ["opencv", "opencv/opencv-34"]
 opencv-32 = ["opencv", "opencv/opencv-32"]
