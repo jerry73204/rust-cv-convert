@@ -408,7 +408,7 @@ mod tests {
                         let tch_index: Vec<_> = tch_index
                             .iter()
                             .cloned()
-                            .map(|val| tch::Tensor::from(val))
+                            .map(|val| Some(tch::Tensor::from(val)))
                             .collect();
                         let tch_val: f32 = before.f_index(&tch_index)?.into();
                         let mat_val: f32 = *mat.at_nd(&cv_index)?;
