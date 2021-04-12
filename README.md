@@ -32,6 +32,8 @@ opencv crate features
 - `opencv-34`: Enable `opencv-34` in opencv crate.
 - `opencv-32`: Enable `opencv-32` in opencv crate.
 - `opencv-buildtime-bindgen`: Enable `buildtime-bindgen` in opencv crate.
+- `opencv-clang-runtime`: Enable `clang-runtime` in opencv crate. Useful if you get `libclang shared library is not loaded on this thread!` panic.
+- `opencv-contrib`: `opencv-contrib` has been dropped by the main `opencv` crate in favour of runtime module set detection. If you need the older version, 0.5.0 was the version that last supported `opencv-0.51.0`. 
 
 image crate feature
 
