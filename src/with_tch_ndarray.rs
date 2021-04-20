@@ -32,7 +32,7 @@ mod to_ndarray_shape {
 
         fn to_ndarray_shape(&self) -> Result<Self::Output, Self::Error> {
             ensure!(
-                self.len() == 0,
+                self.is_empty(),
                 "empty empty tensor dimension, but get {:?}",
                 self
             );

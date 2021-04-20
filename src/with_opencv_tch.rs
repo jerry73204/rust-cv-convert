@@ -427,23 +427,23 @@ mod tests {
     #[test]
     fn tensor_as_image_and_mat_conv() -> Result<()> {
         for _ in 0..ROUNDS {
-            let c = 3;
-            let h = 16;
-            let w = 8;
+            let channels = 3;
+            let height = 16;
+            let width = 8;
 
-            let before = tch::Tensor::randn(&[c, h, w], tch::kind::FLOAT_CPU);
+            let before = tch::Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
             let mat: core::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
             let after = tch::Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
-            for row in 0..h {
-                for col in 0..w {
+            for row in 0..height {
+                for col in 0..width {
                     let pixel: &core::Vec3f = mat.at_2d(row as i32, col as i32)?;
-                    let [r, g, b] = **pixel;
-                    ensure!(f32::from(before.i((0, row, col))) == r, "value mismatch");
-                    ensure!(f32::from(before.i((1, row, col))) == g, "value mismatch");
-                    ensure!(f32::from(before.i((2, row, col))) == b, "value mismatch");
+                    let [red, green, blue] = **pixel;
+                    ensure!(f32::from(before.i((0, row, col))) == red, "value mismatch");
+                    ensure!(f32::from(before.i((1, row, col))) == green, "value mismatch");
+                    ensure!(f32::from(before.i((2, row, col))) == blue, "value mismatch");
                 }
             }
 
@@ -466,18 +466,18 @@ mod tests {
     #[test]
     fn tensor_from_mat_conv() -> Result<()> {
         for _ in 0..ROUNDS {
-            let c = 3;
-            let h = 16;
-            let w = 8;
+            let channel = 3;
+            let height = 16;
+            let width = 8;
 
-            let before = tch::Tensor::randn(&[c, h, w], tch::kind::FLOAT_CPU);
+            let before = tch::Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
             let mat: core::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
             let after = TensorFromMat::try_from_cv(mat)?; // in hwc
 
             // compare original and recovered Tensor values
             {
-                ensure!(&after.size() == &[h, w, c], "size mismatch",);
+                ensure!(after.size() == [height, width, channel], "size mismatch",);
                 ensure!(
                     &before.f_permute(&[1, 2, 0])? == after.tensor(),
                     "value mismatch"
