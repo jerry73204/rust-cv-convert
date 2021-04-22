@@ -442,7 +442,10 @@ mod tests {
                     let pixel: &core::Vec3f = mat.at_2d(row as i32, col as i32)?;
                     let [red, green, blue] = **pixel;
                     ensure!(f32::from(before.i((0, row, col))) == red, "value mismatch");
-                    ensure!(f32::from(before.i((1, row, col))) == green, "value mismatch");
+                    ensure!(
+                        f32::from(before.i((1, row, col))) == green,
+                        "value mismatch"
+                    );
                     ensure!(f32::from(before.i((2, row, col))) == blue, "value mismatch");
                 }
             }

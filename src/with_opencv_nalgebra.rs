@@ -4,7 +4,6 @@ use opencv::{calib3d, core, prelude::*};
 
 // Note for future maintainers: Since the matrixes need to accommodate any size Matrix, we are using na::OMatrix instead of SMatrix.
 
-
 /// A pair of rvec and tvec from OpenCV, standing for rotation and translation.
 #[derive(Debug, Clone)]
 pub struct OpenCvPose<T> {
@@ -30,7 +29,7 @@ impl TryFromCv<OpenCvPose<&core::Point3d>> for geo::Isometry3<f64> {
 
         let translation = {
             let core::Point3_ { x, y, z } = *tvec;
-            geo::Translation3::new(x,y,z) 
+            geo::Translation3::new(x, y, z)
         };
 
         let isometry = geo::Isometry3::from_parts(translation, rotation);
@@ -340,8 +339,6 @@ where
 impl<N, const D: usize> TryFromCv<&geo::Translation<N, D>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    // D: na::DimName,
-    // na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
 {
     type Error = Error;
 
@@ -354,8 +351,6 @@ where
 impl<N, const D: usize> TryFromCv<geo::Translation<N, D>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    // D: na::Dim,
-    // na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
 {
     type Error = Error;
 
