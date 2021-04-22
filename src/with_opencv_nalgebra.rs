@@ -2,6 +2,9 @@ use crate::{common::*, FromCv, TryFromCv};
 use nalgebra::{self as na, geometry as geo};
 use opencv::{calib3d, core, prelude::*};
 
+// Note for future maintainers: Since the matrixes need to accommodate any size Matrix, we are using na::OMatrix instead of SMatrix.
+
+
 /// A pair of rvec and tvec from OpenCV, standing for rotation and translation.
 #[derive(Debug, Clone)]
 pub struct OpenCvPose<T> {
@@ -27,7 +30,7 @@ impl TryFromCv<OpenCvPose<&core::Point3d>> for geo::Isometry3<f64> {
 
         let translation = {
             let core::Point3_ { x, y, z } = *tvec;
-            geo::Translation3::new(x, y, z)
+            geo::Translation3::new(x,y,z) 
         };
 
         let isometry = geo::Isometry3::from_parts(translation, rotation);
@@ -187,7 +190,7 @@ impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core::Mat> {
     }
 }
 
-impl<N, R, C> TryFromCv<&core::Mat> for na::MatrixMN<N, R, C>
+impl<N, R, C> TryFromCv<&core::Mat> for na::OMatrix<N, R, C>
 where
     N: na::Scalar + core::DataType,
     R: na::Dim,
@@ -216,7 +219,7 @@ where
     }
 }
 
-impl<N, R, C> TryFromCv<core::Mat> for na::MatrixMN<N, R, C>
+impl<N, R, C> TryFromCv<core::Mat> for na::OMatrix<N, R, C>
 where
     N: na::Scalar + core::DataType,
     R: na::Dim,
@@ -334,25 +337,25 @@ where
     }
 }
 
-impl<N, D> TryFromCv<&geo::Translation<N, D>> for core::Mat
+impl<N, const D: usize> TryFromCv<&geo::Translation<N, D>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    D: na::DimName,
-    na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
+    // D: na::DimName,
+    // na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
 {
     type Error = Error;
 
     fn try_from_cv(translation: &geo::Translation<N, D>) -> Result<Self> {
-        let mat = core::Mat::from_exact_iter(translation.vector.into_iter().map(|val| *val))?;
+        let mat = core::Mat::from_exact_iter(translation.vector.into_iter().copied())?;
         Ok(mat)
     }
 }
 
-impl<N, D> TryFromCv<geo::Translation<N, D>> for core::Mat
+impl<N, const D: usize> TryFromCv<geo::Translation<N, D>> for core::Mat
 where
     N: na::Scalar + core::DataType,
-    D: na::DimName,
-    na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
+    // D: na::Dim,
+    // na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, D>,
 {
     type Error = Error;
 
@@ -454,7 +457,7 @@ mod tests {
 
     #[test]
     fn matrix_opencv_to_nalgebra_test() -> Result<()> {
-        let input = na::MatrixMN::<i32, U3, U2>::from_row_slice(&[1, 2, 3, 4, 5, 6]);
+        let input = na::OMatrix::<i32, U3, U2>::from_row_slice(&[1, 2, 3, 4, 5, 6]);
         let (nrows, ncols) = input.shape();
         let output = core::Mat::try_from_cv(input)?;
         let output_shape = output.size()?;
@@ -471,7 +474,7 @@ mod tests {
     fn matrix_nalgebra_to_opencv_test() -> Result<()> {
         let input = Mat::from_slice_2d(&[&[1, 2, 3], &[4, 5, 6]])?;
         let input_shape = input.size()?;
-        let output = na::MatrixMN::<i32, U2, U3>::try_from_cv(input)?;
+        let output = na::OMatrix::<i32, U2, U3>::try_from_cv(input)?;
         ensure!(
             output.nrows() == input_shape.height as usize
                 && output.ncols() == input_shape.width as usize,
