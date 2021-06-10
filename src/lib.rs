@@ -13,6 +13,21 @@ mod with_tch_image;
 #[cfg(all(feature = "tch", feature = "ndarray"))]
 mod with_tch_ndarray;
 
+#[cfg(feature = "image")]
+pub use image;
+
+#[cfg(feature = "nalgebra")]
+pub use nalgebra;
+
+#[cfg(feature = "opencv")]
+pub use opencv;
+
+#[cfg(feature = "ndarray")]
+pub use ndarray;
+
+#[cfg(feature = "tch")]
+pub use tch;
+
 pub use traits::*;
 
 #[cfg(feature = "opencv")]
