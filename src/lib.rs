@@ -8,6 +8,8 @@ mod with_opencv;
 mod with_opencv_nalgebra;
 #[cfg(all(feature = "opencv", feature = "tch"))]
 mod with_opencv_tch;
+#[cfg(feature = "tch")]
+mod with_tch;
 #[cfg(all(feature = "tch", feature = "image"))]
 mod with_tch_image;
 #[cfg(all(feature = "tch", feature = "ndarray"))]
