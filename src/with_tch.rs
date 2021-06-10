@@ -10,6 +10,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(from.size() == &[N as i64]);
                 let slice: &[$elem] =
                     unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N) };
@@ -24,6 +25,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(from.size() == &[N1 as i64, N2 as i64]);
                 let slice: &[$elem] =
                     unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2) };
@@ -38,6 +40,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64]);
                 let slice: &[$elem] =
                     unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3) };
@@ -52,6 +55,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64]);
                 let slice: &[$elem] = unsafe {
                     slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3 * N4)
@@ -73,6 +77,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64]);
                 let slice: &[$elem] = unsafe {
                     slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3 * N4 * N5)
@@ -95,6 +100,7 @@ macro_rules! impl_from_array {
 
             fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
                 ensure!(from.device() == tch::Device::Cpu);
+                ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
                 ensure!(
                     from.size()
                         == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64, N6 as i64]
