@@ -61,7 +61,7 @@ impl TryFromCv<&DynamicImage> for core::Mat {
             DynamicImage::ImageBgr8(image) => image.try_into_cv()?,
             DynamicImage::ImageBgra8(image) => image.try_into_cv()?,
 
-            // Reorder the color channels to RGB format used by OpenCv
+            // Reorder color channels to the default BGR format used by OpenCv
             DynamicImage::ImageRgb8(image) => {
                 let image: BgrImage = image.convert();
                 image.try_into_cv()?
@@ -71,7 +71,7 @@ impl TryFromCv<&DynamicImage> for core::Mat {
                 image.try_into_cv()?
             }
 
-            // Convert 16-bit data to 8-bit since OpenCV only supports 8-bit
+            // Convert 16-bit data to 8-bit since OpenCV only supports 8-bit in integer
             DynamicImage::ImageLuma16(image) => {
                 let image: image::GrayImage = image.convert();
                 image.try_into_cv()?
