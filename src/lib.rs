@@ -14,6 +14,8 @@ mod with_tch;
 mod with_tch_image;
 #[cfg(all(feature = "tch", feature = "ndarray"))]
 mod with_tch_ndarray;
+#[cfg(all(feature = "opencv", feature = "image"))]
+mod with_opencv_image;
 
 #[cfg(feature = "image")]
 pub use image;
@@ -46,3 +48,6 @@ pub use with_opencv_tch::*;
 
 #[cfg(all(feature = "tch", feature = "ndarray"))]
 pub use with_tch_ndarray::*;
+
+#[cfg(all(feature = "opencv", feature = "image"))]
+pub use with_opencv_image::*;
