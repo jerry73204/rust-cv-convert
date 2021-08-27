@@ -4,6 +4,8 @@ mod common;
 mod traits;
 #[cfg(feature = "opencv")]
 mod with_opencv;
+#[cfg(all(feature = "opencv", feature = "image"))]
+mod with_opencv_image;
 #[cfg(all(feature = "opencv", feature = "nalgebra"))]
 mod with_opencv_nalgebra;
 #[cfg(all(feature = "opencv", feature = "tch"))]
@@ -14,8 +16,6 @@ mod with_tch;
 mod with_tch_image;
 #[cfg(all(feature = "tch", feature = "ndarray"))]
 mod with_tch_ndarray;
-#[cfg(all(feature = "opencv", feature = "image"))]
-mod with_opencv_image;
 
 #[cfg(feature = "image")]
 pub use image;
