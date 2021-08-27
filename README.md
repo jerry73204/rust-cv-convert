@@ -6,6 +6,7 @@ Type conversions among famous Rust computer vision libraries. It supports the fo
 - [nalgebra](https://crates.io/crates/nalgebra)
 - [opencv](https://crates.io/crates/opencv)
 - [tch](https://crates.io/crates/tch)
+- [ndarray](https://crates.io/crates/ndarray)
 
 ## Import to Your Crate
 
@@ -13,40 +14,26 @@ Add cv-convert to `Cargo.toml` to import most conversions by default.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.9"
+version = "0.11"
 ```
-
-You can manually choose supported libraries to avoid bloating.
+You can specify supported libraries to avoid bloating.
 
 ```toml
-version = "0.9"
+version = "0.11"
 default-features = false
 features = ["opencv", "nalgebra"]
 ```
 
 The minimum supported `rustc` is 1.51
 You may use older versions of the crate (>=0.6) in order to use `rustc` versions that do not support const-generics.
-## Supported Cargo Features
 
-opencv crate features
+## Cargo Features
 
+- `opencv`
 - `opencv-clang-runtime`: Enable `clang-runtime` in opencv crate. Useful if you get `libclang shared library is not loaded on this thread!` panic.
-- `opencv-contrib`: `opencv-contrib` has been dropped by the main `opencv` crate in favour of runtime module set detection. If you need the older version, 0.5.0 was the version that last supported `opencv-0.51.0`. 
-- `opencv-4`, `opencv-34`, `opencv-32`, `opencv-buildtime-bindgen`: These features have been dropped in opencv-0.53.0 in favour of runtime generation and detection. cv-convert-0.6 was the last version that supported `opencv-0.52.0`, which had these features.
-
-image crate feature
-
 - `image`
-
-nalgebra crate feature
-
 - `nalgebra`
-- With the arrival of `nalgebra` 0.26, const-generic are used in this crate and are incompatible with previous versions of `nalgebra`. If you are pulling in previous versions of `nalgebra`, please use 0.6 or older.
-
-tch crate feature
-
 - `tch`
-
 
 ## Usage
 
