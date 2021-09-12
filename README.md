@@ -14,12 +14,12 @@ Add cv-convert to `Cargo.toml` to import most conversions by default.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.11"
+version = "0.12"
 ```
 You can specify supported libraries to avoid bloating.
 
 ```toml
-version = "0.11"
+version = "0.12"
 default-features = false
 features = ["opencv", "nalgebra"]
 ```
