@@ -1,12 +1,12 @@
 use crate::{common::*, TryFromCv, TryIntoCv};
 use image::{buffer::ConvertBuffer, Bgr, Bgra, ColorType, DynamicImage, ImageBuffer};
-use opencv::{core, prelude::MatTrait};
+use opencv::{core as core_cv, prelude::*};
 use std::ops::Deref;
 
 type BgrImage = ImageBuffer<Bgr<u8>, Vec<u8>>;
 type BgraImage = ImageBuffer<Bgra<u8>, Vec<u8>>;
 
-impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for core::Mat
+impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for core_cv::Mat
 where
     P: image::Pixel + 'static,
     P::Subpixel: 'static,
@@ -18,7 +18,7 @@ where
     }
 }
 
-impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for core::Mat
+impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for core_cv::Mat
 where
     P: image::Pixel + 'static,
     P::Subpixel: 'static,
@@ -30,19 +30,19 @@ where
         let height = height as usize;
         let width = width as usize;
         let cv_type = match P::COLOR_TYPE {
-            ColorType::L8 => core::CV_8UC1,
-            ColorType::La8 => core::CV_8UC2,
-            ColorType::Bgr8 => core::CV_8UC3,
-            ColorType::Bgra8 => core::CV_8UC4,
+            ColorType::L8 => core_cv::CV_8UC1,
+            ColorType::La8 => core_cv::CV_8UC2,
+            ColorType::Bgr8 => core_cv::CV_8UC3,
+            ColorType::Bgra8 => core_cv::CV_8UC4,
             typ => bail!("Wrong color type: {:?}", typ),
         };
         let mat = unsafe {
-            core::Mat::new_rows_cols_with_data(
+            core_cv::Mat::new_rows_cols_with_data(
                 height as i32,
                 width as i32,
                 cv_type,
                 from.as_ptr() as *mut _,
-                core::Mat_AUTO_STEP,
+                core_cv::Mat_AUTO_STEP,
             )?
             .try_clone()?
         };
@@ -50,7 +50,7 @@ where
     }
 }
 
-impl TryFromCv<&DynamicImage> for core::Mat {
+impl TryFromCv<&DynamicImage> for core_cv::Mat {
     type Error = Error;
 
     fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
@@ -93,7 +93,7 @@ impl TryFromCv<&DynamicImage> for core::Mat {
     }
 }
 
-impl TryFromCv<DynamicImage> for core::Mat {
+impl TryFromCv<DynamicImage> for core_cv::Mat {
     type Error = Error;
     fn try_from_cv(from: DynamicImage) -> Result<Self, Self::Error> {
         (&from).try_into_cv()

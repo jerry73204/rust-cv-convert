@@ -1,5 +1,5 @@
 use crate::{common::*, TryFromCv, TryIntoCv};
-use opencv::{core, prelude::*};
+use opencv::{core as core_cv, prelude::*};
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
@@ -54,38 +54,38 @@ mod mat_ext {
         fn tch_kind_shape_nd(&self) -> Result<(tch::Kind, Vec<i64>)>;
     }
 
-    impl MatExt for core::Mat {
+    impl MatExt for core_cv::Mat {
         fn tch_kind_shape_2d(&self) -> Result<(tch::Kind, [i64; 3])> {
-            let core::Size { height, width } = self.size()?;
+            let core_cv::Size { height, width } = self.size()?;
             let (kind, n_channels) = match self.typ()? {
-                core::CV_8UC1 => (tch::Kind::Uint8, 1),
-                core::CV_8UC2 => (tch::Kind::Uint8, 2),
-                core::CV_8UC3 => (tch::Kind::Uint8, 3),
-                core::CV_8UC4 => (tch::Kind::Uint8, 4),
-                core::CV_8SC1 => (tch::Kind::Int8, 1),
-                core::CV_8SC2 => (tch::Kind::Int8, 2),
-                core::CV_8SC3 => (tch::Kind::Int8, 3),
-                core::CV_8SC4 => (tch::Kind::Int8, 4),
-                core::CV_16SC1 => (tch::Kind::Int16, 1),
-                core::CV_16SC2 => (tch::Kind::Int16, 2),
-                core::CV_16SC3 => (tch::Kind::Int16, 3),
-                core::CV_16SC4 => (tch::Kind::Int16, 4),
-                core::CV_16FC1 => (tch::Kind::Half, 1),
-                core::CV_16FC2 => (tch::Kind::Half, 2),
-                core::CV_16FC3 => (tch::Kind::Half, 3),
-                core::CV_16FC4 => (tch::Kind::Half, 4),
-                core::CV_32FC1 => (tch::Kind::Float, 1),
-                core::CV_32FC2 => (tch::Kind::Float, 2),
-                core::CV_32FC3 => (tch::Kind::Float, 3),
-                core::CV_32FC4 => (tch::Kind::Float, 4),
-                core::CV_32SC1 => (tch::Kind::Int, 1),
-                core::CV_32SC2 => (tch::Kind::Int, 2),
-                core::CV_32SC3 => (tch::Kind::Int, 3),
-                core::CV_32SC4 => (tch::Kind::Int, 4),
-                core::CV_64FC1 => (tch::Kind::Double, 1),
-                core::CV_64FC2 => (tch::Kind::Double, 2),
-                core::CV_64FC3 => (tch::Kind::Double, 3),
-                core::CV_64FC4 => (tch::Kind::Double, 4),
+                core_cv::CV_8UC1 => (tch::Kind::Uint8, 1),
+                core_cv::CV_8UC2 => (tch::Kind::Uint8, 2),
+                core_cv::CV_8UC3 => (tch::Kind::Uint8, 3),
+                core_cv::CV_8UC4 => (tch::Kind::Uint8, 4),
+                core_cv::CV_8SC1 => (tch::Kind::Int8, 1),
+                core_cv::CV_8SC2 => (tch::Kind::Int8, 2),
+                core_cv::CV_8SC3 => (tch::Kind::Int8, 3),
+                core_cv::CV_8SC4 => (tch::Kind::Int8, 4),
+                core_cv::CV_16SC1 => (tch::Kind::Int16, 1),
+                core_cv::CV_16SC2 => (tch::Kind::Int16, 2),
+                core_cv::CV_16SC3 => (tch::Kind::Int16, 3),
+                core_cv::CV_16SC4 => (tch::Kind::Int16, 4),
+                core_cv::CV_16FC1 => (tch::Kind::Half, 1),
+                core_cv::CV_16FC2 => (tch::Kind::Half, 2),
+                core_cv::CV_16FC3 => (tch::Kind::Half, 3),
+                core_cv::CV_16FC4 => (tch::Kind::Half, 4),
+                core_cv::CV_32FC1 => (tch::Kind::Float, 1),
+                core_cv::CV_32FC2 => (tch::Kind::Float, 2),
+                core_cv::CV_32FC3 => (tch::Kind::Float, 3),
+                core_cv::CV_32FC4 => (tch::Kind::Float, 4),
+                core_cv::CV_32SC1 => (tch::Kind::Int, 1),
+                core_cv::CV_32SC2 => (tch::Kind::Int, 2),
+                core_cv::CV_32SC3 => (tch::Kind::Int, 3),
+                core_cv::CV_32SC4 => (tch::Kind::Int, 4),
+                core_cv::CV_64FC1 => (tch::Kind::Double, 1),
+                core_cv::CV_64FC2 => (tch::Kind::Double, 2),
+                core_cv::CV_64FC3 => (tch::Kind::Double, 3),
+                core_cv::CV_64FC4 => (tch::Kind::Double, 4),
                 other => bail!("unsupported Mat type {}", other),
             };
             Ok((kind, [width as i64, height as i64, n_channels as i64]))
@@ -101,34 +101,34 @@ mod mat_ext {
                 .collect();
 
             let kind = match self.typ()? {
-                core::CV_8UC1 => tch::Kind::Uint8,
-                core::CV_8UC2 => tch::Kind::Uint8,
-                core::CV_8UC3 => tch::Kind::Uint8,
-                core::CV_8UC4 => tch::Kind::Uint8,
-                core::CV_8SC1 => tch::Kind::Int8,
-                core::CV_8SC2 => tch::Kind::Int8,
-                core::CV_8SC3 => tch::Kind::Int8,
-                core::CV_8SC4 => tch::Kind::Int8,
-                core::CV_16SC1 => tch::Kind::Int16,
-                core::CV_16SC2 => tch::Kind::Int16,
-                core::CV_16SC3 => tch::Kind::Int16,
-                core::CV_16SC4 => tch::Kind::Int16,
-                core::CV_16FC1 => tch::Kind::Half,
-                core::CV_16FC2 => tch::Kind::Half,
-                core::CV_16FC3 => tch::Kind::Half,
-                core::CV_16FC4 => tch::Kind::Half,
-                core::CV_32FC1 => tch::Kind::Float,
-                core::CV_32FC2 => tch::Kind::Float,
-                core::CV_32FC3 => tch::Kind::Float,
-                core::CV_32FC4 => tch::Kind::Float,
-                core::CV_32SC1 => tch::Kind::Int,
-                core::CV_32SC2 => tch::Kind::Int,
-                core::CV_32SC3 => tch::Kind::Int,
-                core::CV_32SC4 => tch::Kind::Int,
-                core::CV_64FC1 => tch::Kind::Double,
-                core::CV_64FC2 => tch::Kind::Double,
-                core::CV_64FC3 => tch::Kind::Double,
-                core::CV_64FC4 => tch::Kind::Double,
+                core_cv::CV_8UC1 => tch::Kind::Uint8,
+                core_cv::CV_8UC2 => tch::Kind::Uint8,
+                core_cv::CV_8UC3 => tch::Kind::Uint8,
+                core_cv::CV_8UC4 => tch::Kind::Uint8,
+                core_cv::CV_8SC1 => tch::Kind::Int8,
+                core_cv::CV_8SC2 => tch::Kind::Int8,
+                core_cv::CV_8SC3 => tch::Kind::Int8,
+                core_cv::CV_8SC4 => tch::Kind::Int8,
+                core_cv::CV_16SC1 => tch::Kind::Int16,
+                core_cv::CV_16SC2 => tch::Kind::Int16,
+                core_cv::CV_16SC3 => tch::Kind::Int16,
+                core_cv::CV_16SC4 => tch::Kind::Int16,
+                core_cv::CV_16FC1 => tch::Kind::Half,
+                core_cv::CV_16FC2 => tch::Kind::Half,
+                core_cv::CV_16FC3 => tch::Kind::Half,
+                core_cv::CV_16FC4 => tch::Kind::Half,
+                core_cv::CV_32FC1 => tch::Kind::Float,
+                core_cv::CV_32FC2 => tch::Kind::Float,
+                core_cv::CV_32FC3 => tch::Kind::Float,
+                core_cv::CV_32FC4 => tch::Kind::Float,
+                core_cv::CV_32SC1 => tch::Kind::Int,
+                core_cv::CV_32SC2 => tch::Kind::Int,
+                core_cv::CV_32SC3 => tch::Kind::Int,
+                core_cv::CV_32SC4 => tch::Kind::Int,
+                core_cv::CV_64FC1 => tch::Kind::Double,
+                core_cv::CV_64FC2 => tch::Kind::Double,
+                core_cv::CV_64FC3 => tch::Kind::Double,
+                core_cv::CV_64FC4 => tch::Kind::Double,
                 other => bail!("unsupported Mat type {}", other),
             };
             Ok((kind, size))
@@ -139,11 +139,11 @@ mod mat_ext {
 mod tensor_from_mat {
     use super::*;
 
-    /// A [Tensor](tch::Tensor) which data reference borrows from a [Mat](core::Mat). It can be dereferenced to a [Tensor](tch::Tensor).
+    /// A [Tensor](tch::Tensor) which data reference borrows from a [Mat](core_cv::Mat). It can be dereferenced to a [Tensor](tch::Tensor).
     #[derive(Debug)]
     pub struct TensorFromMat {
         pub(super) tensor: ManuallyDrop<tch::Tensor>,
-        pub(super) mat: ManuallyDrop<core::Mat>,
+        pub(super) mat: ManuallyDrop<core_cv::Mat>,
     }
 
     impl TensorFromMat {
@@ -176,10 +176,10 @@ mod tensor_from_mat {
     }
 }
 
-impl TryFromCv<core::Mat> for TensorFromMat {
+impl TryFromCv<core_cv::Mat> for TensorFromMat {
     type Error = Error;
 
-    fn try_from_cv(from: core::Mat) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: core_cv::Mat) -> Result<Self, Self::Error> {
         ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
 
         let (kind, shape) = from.tch_kind_shape_nd()?;
@@ -211,10 +211,10 @@ impl TryFromCv<core::Mat> for TensorFromMat {
     }
 }
 
-impl TryFromCv<&core::Mat> for tch::Tensor {
+impl TryFromCv<&core_cv::Mat> for tch::Tensor {
     type Error = Error;
 
-    fn try_from_cv(from: &core::Mat) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: &core_cv::Mat) -> Result<Self, Self::Error> {
         ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
         let (kind, shape) = from.tch_kind_shape_nd()?;
 
@@ -230,15 +230,15 @@ impl TryFromCv<&core::Mat> for tch::Tensor {
     }
 }
 
-impl TryFromCv<core::Mat> for tch::Tensor {
+impl TryFromCv<core_cv::Mat> for tch::Tensor {
     type Error = Error;
 
-    fn try_from_cv(from: core::Mat) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: core_cv::Mat) -> Result<Self, Self::Error> {
         (&from).try_into_cv()
     }
 }
 
-impl<T> TryFromCv<&TensorAsImage<T>> for core::Mat
+impl<T> TryFromCv<&TensorAsImage<T>> for core_cv::Mat
 where
     T: Borrow<tch::Tensor>,
 {
@@ -265,34 +265,34 @@ where
 
         let kind = tensor.f_kind()?;
         let typ = match (kind, channels) {
-            (tch::Kind::Uint8, 1) => core::CV_8UC1,
-            (tch::Kind::Uint8, 2) => core::CV_8UC2,
-            (tch::Kind::Uint8, 3) => core::CV_8UC3,
-            (tch::Kind::Uint8, 4) => core::CV_8UC4,
-            (tch::Kind::Int8, 1) => core::CV_8SC1,
-            (tch::Kind::Int8, 2) => core::CV_8SC2,
-            (tch::Kind::Int8, 3) => core::CV_8SC3,
-            (tch::Kind::Int8, 4) => core::CV_8SC4,
-            (tch::Kind::Int16, 1) => core::CV_16SC1,
-            (tch::Kind::Int16, 2) => core::CV_16SC2,
-            (tch::Kind::Int16, 3) => core::CV_16SC3,
-            (tch::Kind::Int16, 4) => core::CV_16SC4,
-            (tch::Kind::Half, 1) => core::CV_16FC1,
-            (tch::Kind::Half, 2) => core::CV_16FC2,
-            (tch::Kind::Half, 3) => core::CV_16FC3,
-            (tch::Kind::Half, 4) => core::CV_16FC4,
-            (tch::Kind::Int, 1) => core::CV_32SC1,
-            (tch::Kind::Int, 2) => core::CV_32SC2,
-            (tch::Kind::Int, 3) => core::CV_32SC3,
-            (tch::Kind::Int, 4) => core::CV_32SC4,
-            (tch::Kind::Float, 1) => core::CV_32FC1,
-            (tch::Kind::Float, 2) => core::CV_32FC2,
-            (tch::Kind::Float, 3) => core::CV_32FC3,
-            (tch::Kind::Float, 4) => core::CV_32FC4,
-            (tch::Kind::Double, 1) => core::CV_64FC1,
-            (tch::Kind::Double, 2) => core::CV_64FC2,
-            (tch::Kind::Double, 3) => core::CV_64FC3,
-            (tch::Kind::Double, 4) => core::CV_64FC4,
+            (tch::Kind::Uint8, 1) => core_cv::CV_8UC1,
+            (tch::Kind::Uint8, 2) => core_cv::CV_8UC2,
+            (tch::Kind::Uint8, 3) => core_cv::CV_8UC3,
+            (tch::Kind::Uint8, 4) => core_cv::CV_8UC4,
+            (tch::Kind::Int8, 1) => core_cv::CV_8SC1,
+            (tch::Kind::Int8, 2) => core_cv::CV_8SC2,
+            (tch::Kind::Int8, 3) => core_cv::CV_8SC3,
+            (tch::Kind::Int8, 4) => core_cv::CV_8SC4,
+            (tch::Kind::Int16, 1) => core_cv::CV_16SC1,
+            (tch::Kind::Int16, 2) => core_cv::CV_16SC2,
+            (tch::Kind::Int16, 3) => core_cv::CV_16SC3,
+            (tch::Kind::Int16, 4) => core_cv::CV_16SC4,
+            (tch::Kind::Half, 1) => core_cv::CV_16FC1,
+            (tch::Kind::Half, 2) => core_cv::CV_16FC2,
+            (tch::Kind::Half, 3) => core_cv::CV_16FC3,
+            (tch::Kind::Half, 4) => core_cv::CV_16FC4,
+            (tch::Kind::Int, 1) => core_cv::CV_32SC1,
+            (tch::Kind::Int, 2) => core_cv::CV_32SC2,
+            (tch::Kind::Int, 3) => core_cv::CV_32SC3,
+            (tch::Kind::Int, 4) => core_cv::CV_32SC4,
+            (tch::Kind::Float, 1) => core_cv::CV_32FC1,
+            (tch::Kind::Float, 2) => core_cv::CV_32FC2,
+            (tch::Kind::Float, 3) => core_cv::CV_32FC3,
+            (tch::Kind::Float, 4) => core_cv::CV_32FC4,
+            (tch::Kind::Double, 1) => core_cv::CV_64FC1,
+            (tch::Kind::Double, 2) => core_cv::CV_64FC2,
+            (tch::Kind::Double, 3) => core_cv::CV_64FC3,
+            (tch::Kind::Double, 4) => core_cv::CV_64FC4,
             (kind, channels) => bail!(
                 "unsupported tensor kind {:?} and channels {}",
                 kind,
@@ -301,13 +301,13 @@ where
         };
 
         let mat = unsafe {
-            core::Mat::new_rows_cols_with_data(
+            core_cv::Mat::new_rows_cols_with_data(
                 rows as i32,
                 cols as i32,
                 typ,
                 tensor.data_ptr(),
                 /* step = */
-                core::Mat_AUTO_STEP,
+                core_cv::Mat_AUTO_STEP,
             )?
             .try_clone()?
         };
@@ -316,7 +316,7 @@ where
     }
 }
 
-impl<T> TryFromCv<TensorAsImage<T>> for core::Mat
+impl<T> TryFromCv<TensorAsImage<T>> for core_cv::Mat
 where
     T: Borrow<tch::Tensor>,
 {
@@ -327,29 +327,29 @@ where
     }
 }
 
-impl TryFromCv<&tch::Tensor> for core::Mat {
+impl TryFromCv<&tch::Tensor> for core_cv::Mat {
     type Error = Error;
 
     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
         let tensor = from.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
         let size: Vec<_> = tensor.size().into_iter().map(|dim| dim as i32).collect();
         let typ = match tensor.f_kind()? {
-            tch::Kind::Uint8 => core::CV_8UC1,
-            tch::Kind::Int8 => core::CV_8SC1,
-            tch::Kind::Int16 => core::CV_16SC1,
-            tch::Kind::Half => core::CV_16FC1,
-            tch::Kind::Int => core::CV_32SC1,
-            tch::Kind::Float => core::CV_32FC1,
-            tch::Kind::Double => core::CV_64FC1,
+            tch::Kind::Uint8 => core_cv::CV_8UC1,
+            tch::Kind::Int8 => core_cv::CV_8SC1,
+            tch::Kind::Int16 => core_cv::CV_16SC1,
+            tch::Kind::Half => core_cv::CV_16FC1,
+            tch::Kind::Int => core_cv::CV_32SC1,
+            tch::Kind::Float => core_cv::CV_32FC1,
+            tch::Kind::Double => core_cv::CV_64FC1,
             kind => bail!("unsupported tensor kind {:?}", kind),
         };
 
-        let mat = unsafe { core::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), None)? };
+        let mat = unsafe { core_cv::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), None)? };
         Ok(mat)
     }
 }
 
-impl TryFromCv<tch::Tensor> for core::Mat {
+impl TryFromCv<tch::Tensor> for core_cv::Mat {
     type Error = Error;
 
     fn try_from_cv(from: tch::Tensor) -> Result<Self, Self::Error> {
@@ -371,7 +371,7 @@ mod tests {
 
         for _ in 0..ROUNDS {
             let before = tch::Tensor::randn(size.as_ref(), tch::kind::FLOAT_CPU);
-            let mat = core::Mat::try_from_cv(&before)?;
+            let mat = core_cv::Mat::try_from_cv(&before)?;
             let after = tch::Tensor::try_from_cv(&mat)?.f_view(size)?;
 
             // compare Tensor and Mat values
@@ -432,14 +432,14 @@ mod tests {
             let width = 8;
 
             let before = tch::Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
-            let mat: core::Mat =
+            let mat: core_cv::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
             let after = tch::Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
             for row in 0..height {
                 for col in 0..width {
-                    let pixel: &core::Vec3f = mat.at_2d(row as i32, col as i32)?;
+                    let pixel: &core_cv::Vec3f = mat.at_2d(row as i32, col as i32)?;
                     let [red, green, blue] = **pixel;
                     ensure!(f32::from(before.i((0, row, col))) == red, "value mismatch");
                     ensure!(
@@ -474,7 +474,7 @@ mod tests {
             let width = 8;
 
             let before = tch::Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
-            let mat: core::Mat =
+            let mat: core_cv::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
             let after = TensorFromMat::try_from_cv(mat)?; // in hwc
 
