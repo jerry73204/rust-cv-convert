@@ -14,7 +14,7 @@ Add this snipplet to your `Cargo.toml` to include cv-convert with full support.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.12"
+version = "0.13"
 features = ["full"]
 ```
 
@@ -22,7 +22,7 @@ To avoid bloat on unused libraries, it's suggested to specify used libraries man
 
 ```toml
 [dependencies.cv-convert]
-version = "0.12"
+version = "0.13"
 features = ["opencv", "nalgebra"]
 ```
 
