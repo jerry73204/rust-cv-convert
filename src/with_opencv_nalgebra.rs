@@ -1,4 +1,4 @@
-use crate::{common::*, FromCv, TryFromCv};
+use crate::{common::*, FromCv, TryFromCv, TryIntoCv};
 use nalgebra::{self as na, geometry as geo};
 use opencv::{calib3d, core as core_cv, prelude::*};
 
@@ -15,7 +15,15 @@ impl TryFromCv<OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
     type Error = Error;
 
     fn try_from_cv(pose: OpenCvPose<&core_cv::Point3d>) -> Result<Self> {
-        let OpenCvPose { rvec, tvec } = pose;
+        (&pose).try_into_cv()
+    }
+}
+
+impl TryFromCv<&OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
+    type Error = Error;
+
+    fn try_from_cv(pose: &OpenCvPose<&core_cv::Point3d>) -> Result<Self> {
+        let OpenCvPose { rvec, tvec } = *pose;
         let rotation = {
             let rvec_mat = {
                 let core_cv::Point3_ { x, y, z, .. } = *rvec;
@@ -58,10 +66,18 @@ impl TryFromCv<OpenCvPose<&core_cv::Mat>> for geo::Isometry3<f64> {
     type Error = Error;
 
     fn try_from_cv(from: OpenCvPose<&core_cv::Mat>) -> Result<Self> {
+        (&from).try_into_cv()
+    }
+}
+
+impl TryFromCv<&OpenCvPose<&core_cv::Mat>> for geo::Isometry3<f64> {
+    type Error = Error;
+
+    fn try_from_cv(from: &OpenCvPose<&core_cv::Mat>) -> Result<Self> {
         let OpenCvPose {
             rvec: rvec_mat,
             tvec: tvec_mat,
-        } = from;
+        } = *from;
         let rvec = core_cv::Point3d::try_from_cv(rvec_mat)?;
         let tvec = core_cv::Point3d::try_from_cv(tvec_mat)?;
         let isometry = TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })?;
