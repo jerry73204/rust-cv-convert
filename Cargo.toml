@@ -28,9 +28,9 @@ itertools = "0.10.1"
 rand = "0.8.4"
 
 [features]
-default = ["full"]
+default = []
 full = ["image", "opencv", "opencv-clang-runtime", "tch", "nalgebra", "ndarray"]
-docs-only = ["opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra", "ndarray"]
+docs-only = ["full", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra", "ndarray"]
 opencv-clang-runtime = ["opencv/clang-runtime"]
 
 [package.metadata.docs.rs]
