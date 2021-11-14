@@ -22,7 +22,7 @@ impl TryFromCv<OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
                 core_cv::Mat::from_slice(&[x, y, z])?
             };
             let mut rotation_mat = core_cv::Mat::zeros(3, 3, core_cv::CV_64FC1)?.to_mat()?;
-            calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut core_cv::no_array()?)?;
+            calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut core_cv::Mat::default())?;
             let rotation_matrix: na::Matrix3<f64> = TryFromCv::try_from_cv(rotation_mat)?;
             geo::UnitQuaternion::from_matrix(&rotation_matrix)
         };
@@ -104,7 +104,7 @@ where
             let rotation_mat =
                 core_cv::Mat::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = core_cv::Mat::zeros(3, 1, core_cv::CV_64FC1)?.to_mat()?;
-            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::no_array()?)?;
+            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             let rvec = core_cv::Point3_::new(
                 *rvec_mat.at_2d::<T>(0, 0)?,
                 *rvec_mat.at_2d::<T>(1, 0)?,
@@ -143,7 +143,7 @@ impl TryFromCv<&geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
             let rotation_mat: Mat =
                 TryFromCv::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = core_cv::Mat::zeros(3, 1, core_cv::CV_64FC1)?.to_mat()?;
-            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::no_array()?)?;
+            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             rvec_mat
         };
         let tvec = core_cv::Mat::from_slice(&[translation.x, translation.y, translation.z])?;
@@ -173,7 +173,7 @@ impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
         let rvec = {
             let rotation_mat = Mat::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = Mat::zeros(3, 1, core_cv::CV_32FC1)?.to_mat()?;
-            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::no_array()?)?;
+            calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             rvec_mat
         };
         let tvec = Mat::from_slice(&[translation.x, translation.y, translation.z])?;
@@ -469,7 +469,7 @@ mod tests {
         let output = core_cv::Mat::try_from_cv(input)?;
         let output_shape = output.size()?;
         ensure!(
-            output.channels()? == 1
+            output.channels() == 1
                 && nrows == output_shape.height as usize
                 && ncols == output_shape.width as usize,
             "the shape does not match"

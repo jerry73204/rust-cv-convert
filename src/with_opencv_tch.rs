@@ -57,7 +57,7 @@ mod mat_ext {
     impl MatExt for core_cv::Mat {
         fn tch_kind_shape_2d(&self) -> Result<(tch::Kind, [i64; 3])> {
             let core_cv::Size { height, width } = self.size()?;
-            let (kind, n_channels) = match self.typ()? {
+            let (kind, n_channels) = match self.typ() {
                 core_cv::CV_8UC1 => (tch::Kind::Uint8, 1),
                 core_cv::CV_8UC2 => (tch::Kind::Uint8, 2),
                 core_cv::CV_8UC3 => (tch::Kind::Uint8, 3),
@@ -97,10 +97,10 @@ mod mat_ext {
                 .iter()
                 .cloned()
                 .map(|dim| dim as i64)
-                .chain(iter::once(self.channels()? as i64))
+                .chain(iter::once(self.channels() as i64))
                 .collect();
 
-            let kind = match self.typ()? {
+            let kind = match self.typ() {
                 core_cv::CV_8UC1 => tch::Kind::Uint8,
                 core_cv::CV_8UC2 => tch::Kind::Uint8,
                 core_cv::CV_8UC3 => tch::Kind::Uint8,
@@ -180,7 +180,7 @@ impl TryFromCv<core_cv::Mat> for TensorFromMat {
     type Error = Error;
 
     fn try_from_cv(from: core_cv::Mat) -> Result<Self, Self::Error> {
-        ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
+        ensure!(from.is_continuous(), "non-continuous Mat is not supported");
 
         let (kind, shape) = from.tch_kind_shape_nd()?;
         let strides = {
@@ -215,7 +215,7 @@ impl TryFromCv<&core_cv::Mat> for tch::Tensor {
     type Error = Error;
 
     fn try_from_cv(from: &core_cv::Mat) -> Result<Self, Self::Error> {
-        ensure!(from.is_continuous()?, "non-continuous Mat is not supported");
+        ensure!(from.is_continuous(), "non-continuous Mat is not supported");
         let (kind, shape) = from.tch_kind_shape_nd()?;
 
         let tensor = unsafe {
