@@ -8,19 +8,21 @@ Type conversions among famous Rust computer vision libraries. It supports the fo
 - [tch](https://crates.io/crates/tch)
 - [ndarray](https://crates.io/crates/ndarray)
 
-## Import to Your Crate
+## Using this crate
 
-Add cv-convert to `Cargo.toml` to import most conversions by default.
+Add this snipplet to your `Cargo.toml` to include cv-convert with full support.
 
 ```toml
 [dependencies.cv-convert]
 version = "0.12"
+features = ["full"]
 ```
-You can specify supported libraries to avoid bloating.
+
+To avoid bloat on unused libraries, it's suggested to specify used libraries manually.
 
 ```toml
+[dependencies.cv-convert]
 version = "0.12"
-default-features = false
 features = ["opencv", "nalgebra"]
 ```
 
@@ -29,10 +31,27 @@ You may use older versions of the crate (>=0.6) in order to use `rustc` versions
 
 ## Cargo Features
 
+### Include everything
+
+- `full`
+
+### OpenCV
+
+Enable `clang-runtime` in opencv crate. It is useful when you get `libclang shared library is not loaded on this thread!` panic.
+
 - `opencv`
-- `opencv-clang-runtime`: Enable `clang-runtime` in opencv crate. Useful if you get `libclang shared library is not loaded on this thread!` panic.
+- `opencv-clang-runtime`
+
+### Image
+
 - `image`
+
+### nalgebra
+
 - `nalgebra`
+
+### tch
+
 - `tch`
 
 ## Usage
