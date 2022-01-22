@@ -8,21 +8,21 @@ Type conversions among famous Rust computer vision libraries. It supports the fo
 - [tch](https://crates.io/crates/tch)
 - [ndarray](https://crates.io/crates/ndarray)
 
-## Using this crate
+## Usage
 
-Add this snipplet to your `Cargo.toml` to include cv-convert with full support.
+Add this crate to `Cargo.toml` with full support on all libraries.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.14"
+version = "0.15"
 features = ["full"]
 ```
 
-To avoid bloat on unused libraries, it's suggested to specify used libraries manually.
+or you can specify the libraries you want.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.14"
+version = "0.15"
 features = ["opencv", "nalgebra"]
 ```
 
