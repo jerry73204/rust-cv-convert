@@ -90,57 +90,100 @@
 //! - [(&)TensorAsImage](TensorAsImage) ->? [Mat](opencv::core::Mat)
 
 mod common;
-
 mod traits;
-pub use traits::*;
+mod utils;
 
 pub mod prelude {
     pub use crate::traits::{FromCv, IntoCv, TryFromCv, TryIntoCv};
 }
 
-#[cfg(feature = "opencv")]
-mod with_opencv;
-#[cfg(feature = "opencv")]
-pub use opencv;
-#[cfg(feature = "opencv")]
-pub use with_opencv::*;
+pub use traits::*;
 
-#[cfg(feature = "image")]
-pub use image;
+use utils::*;
 
-#[cfg(feature = "nalgebra")]
-pub use nalgebra;
+// opencv exports
+#[cfg(feature = "opencv_0-62")]
+pub use opencv_0_62 as opencv;
 
-#[cfg(feature = "ndarray")]
-pub use ndarray;
+#[cfg(feature = "opencv_0-61")]
+pub use opencv_0_61 as opencv;
 
-#[cfg(feature = "tch")]
-pub use tch;
+// image exports
+#[cfg(feature = "image_0-23")]
+pub use image_0_23 as image;
 
-#[cfg(all(feature = "opencv", feature = "image"))]
-mod with_opencv_image;
-#[cfg(all(feature = "opencv", feature = "image"))]
-pub use with_opencv_image::*;
+// nalgebra exports
+#[cfg(feature = "nalgebra_0-30")]
+pub use nalgebra_0_30 as nalgebra;
 
-#[cfg(all(feature = "opencv", feature = "nalgebra"))]
-mod with_opencv_nalgebra;
-#[cfg(all(feature = "opencv", feature = "nalgebra"))]
-pub use with_opencv_nalgebra::*;
+#[cfg(feature = "nalgebra_0-29")]
+pub use nalgebra_0_29 as nalgebra;
 
-#[cfg(all(feature = "opencv", feature = "tch"))]
-mod with_opencv_tch;
-#[cfg(all(feature = "opencv", feature = "tch"))]
-pub use with_opencv_tch::*;
+#[cfg(feature = "nalgebra_0-28")]
+pub use nalgebra_0_28 as nalgebra;
 
-#[cfg(feature = "tch")]
-mod with_tch;
+#[cfg(feature = "nalgebra_0-27")]
+pub use nalgebra_0_27 as nalgebra;
 
-#[cfg(all(feature = "tch", feature = "image"))]
-mod with_tch_image;
-#[cfg(all(feature = "tch", feature = "image"))]
-pub use with_tch_image::*;
+#[cfg(feature = "nalgebra_0-26")]
+pub use nalgebra_0_26 as nalgebra;
 
-#[cfg(all(feature = "tch", feature = "ndarray"))]
-mod with_tch_ndarray;
-#[cfg(all(feature = "tch", feature = "ndarray"))]
-pub use with_tch_ndarray::*;
+// ndarray exports
+#[cfg(feature = "ndarray_0-15")]
+pub use ndarray_0_15 as ndarray;
+
+// tch exports
+#[cfg(feature = "tch_0-6")]
+pub use tch_0_6 as tch;
+
+#[cfg(feature = "tch_0-5")]
+pub use tch_0_5 as tch;
+
+#[cfg(feature = "tch_0-4")]
+pub use tch_0_4 as tch;
+
+// modules
+has_opencv! {
+    mod with_opencv;
+    pub use with_opencv::*;
+}
+
+has_tch! {
+    mod with_tch;
+    pub use with_tch::*;
+}
+
+has_tch! {
+    has_image! {
+        mod with_tch_image;
+        pub use with_tch_image::*;
+    }
+}
+
+has_tch! {
+    has_ndarray! {
+        mod with_tch_ndarray;
+        pub use with_tch_ndarray::*;
+    }
+}
+
+has_image! {
+    has_opencv! {
+        mod with_opencv_image;
+        pub use with_opencv_image::*;
+    }
+}
+
+has_nalgebra! {
+    has_opencv! {
+        mod with_opencv_nalgebra;
+        pub use with_opencv_nalgebra::*;
+    }
+}
+
+has_tch! {
+    has_opencv! {
+        mod with_opencv_tch;
+        pub use with_opencv_tch::*;
+    }
+}

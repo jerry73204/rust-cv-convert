@@ -1,5 +1,5 @@
 use crate::{common::*, TryFromCv};
-use opencv::{core as core_cv, prelude::*};
+use crate::opencv::{core as core_cv, prelude::*};
 
 impl<T> TryFromCv<&core_cv::Mat> for core_cv::Point_<T>
 where

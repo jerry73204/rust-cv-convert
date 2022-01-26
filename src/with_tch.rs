@@ -1,5 +1,6 @@
 use crate::{common::*, FromCv, TryFromCv};
 use slice_of_array::prelude::*;
+use crate::tch;
 
 macro_rules! impl_from_array {
     ($elem:ty) => {
@@ -415,6 +416,7 @@ mod tests {
     use super::*;
     use crate::TryIntoCv;
     use rand::prelude::*;
+    use crate::tch;
 
     #[test]
     fn tensor_to_array_ref() {

@@ -1,4 +1,6 @@
 use crate::{common::*, FromCv, IntoCv, TryFromCv};
+use crate::image;
+use crate::tch;
 use std::ops::Deref;
 
 impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for tch::Tensor

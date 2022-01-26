@@ -1,38 +1,103 @@
 [package]
-name = "cv-convert"
-description = "Type conversions among famous Rust computer vision libraries"
-version = "0.15.0"
-authors = ["jerry73204 <jerry73204@gmail.com>"]
-edition = "2021"
-documentation = "https://docs.rs/cv-convert/"
-repository = "https://github.com/jerry73204/rust-cv-convert.git"
-homepage = "https://github.com/jerry73204/rust-cv-convert/"
-readme = "README.md"
-license = "MIT"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.53"
-image = { version = "0.23.14", optional = true }
-nalgebra = { version = "0.30.1", optional = true }
-opencv = { version = "0.62.0", default-features = false, features = ["calib3d"], optional = true }
-ndarray = { version = "0.15.4", optional = true }
-tch = { version = "0.6.1", optional = true }
-slice-of-array = "0.3.1"
-half = "1.8.2"
-
-[dev-dependencies]
-approx = "0.5.1"
-itertools = "0.10.3"
-rand = "0.8.4"
-
-[features]
-default = []
-full = ["image", "opencv", "tch", "nalgebra", "ndarray"]
-docs-only = ["full", "opencv/docs-only", "tch", "tch/doc-only", "image", "nalgebra", "ndarray"]
-opencv-clang-runtime = ["opencv/clang-runtime"]
+name = 'cv-convert'
+description = 'Type conversions among famous Rust computer vision libraries'
+version = '0.15.0'
+authors = ['jerry73204 <jerry73204@gmail.com>']
+edition = '2021'
+documentation = 'https://docs.rs/cv-convert/'
+repository = 'https://github.com/jerry73204/rust-cv-convert.git'
+homepage = 'https://github.com/jerry73204/rust-cv-convert/'
+readme = 'README.md'
+license = 'MIT'
 
 [package.metadata.docs.rs]
 no-default-features = true
-features = ["docs-only"]
+features = ['docs-only']
+
+[dependencies]
+anyhow = '1.0.53'
+slice-of-array = '0.3.1'
+half = '1.8.2'
+
+[dependencies.image_0-23]
+version = '0.23.14'
+package = 'image'
+optional = true
+
+[dependencies.nalgebra_0-30]
+version = '0.30.1'
+package = 'nalgebra'
+optional = true
+
+[dependencies.nalgebra_0-29]
+version = '0.29.0'
+package = 'nalgebra'
+optional = true
+
+[dependencies.nalgebra_0-28]
+version = '0.28.0'
+package = 'nalgebra'
+optional = true
+
+[dependencies.nalgebra_0-27]
+version = '0.27.1'
+package = 'nalgebra'
+optional = true
+
+[dependencies.nalgebra_0-26]
+version = '0.26.2'
+package = 'nalgebra'
+optional = true
+
+[dependencies.opencv_0-62]
+version = '0.62.0'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-61]
+version = '0.61.3'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.ndarray_0-15]
+version = '0.15.4'
+package = 'ndarray'
+optional = true
+
+[dependencies.tch_0-6]
+version = '0.6.1'
+package = 'tch'
+optional = true
+
+[dev-dependencies]
+approx = '0.5.1'
+itertools = '0.10.3'
+rand = '0.8.4'
+
+[features]
+full = [
+    'image_0-23',
+    'opencv_0-62',
+    'tch_0-6',
+    'nalgebra_0-30',
+    'ndarray_0-15',
+]
+docs-only = [
+    'full',
+    'opencv_0-62/docs-only',
+    'tch_0-6',
+    'tch_0-6/doc-only',
+    'image_0-23',
+    'nalgebra_0-30',
+    'ndarray_0-15',
+]
+opencv_0-62-clang-runtime = [
+    'opencv_0-62/clang-runtime',
+]
+opencv_0-61-clang-runtime = [
+    'opencv_0-61/clang-runtime',
+]

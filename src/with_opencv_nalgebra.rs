@@ -1,6 +1,6 @@
 use crate::{common::*, FromCv, TryFromCv, TryIntoCv};
-use nalgebra::{self as na, geometry as geo};
-use opencv::{calib3d, core as core_cv, prelude::*};
+use crate::nalgebra::{self as na, geometry as geo};
+use crate::opencv::{calib3d, core as core_cv, prelude::*};
 
 // Note for future maintainers: Since the matrixes need to accommodate any size Matrix, we are using na::OMatrix instead of SMatrix.
 
@@ -393,8 +393,8 @@ mod tests {
     use crate::{IntoCv, TryIntoCv};
     use anyhow::Result;
     use approx::abs_diff_eq;
-    use nalgebra::{U2, U3};
-    use opencv::core as core_cv;
+    use crate::nalgebra::{U2, U3};
+    use crate::opencv::core as core_cv;
     use rand::prelude::*;
     use std::f64;
 

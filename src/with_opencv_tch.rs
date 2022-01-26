@@ -1,5 +1,6 @@
 use crate::{common::*, TryFromCv, TryIntoCv};
-use opencv::{core as core_cv, prelude::*};
+use crate::opencv::{core as core_cv, prelude::*};
+use crate::tch;
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
@@ -360,7 +361,7 @@ impl TryFromCv<tch::Tensor> for core_cv::Mat {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tch::IndexOp;
+    use crate::tch::{IndexOp, Tensor, self};
 
     // const EPSILON: f64 = 1e-8;
     const ROUNDS: usize = 1000;
@@ -370,9 +371,9 @@ mod tests {
         let size = [2, 3, 4, 5];
 
         for _ in 0..ROUNDS {
-            let before = tch::Tensor::randn(size.as_ref(), tch::kind::FLOAT_CPU);
+            let before = Tensor::randn(size.as_ref(), tch::kind::FLOAT_CPU);
             let mat = core_cv::Mat::try_from_cv(&before)?;
-            let after = tch::Tensor::try_from_cv(&mat)?.f_view(size)?;
+            let after = Tensor::try_from_cv(&mat)?.f_view(size)?;
 
             // compare Tensor and Mat values
             {
@@ -408,7 +409,7 @@ mod tests {
                         let tch_index: Vec<_> = tch_index
                             .iter()
                             .cloned()
-                            .map(|val| Some(tch::Tensor::from(val)))
+                            .map(|val| Some(Tensor::from(val)))
                             .collect();
                         let tch_val: f32 = before.f_index(&tch_index)?.into();
                         let mat_val: f32 = *mat.at_nd(&cv_index)?;
@@ -431,10 +432,10 @@ mod tests {
             let height = 16;
             let width = 8;
 
-            let before = tch::Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
+            let before = Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
-            let after = tch::Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
+            let after = Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
             for row in 0..height {
@@ -473,7 +474,7 @@ mod tests {
             let height = 16;
             let width = 8;
 
-            let before = tch::Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
+            let before = Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
                 TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
             let after = TensorFromMat::try_from_cv(mat)?; // in hwc
