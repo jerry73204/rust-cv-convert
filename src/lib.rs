@@ -23,13 +23,34 @@
 //!
 //! # Traits
 //!
-//! The traits [FromCv] and [IntoCv] respectively define `.from_cv()` and `.into_cv()` methods.
-//! The usage is similar to std's [From] and [Into]. The traits [TryFromCv] and [TryIntoCv] are fallible counterparts.
-//! They respective define `.try_from_cv()` and `.try_into_cv()` methods. These traits can be imported from prelude.
+//! The traits [FromCv] and [IntoCv] provide `.from_cv()` and `.into_cv()`, and
+//! traits [TryFromCv] and [TryIntoCv] provide `.try_from_cv()` and `.try_into_cv()` methods respectively.
+//! Just like std's [From], [Into], [TryFromCv] and [TryIntoCv].
 //!
 //! ```rust
-//! use cv_convert::prelude::*;
+//! # use cv_convert::{nalgebra, opencv};
+//! use cv_convert::{FromCv, IntoCv, TryFromCv, TryIntoCv};
+//! use nalgebra as na;
+//! use opencv as cv;
+//!
+//! // FromCv
+//! let cv_point = cv::core::Point2d::new(1.0, 3.0);
+//! let na_points = na::Point2::<f64>::from_cv(&cv_point);
+//!
+//! // IntoCv
+//! let cv_point = cv::core::Point2d::new(1.0, 3.0);
+//! let na_points: na::Point2<f64> = cv_point.into_cv();
+//!
+//! // TryFromCv
+//! let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+//! let cv_mat = cv::core::Mat::try_from_cv(&na_mat).unwrap();
+//!
+//! // TryIntoCv
+//! let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+//! let cv_mat: cv::core::Mat = na_mat.try_into_cv().unwrap();
 //! ```
+//! //!
+//!
 //! # Supported conversions
 //!
 //! The notations are used for simplicity.
@@ -113,7 +134,6 @@
 //! # OpenCV
 //! If your system requires `opencv/clang-runtime` to build, enable the `opencv_0-62-clang-runtime` feature to solve.
 //! Other versions are named accordingly.
-//!
 
 mod common;
 mod traits;
