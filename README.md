@@ -10,24 +10,30 @@ Type conversions among famous Rust computer vision libraries. It supports the fo
 
 ## Usage
 
-Add this crate to `Cargo.toml` with full support on all libraries.
+This crate allows crate version selection in Cargo features.
+For example, the feature `nalgebra_0-30` enables nalgebra 0.30.x.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.15"
-features = ["full"]
+version = 'x.y.z'
+features = [
+    'image_0-23',
+    'opencv_0-62',
+    'tch_0-6',
+    'nalgebra_0-30',
+    'ndarray_0-15',
+]
 ```
 
-or you can specify the libraries you want.
+The `full` feature enable all crates with up-to-date versions.
 
 ```toml
 [dependencies.cv-convert]
-version = "0.15"
-features = ["opencv", "nalgebra"]
+version = 'x.y.z'
+features = ['full']
 ```
 
-The minimum supported `rustc` is 1.51
-You may use older versions of the crate (>=0.6) in order to use `rustc` versions that do not support const-generics.
+The minimum supported `rustc` is 1.51. You may use older versions of the crate (>=0.6) in order to use `rustc` versions that do not support const-generics.
 
 ## Cargo Features
 
@@ -35,24 +41,35 @@ You may use older versions of the crate (>=0.6) in order to use `rustc` versions
 
 - `full`
 
-### OpenCV
+### opencv
 
-Enable `clang-runtime` in opencv crate. It is useful when you get `libclang shared library is not loaded on this thread!` panic.
+- `opencv_0-62`
+- `opencv_0-61`
 
-- `opencv`
-- `opencv-clang-runtime`
+Enable the corresponding feature below if you get `libclang shared library is not loaded on this thread!` panic.
 
-### Image
+- `opencv_0-62-clang-runtime`
+- `opencv_0-61-clang-runtime`
 
-- `image`
+### image
+
+- `image_0-23`
+
+### ndarray
+
+- `ndarray_0-15`
 
 ### nalgebra
 
-- `nalgebra`
+- `nalgebra_0-30`
+- `nalgebra_0-29`
+- `nalgebra_0-28`
+- `nalgebra_0-27`
+- `nalgebra_0-26`
 
 ### tch
 
-- `tch`
+- `tch_0-6`
 
 ## Usage
 
