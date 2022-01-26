@@ -23,7 +23,7 @@ slice-of-array = "0.3.1"
 half = "1.8.2"
 
 [dev-dependencies]
-approx = "0.5.0"
+approx = "0.5.1"
 itertools = "0.10.3"
 rand = "0.8.4"
 
