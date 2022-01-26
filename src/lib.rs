@@ -1,5 +1,26 @@
 //! Data conversion among computer vision libraries.
 //!
+//! # Version Selection
+//!
+//! This crate supports multiple dependency versions to choose from.
+//! The choices of dependency versions are named accordingly as Cargo features.
+//! For example, the feature `nalgebra_0-30` enables nalgebra 0.30.x.
+//! It allows to list crate version selections in `Cargo.toml`.
+//!
+//! ```toml
+//! [dependencies.cv-convert]
+//! version = 'x.y.z'
+//! features = [
+//!     'image_0-23',
+//!     'opencv_0-62',
+//!     'tch_0-6',
+//!     'nalgebra_0-30',
+//!     'ndarray_0-15',
+//! ]
+//! ```
+//!
+//! Enable `full` feature if you wish to enable all crates with up-to-date versions.
+//!
 //! # Traits
 //!
 //! The traits [FromCv] and [IntoCv] respectively define `.from_cv()` and `.into_cv()` methods.
@@ -88,6 +109,11 @@
 //!
 //! - [(&)Tensor](tch::Tensor) ->? [Mat](opencv::core::Mat)
 //! - [(&)TensorAsImage](TensorAsImage) ->? [Mat](opencv::core::Mat)
+//!
+//! # OpenCV
+//! If your system requires `opencv/clang-runtime` to build, enable the `opencv_0-62-clang-runtime` feature to solve.
+//! Other versions are named accordingly.
+//!
 
 mod common;
 mod traits;
