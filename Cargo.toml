@@ -72,7 +72,6 @@ itertools = '0.10.3'
 rand = '0.8.4'
 
 [features]
-default = ["full"]
 full = [
     'image_0-23',
     'opencv_0-63',
