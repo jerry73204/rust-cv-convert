@@ -3,7 +3,7 @@ use crate::opencv::{core as core_cv, prelude::*};
 
 impl<T> TryFromCv<&core_cv::Mat> for core_cv::Point_<T>
 where
-    T: core_cv::DataType + core_cv::ValidPointType,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -20,7 +20,7 @@ where
 
 impl<T> TryFromCv<core_cv::Mat> for core_cv::Point_<T>
 where
-    T: core_cv::DataType + core_cv::ValidPointType,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -31,7 +31,7 @@ where
 
 impl<T> TryFromCv<&core_cv::Mat> for core_cv::Point3_<T>
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -49,7 +49,7 @@ where
 
 impl<T> TryFromCv<core_cv::Mat> for core_cv::Point3_<T>
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -60,7 +60,7 @@ where
 
 impl<T> TryFromCv<&core_cv::Point_<T>> for core_cv::Mat
 where
-    T: core_cv::DataType + core_cv::ValidPointType,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -73,7 +73,7 @@ where
 
 impl<T> TryFromCv<core_cv::Point_<T>> for core_cv::Mat
 where
-    T: core_cv::DataType + core_cv::ValidPointType,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -84,7 +84,7 @@ where
 
 impl<T> TryFromCv<&core_cv::Point3_<T>> for core_cv::Mat
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type,
+    T: core_cv::DataType,
 {
     type Error = Error;
 
@@ -97,7 +97,7 @@ where
 
 impl<T> TryFromCv<core_cv::Point3_<T>> for core_cv::Mat
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type,
+    T: core_cv::DataType,
 {
     type Error = Error;
 

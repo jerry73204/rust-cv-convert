@@ -36,8 +36,7 @@ macro_rules! if_opencv {
     ($($item:item)*) => {
         $(
             #[cfg(any(
-                feature = "opencv_0-62",
-                feature = "opencv_0-61",
+                feature = "opencv_0-63",
             ))]
             $item
         )*

@@ -105,7 +105,7 @@ impl TryFromCv<OpenCvPose<core_cv::Mat>> for geo::Isometry3<f64> {
 
 impl<T> TryFromCv<&geo::Isometry3<T>> for OpenCvPose<core_cv::Point3_<T>>
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type + na::RealField,
+    T: core_cv::DataType + na::RealField,
 {
     type Error = Error;
 
@@ -136,7 +136,7 @@ where
 
 impl<T> TryFromCv<geo::Isometry3<T>> for OpenCvPose<core_cv::Point3_<T>>
 where
-    T: core_cv::DataType + core_cv::ValidPoint3Type + na::RealField,
+    T: core_cv::DataType + na::RealField,
 {
     type Error = Error;
 
@@ -294,7 +294,7 @@ where
 
 impl<T> FromCv<&na::Point2<T>> for core_cv::Point_<T>
 where
-    T: na::Scalar + core_cv::ValidPointType,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: &na::Point2<T>) -> Self {
         core_cv::Point_::new(from.x, from.y)
@@ -303,7 +303,7 @@ where
 
 impl<T> FromCv<na::Point2<T>> for core_cv::Point_<T>
 where
-    T: na::Scalar + core_cv::ValidPointType,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: na::Point2<T>) -> Self {
         FromCv::from_cv(&from)
@@ -312,7 +312,7 @@ where
 
 impl<T> FromCv<&core_cv::Point_<T>> for na::Point2<T>
 where
-    T: na::Scalar + core_cv::ValidPointType,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: &core_cv::Point_<T>) -> Self {
         Self::new(from.x, from.y)
@@ -321,7 +321,7 @@ where
 
 impl<T> FromCv<core_cv::Point_<T>> for na::Point2<T>
 where
-    T: na::Scalar + core_cv::ValidPointType,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: core_cv::Point_<T>) -> Self {
         FromCv::from_cv(&from)
@@ -330,7 +330,7 @@ where
 
 impl<T> FromCv<&na::Point3<T>> for core_cv::Point3_<T>
 where
-    T: na::Scalar + core_cv::ValidPoint3Type,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: &na::Point3<T>) -> Self {
         Self::new(from.x, from.y, from.z)
@@ -339,7 +339,7 @@ where
 
 impl<T> FromCv<na::Point3<T>> for core_cv::Point3_<T>
 where
-    T: na::Scalar + core_cv::ValidPoint3Type,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: na::Point3<T>) -> Self {
         FromCv::from_cv(&from)
@@ -348,7 +348,7 @@ where
 
 impl<T> FromCv<&core_cv::Point3_<T>> for na::Point3<T>
 where
-    T: na::Scalar + core_cv::ValidPoint3Type,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: &core_cv::Point3_<T>) -> Self {
         Self::new(from.x, from.y, from.z)
@@ -357,7 +357,7 @@ where
 
 impl<T> FromCv<core_cv::Point3_<T>> for na::Point3<T>
 where
-    T: na::Scalar + core_cv::ValidPoint3Type,
+    T: na::Scalar + Copy,
 {
     fn from_cv(from: core_cv::Point3_<T>) -> Self {
         FromCv::from_cv(&from)

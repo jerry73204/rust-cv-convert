@@ -148,11 +148,8 @@ pub use traits::*;
 use utils::*;
 
 // opencv exports
-#[cfg(feature = "opencv_0-62")]
-pub use opencv_0_62 as opencv;
-
-#[cfg(feature = "opencv_0-61")]
-pub use opencv_0_61 as opencv;
+#[cfg(feature = "opencv_0-63")]
+pub use opencv_0_63 as opencv;
 
 // image exports
 #[cfg(feature = "image_0-23")]

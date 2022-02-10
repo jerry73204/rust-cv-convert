@@ -49,15 +49,8 @@ version = '0.26.2'
 package = 'nalgebra'
 optional = true
 
-[dependencies.opencv_0-62]
-version = '0.62.0'
-package = 'opencv'
-default-features = false
-features = ['calib3d']
-optional = true
-
-[dependencies.opencv_0-61]
-version = '0.61.3'
+[dependencies.opencv_0-63]
+version = '0.63.0'
 package = 'opencv'
 default-features = false
 features = ['calib3d']
@@ -69,7 +62,7 @@ package = 'ndarray'
 optional = true
 
 [dependencies.tch_0-6]
-version = '0.6.1'
+version = "0.6.1"
 package = 'tch'
 optional = true
 
@@ -79,25 +72,23 @@ itertools = '0.10.3'
 rand = '0.8.4'
 
 [features]
+default = ["full"]
 full = [
     'image_0-23',
-    'opencv_0-62',
+    'opencv_0-63',
     'tch_0-6',
     'nalgebra_0-30',
     'ndarray_0-15',
 ]
 docs-only = [
     'full',
-    'opencv_0-62/docs-only',
+    'opencv_0-63/docs-only',
     'tch_0-6',
     'tch_0-6/doc-only',
     'image_0-23',
     'nalgebra_0-30',
     'ndarray_0-15',
 ]
-opencv_0-62-clang-runtime = [
-    'opencv_0-62/clang-runtime',
-]
-opencv_0-61-clang-runtime = [
-    'opencv_0-61/clang-runtime',
+opencv_0-63-clang-runtime = [
+    'opencv_0-63/clang-runtime',
 ]
