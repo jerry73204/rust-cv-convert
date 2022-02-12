@@ -11,7 +11,6 @@ readme = 'README.md'
 license = 'MIT'
 
 [package.metadata.docs.rs]
-no-default-features = true
 features = ['docs-only']
 
 [dependencies]
@@ -82,11 +81,7 @@ full = [
 docs-only = [
     'full',
     'opencv_0-63/docs-only',
-    'tch_0-6',
     'tch_0-6/doc-only',
-    'image_0-23',
-    'nalgebra_0-30',
-    'ndarray_0-15',
 ]
 opencv_0-63-clang-runtime = [
     'opencv_0-63/clang-runtime',
