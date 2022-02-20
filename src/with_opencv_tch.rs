@@ -1,6 +1,6 @@
-use crate::{common::*, TryFromCv, TryIntoCv};
 use crate::opencv::{core as core_cv, prelude::*};
 use crate::tch;
+use crate::{common::*, TryFromCv, TryIntoCv};
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
@@ -58,38 +58,25 @@ mod mat_ext {
     impl MatExt for core_cv::Mat {
         fn tch_kind_shape_2d(&self) -> Result<(tch::Kind, [i64; 3])> {
             let core_cv::Size { height, width } = self.size()?;
-            let (kind, n_channels) = match self.typ() {
-                core_cv::CV_8UC1 => (tch::Kind::Uint8, 1),
-                core_cv::CV_8UC2 => (tch::Kind::Uint8, 2),
-                core_cv::CV_8UC3 => (tch::Kind::Uint8, 3),
-                core_cv::CV_8UC4 => (tch::Kind::Uint8, 4),
-                core_cv::CV_8SC1 => (tch::Kind::Int8, 1),
-                core_cv::CV_8SC2 => (tch::Kind::Int8, 2),
-                core_cv::CV_8SC3 => (tch::Kind::Int8, 3),
-                core_cv::CV_8SC4 => (tch::Kind::Int8, 4),
-                core_cv::CV_16SC1 => (tch::Kind::Int16, 1),
-                core_cv::CV_16SC2 => (tch::Kind::Int16, 2),
-                core_cv::CV_16SC3 => (tch::Kind::Int16, 3),
-                core_cv::CV_16SC4 => (tch::Kind::Int16, 4),
-                core_cv::CV_16FC1 => (tch::Kind::Half, 1),
-                core_cv::CV_16FC2 => (tch::Kind::Half, 2),
-                core_cv::CV_16FC3 => (tch::Kind::Half, 3),
-                core_cv::CV_16FC4 => (tch::Kind::Half, 4),
-                core_cv::CV_32FC1 => (tch::Kind::Float, 1),
-                core_cv::CV_32FC2 => (tch::Kind::Float, 2),
-                core_cv::CV_32FC3 => (tch::Kind::Float, 3),
-                core_cv::CV_32FC4 => (tch::Kind::Float, 4),
-                core_cv::CV_32SC1 => (tch::Kind::Int, 1),
-                core_cv::CV_32SC2 => (tch::Kind::Int, 2),
-                core_cv::CV_32SC3 => (tch::Kind::Int, 3),
-                core_cv::CV_32SC4 => (tch::Kind::Int, 4),
-                core_cv::CV_64FC1 => (tch::Kind::Double, 1),
-                core_cv::CV_64FC2 => (tch::Kind::Double, 2),
-                core_cv::CV_64FC3 => (tch::Kind::Double, 3),
-                core_cv::CV_64FC4 => (tch::Kind::Double, 4),
-                other => bail!("unsupported Mat type {}", other),
+
+            let kind = {
+                use core_cv as c;
+                use tch::Kind as K;
+
+                match self.depth() {
+                    c::CV_8U => K::Uint8,
+                    c::CV_8S => K::Int8,
+                    c::CV_16S => K::Int16,
+                    c::CV_32S => K::Int,
+                    c::CV_16F => K::Half,
+                    c::CV_32F => K::Float,
+                    c::CV_64F => K::Double,
+                    depth => bail!("unsupported Mat depth {}", depth),
+                }
             };
-            Ok((kind, [width as i64, height as i64, n_channels as i64]))
+            let channels = self.channels();
+
+            Ok((kind, [width as i64, height as i64, channels as i64]))
         }
 
         fn tch_kind_shape_nd(&self) -> Result<(tch::Kind, Vec<i64>)> {
@@ -101,37 +88,22 @@ mod mat_ext {
                 .chain(iter::once(self.channels() as i64))
                 .collect();
 
-            let kind = match self.typ() {
-                core_cv::CV_8UC1 => tch::Kind::Uint8,
-                core_cv::CV_8UC2 => tch::Kind::Uint8,
-                core_cv::CV_8UC3 => tch::Kind::Uint8,
-                core_cv::CV_8UC4 => tch::Kind::Uint8,
-                core_cv::CV_8SC1 => tch::Kind::Int8,
-                core_cv::CV_8SC2 => tch::Kind::Int8,
-                core_cv::CV_8SC3 => tch::Kind::Int8,
-                core_cv::CV_8SC4 => tch::Kind::Int8,
-                core_cv::CV_16SC1 => tch::Kind::Int16,
-                core_cv::CV_16SC2 => tch::Kind::Int16,
-                core_cv::CV_16SC3 => tch::Kind::Int16,
-                core_cv::CV_16SC4 => tch::Kind::Int16,
-                core_cv::CV_16FC1 => tch::Kind::Half,
-                core_cv::CV_16FC2 => tch::Kind::Half,
-                core_cv::CV_16FC3 => tch::Kind::Half,
-                core_cv::CV_16FC4 => tch::Kind::Half,
-                core_cv::CV_32FC1 => tch::Kind::Float,
-                core_cv::CV_32FC2 => tch::Kind::Float,
-                core_cv::CV_32FC3 => tch::Kind::Float,
-                core_cv::CV_32FC4 => tch::Kind::Float,
-                core_cv::CV_32SC1 => tch::Kind::Int,
-                core_cv::CV_32SC2 => tch::Kind::Int,
-                core_cv::CV_32SC3 => tch::Kind::Int,
-                core_cv::CV_32SC4 => tch::Kind::Int,
-                core_cv::CV_64FC1 => tch::Kind::Double,
-                core_cv::CV_64FC2 => tch::Kind::Double,
-                core_cv::CV_64FC3 => tch::Kind::Double,
-                core_cv::CV_64FC4 => tch::Kind::Double,
-                other => bail!("unsupported Mat type {}", other),
+            let kind = {
+                use core_cv as c;
+                use tch::Kind as K;
+
+                match self.depth() {
+                    c::CV_8U => K::Uint8,
+                    c::CV_8S => K::Int8,
+                    c::CV_16S => K::Int16,
+                    c::CV_32S => K::Int,
+                    c::CV_16F => K::Half,
+                    c::CV_32F => K::Float,
+                    c::CV_64F => K::Double,
+                    depth => bail!("unsupported Mat depth {}", depth),
+                }
             };
+
             Ok((kind, size))
         }
     }
@@ -265,41 +237,26 @@ where
         let tensor = tensor.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
 
         let kind = tensor.f_kind()?;
-        let typ = match (kind, channels) {
-            (tch::Kind::Uint8, 1) => core_cv::CV_8UC1,
-            (tch::Kind::Uint8, 2) => core_cv::CV_8UC2,
-            (tch::Kind::Uint8, 3) => core_cv::CV_8UC3,
-            (tch::Kind::Uint8, 4) => core_cv::CV_8UC4,
-            (tch::Kind::Int8, 1) => core_cv::CV_8SC1,
-            (tch::Kind::Int8, 2) => core_cv::CV_8SC2,
-            (tch::Kind::Int8, 3) => core_cv::CV_8SC3,
-            (tch::Kind::Int8, 4) => core_cv::CV_8SC4,
-            (tch::Kind::Int16, 1) => core_cv::CV_16SC1,
-            (tch::Kind::Int16, 2) => core_cv::CV_16SC2,
-            (tch::Kind::Int16, 3) => core_cv::CV_16SC3,
-            (tch::Kind::Int16, 4) => core_cv::CV_16SC4,
-            (tch::Kind::Half, 1) => core_cv::CV_16FC1,
-            (tch::Kind::Half, 2) => core_cv::CV_16FC2,
-            (tch::Kind::Half, 3) => core_cv::CV_16FC3,
-            (tch::Kind::Half, 4) => core_cv::CV_16FC4,
-            (tch::Kind::Int, 1) => core_cv::CV_32SC1,
-            (tch::Kind::Int, 2) => core_cv::CV_32SC2,
-            (tch::Kind::Int, 3) => core_cv::CV_32SC3,
-            (tch::Kind::Int, 4) => core_cv::CV_32SC4,
-            (tch::Kind::Float, 1) => core_cv::CV_32FC1,
-            (tch::Kind::Float, 2) => core_cv::CV_32FC2,
-            (tch::Kind::Float, 3) => core_cv::CV_32FC3,
-            (tch::Kind::Float, 4) => core_cv::CV_32FC4,
-            (tch::Kind::Double, 1) => core_cv::CV_64FC1,
-            (tch::Kind::Double, 2) => core_cv::CV_64FC2,
-            (tch::Kind::Double, 3) => core_cv::CV_64FC3,
-            (tch::Kind::Double, 4) => core_cv::CV_64FC4,
-            (kind, channels) => bail!(
-                "unsupported tensor kind {:?} and channels {}",
-                kind,
-                channels
-            ),
+
+        let depth = {
+            use core_cv as c;
+            use tch::Kind as K;
+
+            match kind {
+                K::Uint8 => c::CV_8U,
+                K::Int8 => c::CV_8S,
+                K::Int16 => c::CV_16S,
+                K::Int => c::CV_32S,
+                K::Half => c::CV_16F,
+                K::Float => c::CV_32F,
+                K::Double => c::CV_64F,
+                kind => bail!(
+                    "Conversion from torch tensor type {:?} to OpenCV is not supported",
+                    kind,
+                ),
+            }
         };
+        let typ = core_cv::CV_MAKE_TYPE(depth, channels as i32);
 
         let mat = unsafe {
             core_cv::Mat::new_rows_cols_with_data(
@@ -361,7 +318,7 @@ impl TryFromCv<tch::Tensor> for core_cv::Mat {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tch::{IndexOp, Tensor, self};
+    use crate::tch::{self, IndexOp, Tensor};
 
     // const EPSILON: f64 = 1e-8;
     const ROUNDS: usize = 1000;
