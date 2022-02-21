@@ -230,3 +230,10 @@ has_tch! {
         pub use with_opencv_tch::*;
     }
 }
+
+has_opencv! {
+    has_ndarray! {
+        mod with_opencv_ndarray;
+        pub use with_opencv_ndarray::*;
+    }
+}
