@@ -77,7 +77,7 @@ mod mat_ext {
             ensure!(self.depth() == T::DEPTH, "element type mismatch");
             ensure!(self.is_continuous(), "Mat data must be continuous");
 
-            let numel = self.total();
+            let numel = self.shape().iter().fold(1, |a, b| a * b);
             let ptr = self.ptr(0)? as *const T;
 
             let slice = unsafe { slice::from_raw_parts(ptr, numel) };
