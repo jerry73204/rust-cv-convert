@@ -49,7 +49,7 @@
 //! let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
 //! let cv_mat: cv::core::Mat = na_mat.try_into_cv().unwrap();
 //! ```
-//! //!
+//!
 //!
 //! # Supported conversions
 //!
@@ -130,6 +130,10 @@
 //!
 //! - [(&)Tensor](tch::Tensor) ->? [Mat](opencv::core::Mat)
 //! - [(&)TensorAsImage](TensorAsImage) ->? [Mat](opencv::core::Mat)
+//!
+//! ## opencv -> ndarray
+//!
+//! - [&Mat](opencv::core::Mat) ->? [ArrayView](ndarray::ArrayView)
 //!
 //! # OpenCV
 //! If your system requires `opencv/clang-runtime` to build, enable the `opencv_0-62-clang-runtime` feature to solve.
