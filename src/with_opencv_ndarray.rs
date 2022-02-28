@@ -1,8 +1,8 @@
 use crate::ndarray as nd;
-use crate::opencv::{core as cv, prelude::*};
+use crate::opencv::core as cv;
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
-use crate::{common::*, TryFromCv, TryIntoCv};
+use crate::{common::*, TryFromCv};
 
 impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
 where
@@ -24,7 +24,9 @@ mod tests {
     use super::*;
     use itertools::chain;
     use itertools::Itertools as _;
+    use crate::opencv::prelude::*;
     use rand::prelude::*;
+    use crate::TryIntoCv as _;
 
     #[test]
     fn mat_ref_to_array_view_conversion() -> Result<()> {
@@ -34,7 +36,7 @@ mod tests {
             let ndim: usize = rng.gen_range(2..=4);
             let shape: Vec<usize> = (0..ndim).map(|_| rng.gen_range(1..=32)).collect();
 
-            let mat = Mat::new_randn::<f32>(&shape)?;
+            let mat = cv::Mat::new_randn::<f32>(&shape)?;
             let array: nd::ArrayViewD<f32> = (&mat).try_into_cv()?;
 
             shape
