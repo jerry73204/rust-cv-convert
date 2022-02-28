@@ -1,6 +1,6 @@
-use crate::{common::*, FromCv, TryFromCv, TryIntoCv};
 use crate::nalgebra::{self as na, geometry as geo};
 use crate::opencv::{calib3d, core as core_cv, prelude::*};
+use crate::{common::*, FromCv, TryFromCv, TryIntoCv};
 
 // Note for future maintainers: Since the matrixes need to accommodate any size Matrix, we are using na::OMatrix instead of SMatrix.
 
@@ -192,7 +192,9 @@ impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
             calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             rvec_mat
         };
-        let tvec = Mat::from_slice(&[translation.x, translation.y, translation.z])?;
+        let tvec = Mat::from_slice(&[translation.x, translation.y, translation.z])?
+            .t()?
+            .to_mat()?;
 
         Ok(OpenCvPose { rvec, tvec })
     }
@@ -390,11 +392,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::nalgebra::{U2, U3};
+    use crate::opencv::core as core_cv;
     use crate::{IntoCv, TryIntoCv};
     use anyhow::Result;
     use approx::abs_diff_eq;
-    use crate::nalgebra::{U2, U3};
-    use crate::opencv::core as core_cv;
     use rand::prelude::*;
     use std::f64;
 
