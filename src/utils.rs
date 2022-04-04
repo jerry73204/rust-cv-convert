@@ -60,6 +60,7 @@ macro_rules! if_image {
     ($($item:item)*) => {
         $(
             #[cfg(any(
+                feature = "image_0-24",
                 feature = "image_0-23",
             ))]
             $item

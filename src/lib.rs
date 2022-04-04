@@ -156,6 +156,9 @@ use utils::*;
 pub use opencv_0_63 as opencv;
 
 // image exports
+#[cfg(feature = "image_0-24")]
+pub use image_0_24 as image;
+
 #[cfg(feature = "image_0-23")]
 pub use image_0_23 as image;
 
