@@ -95,8 +95,8 @@
 //!
 //! ## image -> tch
 //!
-//! - [(&)ImageBuffer](image::ImageBuffer) ->? [Tensor](tch::Tensor)
-//! - [(&)DynamicImage](image::DynamicImage) ->? [Tensor](tch::Tensor)
+//! - [(&)ImageBuffer](image::ImageBuffer) ->? [TchTensorAsImage]
+//! - [(&)DynamicImage](image::DynamicImage) ->? [TchTensorAsImage]
 //!
 //! ## image -> opencv
 //!
@@ -129,7 +129,7 @@
 //! ## tch -> opencv
 //!
 //! - [(&)Tensor](tch::Tensor) ->? [Mat](opencv::core::Mat)
-//! - [(&)TensorAsImage](TensorAsImage) ->? [Mat](opencv::core::Mat)
+//! - [(&)TchTensorAsImage](TchTensorAsImage) ->? [Mat](opencv::core::Mat)
 //!
 //! ## opencv -> ndarray
 //!

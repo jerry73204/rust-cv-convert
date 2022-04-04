@@ -2,10 +2,10 @@
 mod with_image_0_23 {
     use crate::image;
     use crate::tch;
-    use crate::{common::*, FromCv, IntoCv, TryFromCv};
+    use crate::{common::*, FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
     use std::ops::Deref;
 
-    impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -14,11 +14,16 @@ mod with_image_0_23 {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
             let channels = P::CHANNEL_COUNT;
-            Self::of_slice(&*from).view([width as i64, height as i64, channels as i64])
+            let tensor =
+                tch::Tensor::of_slice(&*from).view([width as i64, height as i64, channels as i64]);
+            TchTensorAsImage {
+                tensor,
+                kind: TchTensorImageShape::Whc,
+            }
         }
     }
 
-    impl<P, Container> FromCv<image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -29,7 +34,7 @@ mod with_image_0_23 {
         }
     }
 
-    impl TryFromCv<&image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<&image::DynamicImage> for TchTensorAsImage {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
@@ -48,7 +53,7 @@ mod with_image_0_23 {
         }
     }
 
-    impl TryFromCv<image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<image::DynamicImage> for TchTensorAsImage {
         type Error = Error;
 
         fn try_from_cv(from: image::DynamicImage) -> Result<Self, Self::Error> {
@@ -61,10 +66,10 @@ mod with_image_0_23 {
 mod with_image_0_24 {
     use crate::image;
     use crate::tch;
-    use crate::{common::*, FromCv, IntoCv, TryFromCv};
+    use crate::{common::*, FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
     use std::ops::Deref;
 
-    impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -73,11 +78,16 @@ mod with_image_0_24 {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
             let channels = P::CHANNEL_COUNT;
-            Self::of_slice(&*from).view([width as i64, height as i64, channels as i64])
+            let tensor =
+                tch::Tensor::of_slice(&*from).view([width as i64, height as i64, channels as i64]);
+            TchTensorAsImage {
+                tensor,
+                kind: TchTensorImageShape::Whc,
+            }
         }
     }
 
-    impl<P, Container> FromCv<image::ImageBuffer<P, Container>> for tch::Tensor
+    impl<P, Container> FromCv<image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
         P: image::Pixel + 'static,
         P::Subpixel: 'static + tch::kind::Element,
@@ -88,7 +98,7 @@ mod with_image_0_24 {
         }
     }
 
-    impl TryFromCv<&image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<&image::DynamicImage> for TchTensorAsImage {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
@@ -107,7 +117,7 @@ mod with_image_0_24 {
         }
     }
 
-    impl TryFromCv<image::DynamicImage> for tch::Tensor {
+    impl TryFromCv<image::DynamicImage> for TchTensorAsImage {
         type Error = Error;
 
         fn try_from_cv(from: image::DynamicImage) -> Result<Self, Self::Error> {
