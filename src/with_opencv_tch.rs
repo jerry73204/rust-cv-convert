@@ -169,13 +169,10 @@ impl TryFromCv<core_cv::Mat> for tch::Tensor {
     }
 }
 
-impl<T> TryFromCv<&TchTensorAsImage<T>> for core_cv::Mat
-where
-    T: Borrow<tch::Tensor>,
-{
+impl TryFromCv<&TchTensorAsImage> for core_cv::Mat {
     type Error = Error;
 
-    fn try_from_cv(from: &TchTensorAsImage<T>) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: &TchTensorAsImage) -> Result<Self, Self::Error> {
         let TchTensorAsImage {
             ref tensor,
             kind: convention,
@@ -232,13 +229,10 @@ where
     }
 }
 
-impl<T> TryFromCv<TchTensorAsImage<T>> for core_cv::Mat
-where
-    T: Borrow<tch::Tensor>,
-{
+impl TryFromCv<TchTensorAsImage> for core_cv::Mat {
     type Error = Error;
 
-    fn try_from_cv(from: TchTensorAsImage<T>) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: TchTensorAsImage) -> Result<Self, Self::Error> {
         (&from).try_into_cv()
     }
 }
@@ -349,7 +343,8 @@ mod tests {
 
             let before = Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
-                TchTensorAsImage::new(&before, TchTensorImageShape::Chw)?.try_into_cv()?;
+                TchTensorAsImage::new(before.shallow_clone(), TchTensorImageShape::Chw)?
+                    .try_into_cv()?;
             let after = Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
@@ -391,7 +386,8 @@ mod tests {
 
             let before = Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
-                TchTensorAsImage::new(&before, TchTensorImageShape::Chw)?.try_into_cv()?;
+                TchTensorAsImage::new(before.shallow_clone(), TchTensorImageShape::Chw)?
+                    .try_into_cv()?;
             let after = TensorFromMat::try_from_cv(mat)?; // in hwc
 
             // compare original and recovered Tensor values

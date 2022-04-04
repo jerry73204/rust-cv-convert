@@ -417,11 +417,9 @@ mod tensor_as_image {
 
     /// An 2D image [Tensor](tch::Tensor) with dimension order.
     #[derive(Debug)]
-    pub struct TchTensorAsImage<T>
-    where
-        T: Borrow<tch::Tensor>,
+    pub struct TchTensorAsImage
     {
-        pub(crate) tensor: T,
+        pub(crate) tensor: tch::Tensor,
         pub(crate) kind: TchTensorImageShape,
     }
 
@@ -434,12 +432,10 @@ mod tensor_as_image {
         Cwh,
     }
 
-    impl<T> TchTensorAsImage<T>
-    where
-        T: Borrow<tch::Tensor>,
+    impl TchTensorAsImage
     {
-        pub fn new(tensor: T, kind: TchTensorImageShape) -> Result<Self> {
-            let ndim = tensor.borrow().dim();
+        pub fn new(tensor: tch::Tensor, kind: TchTensorImageShape) -> Result<Self> {
+            let ndim = tensor.dim();
             ensure!(
                 ndim == 3,
                 "the tensor must have 3 dimensions, but get {}",
@@ -448,7 +444,7 @@ mod tensor_as_image {
             Ok(Self { tensor, kind })
         }
 
-        pub fn into_inner(self) -> T {
+        pub fn into_inner(self) -> tch::Tensor {
             self.tensor
         }
 
