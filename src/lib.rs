@@ -124,12 +124,29 @@
 //! ## opencv -> tch
 //!
 //! - [(&)Mat](opencv::core::Mat) ->? [Tensor](tch::Tensor)
-//! - [Mat](opencv::core::Mat) ->? [TensorFromMat]
+//!
+//!   The input [Mat](opencv::core::Mat) is regarded as an n-dimensional array with a m-channel elements.
+//!   The output [Tensor](tch::Tensor) have n+1 dimensions, which last additional m-sized dimension is the channel.
+//!
+//! - [(&)Mat](opencv::core::Mat) ->? [TchTensorAsImage]
+//!
+//!   The input [Mat](opencv::core::Mat) must be a 2D image.
+//!   The output [Tensor](tch::Tensor) within [TchTensorAsImage] has 3 dimensions, which last additional dimension is the channel.
+//!
+//! - [&Mat](opencv::core::Mat) ->? [OpenCvMatAsTchTensor]
 //!
 //! ## tch -> opencv
 //!
 //! - [(&)Tensor](tch::Tensor) ->? [Mat](opencv::core::Mat)
+//!
+//!    The n-dimensinoal input [Tensor](tch::Tensor) is converted to a [Mat](opencv::core::Mat)
+//!    with n dimensions and a channel of size 1.
+//!
 //! - [(&)TchTensorAsImage](TchTensorAsImage) ->? [Mat](opencv::core::Mat)
+//!
+//!    The output [Mat](opencv::core::Mat) is a 2D image, which height, width and channel size
+//!    are judged from the input [TchTensorAsImage](TchTensorAsImage) shape.
+//!
 //!
 //! ## opencv -> ndarray
 //!
