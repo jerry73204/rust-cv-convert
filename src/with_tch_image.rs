@@ -13,31 +13,8 @@ mod with_image_0_23 {
     {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
-            let height = height as usize;
-            let width = width as usize;
-            let channels = P::CHANNEL_COUNT as usize;
-
-            let buffer = unsafe {
-                let buf_len = channels * height * width;
-                let mut buffer: Vec<P::Subpixel> = Vec::with_capacity(buf_len);
-                let ptr = buffer.as_mut_ptr();
-                from.enumerate_pixels().for_each(|(x, y, pixel)| {
-                    let x = x as usize;
-                    let y = y as usize;
-                    pixel
-                        .channels()
-                        .iter()
-                        .cloned()
-                        .enumerate()
-                        .for_each(|(c, component)| {
-                            *ptr.add(x + width * (y + height * c)) = component;
-                        });
-                });
-                buffer.set_len(buf_len);
-                buffer
-            };
-
-            Self::of_slice(&buffer).view([channels as i64, height as i64, width as i64])
+            let channels = P::CHANNEL_COUNT;
+            Self::of_slice(&*from).view([width as i64, height as i64, channels as i64])
         }
     }
 
@@ -56,15 +33,15 @@ mod with_image_0_23 {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
-            use image::DynamicImage;
+            use image::DynamicImage as D;
 
             let tensor = match from {
-                DynamicImage::ImageLuma8(image) => image.into_cv(),
-                DynamicImage::ImageLumaA8(image) => image.into_cv(),
-                DynamicImage::ImageRgb8(image) => image.into_cv(),
-                DynamicImage::ImageRgba8(image) => image.into_cv(),
-                DynamicImage::ImageBgr8(image) => image.into_cv(),
-                DynamicImage::ImageBgra8(image) => image.into_cv(),
+                D::ImageLuma8(image) => image.into_cv(),
+                D::ImageLumaA8(image) => image.into_cv(),
+                D::ImageRgb8(image) => image.into_cv(),
+                D::ImageRgba8(image) => image.into_cv(),
+                D::ImageBgr8(image) => image.into_cv(),
+                D::ImageBgra8(image) => image.into_cv(),
                 _ => bail!("cannot convert an image with u16 components to a tensor"),
             };
             Ok(tensor)
@@ -95,31 +72,8 @@ mod with_image_0_24 {
     {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
-            let height = height as usize;
-            let width = width as usize;
-            let channels = P::CHANNEL_COUNT as usize;
-
-            let buffer = unsafe {
-                let buf_len = channels * height * width;
-                let mut buffer: Vec<P::Subpixel> = Vec::with_capacity(buf_len);
-                let ptr = buffer.as_mut_ptr();
-                from.enumerate_pixels().for_each(|(x, y, pixel)| {
-                    let x = x as usize;
-                    let y = y as usize;
-                    pixel
-                        .channels()
-                        .iter()
-                        .cloned()
-                        .enumerate()
-                        .for_each(|(c, component)| {
-                            *ptr.add(x + width * (y + height * c)) = component;
-                        });
-                });
-                buffer.set_len(buf_len);
-                buffer
-            };
-
-            Self::of_slice(&buffer).view([channels as i64, height as i64, width as i64])
+            let channels = P::CHANNEL_COUNT;
+            Self::of_slice(&*from).view([width as i64, height as i64, channels as i64])
         }
     }
 
@@ -138,14 +92,16 @@ mod with_image_0_24 {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
-            use image::DynamicImage;
+            use image::DynamicImage as D;
 
             let tensor = match from {
-                DynamicImage::ImageLuma8(image) => image.into_cv(),
-                DynamicImage::ImageLumaA8(image) => image.into_cv(),
-                DynamicImage::ImageRgb8(image) => image.into_cv(),
-                DynamicImage::ImageRgba8(image) => image.into_cv(),
-                _ => bail!("cannot convert an image with u16 components to a tensor"),
+                D::ImageLuma8(image) => image.into_cv(),
+                D::ImageLumaA8(image) => image.into_cv(),
+                D::ImageRgb8(image) => image.into_cv(),
+                D::ImageRgba8(image) => image.into_cv(),
+                D::ImageRgb32F(image) => image.into_cv(),
+                D::ImageRgba32F(image) => image.into_cv(),
+                _ => bail!("the color type {:?} is not supported", from.color()),
             };
             Ok(tensor)
         }
