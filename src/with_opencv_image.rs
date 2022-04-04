@@ -1,19 +1,14 @@
 #[cfg(feature = "image_0-23")]
 mod with_image_0_23 {
-    use crate::image::{
-        self, buffer::ConvertBuffer, Bgr, Bgra, ColorType, DynamicImage, ImageBuffer,
-    };
-    use crate::opencv::{core as core_cv, prelude::*};
-    use crate::{common::*, TryFromCv, TryIntoCv};
+    use crate::image;
+    use crate::opencv::{core as cv, prelude::*};
+    use crate::{common::*, OpenCvElement, TryFromCv, TryIntoCv};
     use std::ops::Deref;
 
-    type BgrImage = ImageBuffer<Bgr<u8>, Vec<u8>>;
-    type BgraImage = ImageBuffer<Bgra<u8>, Vec<u8>>;
-
-    impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for core_cv::Mat
+    impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for cv::Mat
     where
         P: image::Pixel + 'static,
-        P::Subpixel: 'static,
+        P::Subpixel: 'static + OpenCvElement,
         Container: Deref<Target = [P::Subpixel]> + Clone,
     {
         type Error = Error;
@@ -22,31 +17,23 @@ mod with_image_0_23 {
         }
     }
 
-    impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for core_cv::Mat
+    impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for cv::Mat
     where
         P: image::Pixel + 'static,
-        P::Subpixel: 'static,
+        P::Subpixel: 'static + OpenCvElement,
         Container: Deref<Target = [P::Subpixel]> + Clone,
     {
         type Error = Error;
         fn try_from_cv(from: &image::ImageBuffer<P, Container>) -> Result<Self, Self::Error> {
             let (width, height) = from.dimensions();
-            let height = height as usize;
-            let width = width as usize;
-            let cv_type = match P::COLOR_TYPE {
-                ColorType::L8 => core_cv::CV_8UC1,
-                ColorType::La8 => core_cv::CV_8UC2,
-                ColorType::Bgr8 => core_cv::CV_8UC3,
-                ColorType::Bgra8 => core_cv::CV_8UC4,
-                typ => bail!("Wrong color type: {:?}", typ),
-            };
+            let cv_type = cv::CV_MAKETYPE(P::Subpixel::DEPTH, P::CHANNEL_COUNT as i32);
             let mat = unsafe {
-                core_cv::Mat::new_rows_cols_with_data(
+                cv::Mat::new_rows_cols_with_data(
                     height as i32,
                     width as i32,
                     cv_type,
                     from.as_ptr() as *mut _,
-                    core_cv::Mat_AUTO_STEP,
+                    cv::Mat_AUTO_STEP,
                 )?
                 .try_clone()?
             };
@@ -54,52 +41,31 @@ mod with_image_0_23 {
         }
     }
 
-    impl TryFromCv<&DynamicImage> for core_cv::Mat {
+    impl TryFromCv<&image::DynamicImage> for cv::Mat {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
-            // let mat = from.to_bgra8().try_into_cv()?;
+            use image::DynamicImage as D;
+
             let mat = match from {
-                DynamicImage::ImageLuma8(image) => image.try_into_cv()?,
-                DynamicImage::ImageLumaA8(image) => image.try_into_cv()?,
-                DynamicImage::ImageBgr8(image) => image.try_into_cv()?,
-                DynamicImage::ImageBgra8(image) => image.try_into_cv()?,
-
-                // Reorder color channels to the default BGR format used by OpenCv
-                DynamicImage::ImageRgb8(image) => {
-                    let image: BgrImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageRgba8(image) => {
-                    let image: BgraImage = image.convert();
-                    image.try_into_cv()?
-                }
-
-                // Convert 16-bit data to 8-bit since OpenCV only supports 8-bit in integer
-                DynamicImage::ImageLuma16(image) => {
-                    let image: image::GrayImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageLumaA16(image) => {
-                    let image: image::GrayAlphaImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageRgb16(image) => {
-                    let image: image::RgbImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageRgba16(image) => {
-                    let image: image::RgbaImage = image.convert();
-                    image.try_into_cv()?
-                }
+                D::ImageLuma8(image) => image.try_into_cv()?,
+                D::ImageLumaA8(image) => image.try_into_cv()?,
+                D::ImageBgr8(image) => image.try_into_cv()?,
+                D::ImageBgra8(image) => image.try_into_cv()?,
+                D::ImageRgb8(image) => image.try_into_cv()?,
+                D::ImageRgba8(image) => image.try_into_cv()?,
+                D::ImageLuma16(image) => image.try_into_cv()?,
+                D::ImageLumaA16(image) => image.try_into_cv()?,
+                D::ImageRgb16(image) => image.try_into_cv()?,
+                D::ImageRgba16(image) => image.try_into_cv()?,
             };
             Ok(mat)
         }
     }
 
-    impl TryFromCv<DynamicImage> for core_cv::Mat {
+    impl TryFromCv<image::DynamicImage> for cv::Mat {
         type Error = Error;
-        fn try_from_cv(from: DynamicImage) -> Result<Self, Self::Error> {
+        fn try_from_cv(from: image::DynamicImage) -> Result<Self, Self::Error> {
             (&from).try_into_cv()
         }
     }
@@ -107,15 +73,15 @@ mod with_image_0_23 {
 
 #[cfg(feature = "image_0-24")]
 mod with_image_0_24 {
-    use crate::image::{self, buffer::ConvertBuffer, ColorType, DynamicImage};
-    use crate::opencv::{core as core_cv, prelude::*};
-    use crate::{common::*, TryFromCv, TryIntoCv};
+    use crate::image;
+    use crate::opencv::{core as cv, prelude::*};
+    use crate::{common::*, OpenCvElement, TryFromCv, TryIntoCv};
     use std::ops::Deref;
 
-    impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for core_cv::Mat
+    impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for cv::Mat
     where
-        P: image::PixelWithColorType + 'static,
-        P::Subpixel: 'static,
+        P: image::Pixel + 'static,
+        P::Subpixel: 'static + OpenCvElement,
         Container: Deref<Target = [P::Subpixel]> + Clone,
     {
         type Error = Error;
@@ -124,29 +90,23 @@ mod with_image_0_24 {
         }
     }
 
-    impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for core_cv::Mat
+    impl<P, Container> TryFromCv<&image::ImageBuffer<P, Container>> for cv::Mat
     where
-        P: image::PixelWithColorType + 'static,
-        P::Subpixel: 'static,
+        P: image::Pixel + 'static,
+        P::Subpixel: 'static + OpenCvElement,
         Container: Deref<Target = [P::Subpixel]> + Clone,
     {
         type Error = Error;
         fn try_from_cv(from: &image::ImageBuffer<P, Container>) -> Result<Self, Self::Error> {
             let (width, height) = from.dimensions();
-            let height = height as usize;
-            let width = width as usize;
-            let cv_type = match P::COLOR_TYPE {
-                ColorType::L8 => core_cv::CV_8UC1,
-                ColorType::La8 => core_cv::CV_8UC2,
-                typ => bail!("Wrong color type: {:?}", typ),
-            };
+            let cv_type = cv::CV_MAKETYPE(P::Subpixel::DEPTH, P::CHANNEL_COUNT as i32);
             let mat = unsafe {
-                core_cv::Mat::new_rows_cols_with_data(
+                cv::Mat::new_rows_cols_with_data(
                     height as i32,
                     width as i32,
                     cv_type,
                     from.as_ptr() as *mut _,
-                    core_cv::Mat_AUTO_STEP,
+                    cv::Mat_AUTO_STEP,
                 )?
                 .try_clone()?
             };
@@ -154,46 +114,32 @@ mod with_image_0_24 {
         }
     }
 
-    impl TryFromCv<&DynamicImage> for core_cv::Mat {
+    impl TryFromCv<&image::DynamicImage> for cv::Mat {
         type Error = Error;
 
         fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
-            // let mat = from.to_bgra8().try_into_cv()?;
+            use image::DynamicImage as D;
+
             let mat = match from {
-                DynamicImage::ImageLuma8(image) => image.try_into_cv()?,
-                DynamicImage::ImageLumaA8(image) => image.try_into_cv()?,
-
-                // Reorder color channels to the default BGR format used by OpenCv
-                DynamicImage::ImageRgb8(image) => image.try_into_cv()?,
-                DynamicImage::ImageRgba8(image) => image.try_into_cv()?,
-
-                // Convert 16-bit data to 8-bit since OpenCV only supports 8-bit in integer
-                DynamicImage::ImageLuma16(image) => {
-                    let image: image::GrayImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageLumaA16(image) => {
-                    let image: image::GrayAlphaImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageRgb16(image) => {
-                    let image: image::RgbImage = image.convert();
-                    image.try_into_cv()?
-                }
-                DynamicImage::ImageRgba16(image) => {
-                    let image: image::RgbaImage = image.convert();
-                    image.try_into_cv()?
-                }
-
+                D::ImageLuma8(image) => image.try_into_cv()?,
+                D::ImageLumaA8(image) => image.try_into_cv()?,
+                D::ImageRgb8(image) => image.try_into_cv()?,
+                D::ImageRgba8(image) => image.try_into_cv()?,
+                D::ImageLuma16(image) => image.try_into_cv()?,
+                D::ImageLumaA16(image) => image.try_into_cv()?,
+                D::ImageRgb16(image) => image.try_into_cv()?,
+                D::ImageRgba16(image) => image.try_into_cv()?,
+                D::ImageRgb32F(image) => image.try_into_cv()?,
+                D::ImageRgba32F(image) => image.try_into_cv()?,
                 image => bail!("the color type {:?} is not supported", image.color()),
             };
             Ok(mat)
         }
     }
 
-    impl TryFromCv<DynamicImage> for core_cv::Mat {
+    impl TryFromCv<image::DynamicImage> for cv::Mat {
         type Error = Error;
-        fn try_from_cv(from: DynamicImage) -> Result<Self, Self::Error> {
+        fn try_from_cv(from: image::DynamicImage) -> Result<Self, Self::Error> {
             (&from).try_into_cv()
         }
     }
