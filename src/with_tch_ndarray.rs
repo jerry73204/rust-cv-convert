@@ -1,6 +1,6 @@
-use crate::{common::*, FromCv, TryFromCv};
 use crate::ndarray as nd;
 use crate::tch;
+use crate::{common::*, FromCv, TryFromCv};
 
 use to_ndarray_shape::*;
 
@@ -206,10 +206,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tch::{self, IndexOp};
     use crate::TryIntoCv;
     use itertools::{iproduct, izip};
     use rand::prelude::*;
-    use crate::tch::{IndexOp, self};
 
     #[test]
     fn tensor_to_ndarray_conversion() -> Result<()> {

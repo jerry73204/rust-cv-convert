@@ -1,10 +1,9 @@
 use crate::opencv::{core as core_cv, prelude::*};
 use crate::tch;
-use crate::{common::*, TryFromCv, TryIntoCv, TchTensorAsImage, TchTensorImageShape};
+use crate::{common::*, TchTensorAsImage, TchTensorImageShape, TryFromCv, TryIntoCv};
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
-
 
 mod mat_ext {
     use super::*;

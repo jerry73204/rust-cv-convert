@@ -1,6 +1,6 @@
+use crate::tch;
 use crate::{common::*, FromCv, TryFromCv};
 use slice_of_array::prelude::*;
-use crate::tch;
 
 macro_rules! impl_from_array {
     ($elem:ty) => {
@@ -440,7 +440,11 @@ mod tensor_as_image {
     {
         pub fn new(tensor: T, kind: TchTensorImageShape) -> Result<Self> {
             let ndim = tensor.borrow().dim();
-            ensure!(ndim == 3, "the tensor must have 3 dimensions, but get {}", ndim);
+            ensure!(
+                ndim == 3,
+                "the tensor must have 3 dimensions, but get {}",
+                ndim
+            );
             Ok(Self { tensor, kind })
         }
 
@@ -454,13 +458,12 @@ mod tensor_as_image {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tch;
     use crate::TryIntoCv;
     use rand::prelude::*;
-    use crate::tch;
 
     #[test]
     fn tensor_to_array_ref() {

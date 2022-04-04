@@ -22,11 +22,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::opencv::prelude::*;
+    use crate::TryIntoCv as _;
     use itertools::chain;
     use itertools::Itertools as _;
-    use crate::opencv::prelude::*;
     use rand::prelude::*;
-    use crate::TryIntoCv as _;
 
     #[test]
     fn mat_ref_to_array_view_conversion() -> Result<()> {
