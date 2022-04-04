@@ -183,14 +183,8 @@ pub use nalgebra_0_26 as nalgebra;
 pub use ndarray_0_15 as ndarray;
 
 // tch exports
-#[cfg(feature = "tch_0-6")]
-pub use tch_0_6 as tch;
-
-#[cfg(feature = "tch_0-5")]
-pub use tch_0_5 as tch;
-
-#[cfg(feature = "tch_0-4")]
-pub use tch_0_4 as tch;
+#[cfg(feature = "tch_0-7")]
+pub use tch_0_7 as tch;
 
 // modules
 has_opencv! {

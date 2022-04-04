@@ -65,8 +65,8 @@ version = '0.15.4'
 package = 'ndarray'
 optional = true
 
-[dependencies.tch_0-6]
-version = "0.6.1"
+[dependencies.tch_0-7]
+version = "0.7.0"
 package = 'tch'
 optional = true
 
@@ -79,14 +79,14 @@ rand = '0.8.4'
 full = [
     'image_0-24',
     'opencv_0-63',
-    'tch_0-6',
+    'tch_0-7',
     'nalgebra_0-30',
     'ndarray_0-15',
 ]
 docs-only = [
     'full',
     'opencv_0-63/docs-only',
-    'tch_0-6/doc-only',
+    'tch_0-7/doc-only',
 ]
 opencv_0-63-clang-runtime = [
     'opencv_0-63/clang-runtime',

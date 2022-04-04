@@ -110,9 +110,7 @@ macro_rules! if_tch {
     ($($item:item)*) => {
         $(
             #[cfg(any(
-                feature = "tch_0-6",
-                feature = "tch_0-5",
-                feature = "tch_0-4",
+                feature = "tch_0-7",
             ))]
             $item
         )*
