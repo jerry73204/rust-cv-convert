@@ -11,9 +11,9 @@
 //! [dependencies.cv-convert]
 //! version = 'x.y.z'
 //! features = [
-//!     'image_0-23',
-//!     'opencv_0-62',
-//!     'tch_0-6',
+//!     'image_0-24',
+//!     'opencv_0-63',
+//!     'tch_0-7',
 //!     'nalgebra_0-30',
 //!     'ndarray_0-15',
 //! ]

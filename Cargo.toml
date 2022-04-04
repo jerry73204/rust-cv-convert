@@ -54,7 +54,7 @@ package = 'nalgebra'
 optional = true
 
 [dependencies.opencv_0-63]
-version = '0.63.0'
+version = '0.63.1'
 package = 'opencv'
 default-features = false
 features = ['calib3d']
@@ -87,7 +87,4 @@ docs-only = [
     'full',
     'opencv_0-63/docs-only',
     'tch_0-7/doc-only',
-]
-opencv_0-63-clang-runtime = [
-    'opencv_0-63/clang-runtime',
 ]
