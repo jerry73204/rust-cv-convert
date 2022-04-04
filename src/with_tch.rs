@@ -411,6 +411,50 @@ impl_from_array!(f32);
 impl_from_array!(f64);
 impl_from_array!(bool);
 
+pub use tensor_as_image::*;
+mod tensor_as_image {
+    use super::*;
+
+    /// An 2D image [Tensor](tch::Tensor) with dimension order.
+    #[derive(Debug)]
+    pub struct TchTensorAsImage<T>
+    where
+        T: Borrow<tch::Tensor>,
+    {
+        pub(crate) tensor: T,
+        pub(crate) kind: TchTensorImageShape,
+    }
+
+    /// Describes the image channel order of a [Tensor](tch::Tensor).
+    #[derive(Debug, Clone, Copy)]
+    pub enum TchTensorImageShape {
+        Whc,
+        Hwc,
+        Chw,
+        Cwh,
+    }
+
+    impl<T> TchTensorAsImage<T>
+    where
+        T: Borrow<tch::Tensor>,
+    {
+        pub fn new(tensor: T, kind: TchTensorImageShape) -> Result<Self> {
+            let ndim = tensor.borrow().dim();
+            ensure!(ndim == 3, "the tensor must have 3 dimensions, but get {}", ndim);
+            Ok(Self { tensor, kind })
+        }
+
+        pub fn into_inner(self) -> T {
+            self.tensor
+        }
+
+        pub fn kind(&self) -> TchTensorImageShape {
+            self.kind
+        }
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

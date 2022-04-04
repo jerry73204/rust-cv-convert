@@ -1,51 +1,10 @@
 use crate::opencv::{core as core_cv, prelude::*};
 use crate::tch;
-use crate::{common::*, TryFromCv, TryIntoCv};
+use crate::{common::*, TryFromCv, TryIntoCv, TchTensorAsImage, TchTensorImageShape};
 
 use mat_ext::*;
 pub use tensor_from_mat::*;
-pub use tensor_with_convention::*;
 
-mod tensor_with_convention {
-    use super::*;
-
-    /// A tensor with image shape convention that is used to convert to [Tensor](tch::Tensor).
-    #[derive(Debug)]
-    pub struct TensorAsImage<T>
-    where
-        T: Borrow<tch::Tensor>,
-    {
-        pub(crate) tensor: T,
-        pub(crate) convention: ShapeConvention,
-    }
-
-    /// Describes the image channel order of a [Tensor](tch::Tensor).
-    #[derive(Debug, Clone, Copy)]
-    pub enum ShapeConvention {
-        Whc,
-        Hwc,
-        Chw,
-        Cwh,
-    }
-
-    impl<T> TensorAsImage<T>
-    where
-        T: Borrow<tch::Tensor>,
-    {
-        pub fn new(tensor: T, convention: ShapeConvention) -> Result<Self> {
-            let size = tensor.borrow().size();
-            match size.len() {
-                2 | 3 => (),
-                _ => bail!("tensor size {:?} is not supported", size),
-            }
-            Ok(Self { tensor, convention })
-        }
-
-        pub fn into_inner(self) -> T {
-            self.tensor
-        }
-    }
-}
 
 mod mat_ext {
     use super::*;
@@ -211,27 +170,27 @@ impl TryFromCv<core_cv::Mat> for tch::Tensor {
     }
 }
 
-impl<T> TryFromCv<&TensorAsImage<T>> for core_cv::Mat
+impl<T> TryFromCv<&TchTensorAsImage<T>> for core_cv::Mat
 where
     T: Borrow<tch::Tensor>,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &TensorAsImage<T>) -> Result<Self, Self::Error> {
-        let TensorAsImage {
+    fn try_from_cv(from: &TchTensorAsImage<T>) -> Result<Self, Self::Error> {
+        let TchTensorAsImage {
             ref tensor,
-            convention,
+            kind: convention,
         } = *from;
         let tensor = tensor.borrow();
         let (tensor, [channels, rows, cols]) = match (tensor.size().as_slice(), convention) {
-            (&[w, h], ShapeConvention::Whc) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
-            (&[h, w], ShapeConvention::Hwc) => (tensor.shallow_clone(), [1, h, w]),
-            (&[w, h], ShapeConvention::Cwh) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
-            (&[h, w], ShapeConvention::Chw) => (tensor.shallow_clone(), [1, h, w]),
-            (&[w, h, c], ShapeConvention::Whc) => (tensor.f_permute(&[1, 0, 2])?, [c, h, w]),
-            (&[h, w, c], ShapeConvention::Hwc) => (tensor.shallow_clone(), [c, h, w]),
-            (&[c, w, h], ShapeConvention::Cwh) => (tensor.f_permute(&[2, 1, 0])?, [c, h, w]),
-            (&[c, h, w], ShapeConvention::Chw) => (tensor.f_permute(&[1, 2, 0])?, [c, h, w]),
+            (&[w, h], TchTensorImageShape::Whc) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
+            (&[h, w], TchTensorImageShape::Hwc) => (tensor.shallow_clone(), [1, h, w]),
+            (&[w, h], TchTensorImageShape::Cwh) => (tensor.f_permute(&[1, 0])?, [1, h, w]),
+            (&[h, w], TchTensorImageShape::Chw) => (tensor.shallow_clone(), [1, h, w]),
+            (&[w, h, c], TchTensorImageShape::Whc) => (tensor.f_permute(&[1, 0, 2])?, [c, h, w]),
+            (&[h, w, c], TchTensorImageShape::Hwc) => (tensor.shallow_clone(), [c, h, w]),
+            (&[c, w, h], TchTensorImageShape::Cwh) => (tensor.f_permute(&[2, 1, 0])?, [c, h, w]),
+            (&[c, h, w], TchTensorImageShape::Chw) => (tensor.f_permute(&[1, 2, 0])?, [c, h, w]),
             (shape, _convention) => bail!("unsupported tensor shape {:?}", shape),
         };
         let tensor = tensor.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
@@ -274,13 +233,13 @@ where
     }
 }
 
-impl<T> TryFromCv<TensorAsImage<T>> for core_cv::Mat
+impl<T> TryFromCv<TchTensorAsImage<T>> for core_cv::Mat
 where
     T: Borrow<tch::Tensor>,
 {
     type Error = Error;
 
-    fn try_from_cv(from: TensorAsImage<T>) -> Result<Self, Self::Error> {
+    fn try_from_cv(from: TchTensorAsImage<T>) -> Result<Self, Self::Error> {
         (&from).try_into_cv()
     }
 }
@@ -391,7 +350,7 @@ mod tests {
 
             let before = Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
-                TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
+                TchTensorAsImage::new(&before, TchTensorImageShape::Chw)?.try_into_cv()?;
             let after = Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
@@ -433,7 +392,7 @@ mod tests {
 
             let before = Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
             let mat: core_cv::Mat =
-                TensorAsImage::new(&before, ShapeConvention::Chw)?.try_into_cv()?;
+                TchTensorAsImage::new(&before, TchTensorImageShape::Chw)?.try_into_cv()?;
             let after = TensorFromMat::try_from_cv(mat)?; // in hwc
 
             // compare original and recovered Tensor values
