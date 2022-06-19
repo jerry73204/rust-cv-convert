@@ -4,7 +4,7 @@
 //!
 //! This crate supports multiple dependency versions to choose from.
 //! The choices of dependency versions are named accordingly as Cargo features.
-//! For example, the feature `nalgebra_0-30` enables nalgebra 0.30.x.
+//! For example, the feature `nalgebra_0-31` enables nalgebra 0.31.x.
 //! It allows to list crate version selections in `Cargo.toml`.
 //!
 //! ```toml
@@ -14,7 +14,7 @@
 //!     'image_0-24',
 //!     'opencv_0-63',
 //!     'tch_0-7',
-//!     'nalgebra_0-30',
+//!     'nalgebra_0-31',
 //!     'ndarray_0-15',
 //! ]
 //! ```
@@ -169,6 +169,12 @@ pub use traits::*;
 use utils::*;
 
 // opencv exports
+#[cfg(feature = "opencv_0-65")]
+pub use opencv_0_65 as opencv;
+
+#[cfg(feature = "opencv_0-64")]
+pub use opencv_0_64 as opencv;
+
 #[cfg(feature = "opencv_0-63")]
 pub use opencv_0_63 as opencv;
 
@@ -180,6 +186,9 @@ pub use image_0_24 as image;
 pub use image_0_23 as image;
 
 // nalgebra exports
+#[cfg(feature = "nalgebra_0-31")]
+pub use nalgebra_0_31 as nalgebra;
+
 #[cfg(feature = "nalgebra_0-30")]
 pub use nalgebra_0_30 as nalgebra;
 

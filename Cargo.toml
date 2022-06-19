@@ -19,13 +19,19 @@ slice-of-array = '0.3.1'
 half = '1.8.2'
 
 [dependencies.image_0-24]
-version = '0.24.1'
+version = '0.24.2'
 package = 'image'
 optional = true
 
 [dependencies.image_0-23]
 version = '0.23.14'
 package = 'image'
+optional = true
+
+
+[dependencies.nalgebra_0-31]
+version = '0.31.0'
+package = 'nalgebra'
 optional = true
 
 [dependencies.nalgebra_0-30]
@@ -53,8 +59,22 @@ version = '0.26.2'
 package = 'nalgebra'
 optional = true
 
+[dependencies.opencv_0-65]
+version = '0.65.0'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-64]
+version = '0.64.1'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.opencv_0-63]
-version = '0.63.1'
+version = '0.63.2'
 package = 'opencv'
 default-features = false
 features = ['calib3d']
@@ -66,7 +86,7 @@ package = 'ndarray'
 optional = true
 
 [dependencies.tch_0-7]
-version = "0.7.0"
+version = "0.7.2"
 package = 'tch'
 optional = true
 
@@ -78,13 +98,13 @@ rand = '0.8.4'
 [features]
 full = [
     'image_0-24',
-    'opencv_0-63',
+    'opencv_0-65',
     'tch_0-7',
-    'nalgebra_0-30',
+    'nalgebra_0-31',
     'ndarray_0-15',
 ]
 docs-only = [
     'full',
-    'opencv_0-63/docs-only',
+    'opencv_0-65/docs-only',
     'tch_0-7/doc-only',
 ]

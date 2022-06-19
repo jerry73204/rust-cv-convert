@@ -6,6 +6,7 @@ macro_rules! if_nalgebra {
     ($($item:item)*) => {
         $(
             #[cfg(any(
+                feature = "nalgebra_0-31",
                 feature = "nalgebra_0-30",
                 feature = "nalgebra_0-29",
                 feature = "nalgebra_0-28",
@@ -36,6 +37,8 @@ macro_rules! if_opencv {
     ($($item:item)*) => {
         $(
             #[cfg(any(
+                feature = "opencv_0-65",
+                feature = "opencv_0-64",
                 feature = "opencv_0-63",
             ))]
             $item
