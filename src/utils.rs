@@ -108,7 +108,6 @@ macro_rules! has_ndarray {
 pub(crate) use has_ndarray;
 
 // tch
-
 macro_rules! if_tch {
     ($($item:item)*) => {
         $(

@@ -43,6 +43,8 @@ The minimum supported `rustc` is 1.51. You may use older versions of the crate (
 
 ### opencv
 
+- `opencv_0-65`
+- `opencv_0-64`
 - `opencv_0-63`
 
 Enable the corresponding feature below if you get `libclang shared library is not loaded on this thread!` panic.
@@ -68,7 +70,7 @@ Enable the corresponding feature below if you get `libclang shared library is no
 
 ### tch
 
-- `tch_0-6`
+- `tch_0-7`
 
 ## Usage
 
