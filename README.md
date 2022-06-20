@@ -3,6 +3,7 @@
 Type conversions among famous Rust computer vision libraries. It supports the following crates:
 
 - [image](https://crates.io/crates/image)
+- [imageproc](https://crates.io/crates/imageproc)
 - [nalgebra](https://crates.io/crates/nalgebra)
 - [opencv](https://crates.io/crates/opencv)
 - [tch](https://crates.io/crates/tch)
@@ -55,6 +56,10 @@ Enable the corresponding feature below if you get `libclang shared library is no
 ### image
 
 - `image_0-23`
+
+### imageproc
+
+- `imageproc_0-23`
 
 ### ndarray
 
