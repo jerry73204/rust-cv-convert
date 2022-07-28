@@ -140,6 +140,6 @@ full = [
 ]
 docs-only = [
     'full',
-    'opencv_0-65/docs-only',
+    'opencv_0-66/docs-only',
     'tch_0-8/doc-only',
 ]
