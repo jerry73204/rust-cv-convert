@@ -11,6 +11,7 @@ VERSION_GROUPS = {
     "opencv": ["0.63", "0.64", "0.65"],
     "ndarray": ["0.15"],
     "tch": ["0.7"],
+    "imageproc": ["0.23"],
 }
 
 
