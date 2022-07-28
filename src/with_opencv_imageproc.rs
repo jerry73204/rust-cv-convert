@@ -40,7 +40,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use anyhow::Result;
     use approx::abs_diff_eq;
     use crate::imageproc;
