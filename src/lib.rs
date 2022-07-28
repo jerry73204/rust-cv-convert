@@ -103,6 +103,12 @@
 //! - [(&)ImageBuffer](image::ImageBuffer) ->? [Mat](opencv::core::Mat)
 //! - [(&)DynamicImage](image::DynamicImage) ->? [Mat](opencv::core::Mat)
 //!
+//! ## opencv -> imageproc
+//! - [(&)Point_<T>](opencv::core::Point_) -> [Point<T>](imageproc::point::Point)
+//!
+//! ## imageproc -> opencv
+//! - [(&)Point<T>](imageproc::point::Point) -> [Point_<T>](opencv::core::Point_)
+//!
 //! ## opencv -> nalgebra
 //!
 //! - [(&)Mat](opencv::core::Mat) ->? [OMatrix](nalgebra::OMatrix)
@@ -185,6 +191,10 @@ pub use image_0_24 as image;
 #[cfg(feature = "image_0-23")]
 pub use image_0_23 as image;
 
+// imageproc exports
+#[cfg(feature = "imageproc_0-23")]
+pub use imageproc_0_23 as imageproc;
+
 // nalgebra exports
 #[cfg(feature = "nalgebra_0-31")]
 pub use nalgebra_0_31 as nalgebra;
@@ -241,6 +251,13 @@ has_image! {
     has_opencv! {
         mod with_opencv_image;
         pub use with_opencv_image::*;
+    }
+}
+
+has_imageproc! {
+    has_opencv! {
+        mod with_opencv_imageproc;
+        pub use with_opencv_imageproc::*;
     }
 }
 

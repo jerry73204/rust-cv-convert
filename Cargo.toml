@@ -15,8 +15,14 @@ features = ['docs-only']
 
 [dependencies]
 anyhow = '1.0.53'
+num-traits = '0.2.15'
 slice-of-array = '0.3.1'
 half = '1.8.2'
+
+[dependencies.imageproc_0-23]
+version = '0.23.0'
+package = 'imageproc'
+optional = true
 
 [dependencies.image_0-24]
 version = '0.24.2'
@@ -27,7 +33,6 @@ optional = true
 version = '0.23.14'
 package = 'image'
 optional = true
-
 
 [dependencies.nalgebra_0-31]
 version = '0.31.0'
@@ -98,6 +103,7 @@ rand = '0.8.4'
 [features]
 full = [
     'image_0-24',
+    'imageproc_0-23',
     'opencv_0-65',
     'tch_0-7',
     'nalgebra_0-31',

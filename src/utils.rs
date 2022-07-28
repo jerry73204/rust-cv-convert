@@ -83,6 +83,31 @@ macro_rules! has_image {
 }
 pub(crate) use has_image;
 
+// imageproc
+macro_rules! if_imageproc {
+    ($($item:item)*) => {
+        $(
+            #[cfg(any(
+                feature = "imageproc_0-23",
+            ))]
+            $item
+        )*
+    };
+}
+pub(crate) use if_imageproc;
+
+macro_rules! has_imageproc {
+    ($($item:item)*) => {
+        crate::utils::if_imageproc! {
+            #[allow(unused_imports)]
+            use crate::imageproc as _;
+            $($item)*
+        }
+    }
+}
+pub(crate) use has_imageproc;
+
+
 // ndarray
 macro_rules! if_ndarray {
     ($($item:item)*) => {
@@ -108,7 +133,6 @@ macro_rules! has_ndarray {
 pub(crate) use has_ndarray;
 
 // tch
-
 macro_rules! if_tch {
     ($($item:item)*) => {
         $(
