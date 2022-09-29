@@ -18,10 +18,10 @@ For example, the feature `nalgebra_0-30` enables nalgebra 0.30.x.
 [dependencies.cv-convert]
 version = 'x.y.z'
 features = [
-    'image_0-23',
-    'opencv_0-62',
-    'tch_0-6',
-    'nalgebra_0-30',
+    'image_0-24',
+    'opencv_0-66',
+    'tch_0-8',
+    'nalgebra_0-31',
     'ndarray_0-15',
 ]
 ```
@@ -44,6 +44,9 @@ The minimum supported `rustc` is 1.51. You may use older versions of the crate (
 
 ### opencv
 
+- `opencv_0-68`
+- `opencv_0-67`
+- `opencv_0-66`
 - `opencv_0-65`
 - `opencv_0-64`
 - `opencv_0-63`
@@ -55,6 +58,7 @@ Enable the corresponding feature below if you get `libclang shared library is no
 
 ### image
 
+- `image_0-24`
 - `image_0-23`
 
 ### imageproc
@@ -67,6 +71,7 @@ Enable the corresponding feature below if you get `libclang shared library is no
 
 ### nalgebra
 
+- `nalgebra_0-31`
 - `nalgebra_0-30`
 - `nalgebra_0-29`
 - `nalgebra_0-28`
@@ -75,7 +80,7 @@ Enable the corresponding feature below if you get `libclang shared library is no
 
 ### tch
 
-- `tch_0-7`
+- `tch_0-8`
 
 ## Usage
 
