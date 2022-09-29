@@ -14,16 +14,13 @@ license = 'MIT'
 features = ['docs-only']
 
 [features]
-full = [
+docs-only = [
     'image_0-24',
     'imageproc_0-23',
     'opencv_0-68',
     'tch_0-8',
     'nalgebra_0-31',
     'ndarray_0-15',
-]
-docs-only = [
-    'full',
     'opencv_0-68/docs-only',
     'tch_0-8/doc-only',
 ]

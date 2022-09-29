@@ -26,13 +26,7 @@ features = [
 ]
 ```
 
-The `full` feature enable all crates with up-to-date versions.
-
-```toml
-[dependencies.cv-convert]
-version = 'x.y.z'
-features = ['full']
-```
+The `full` feature was available before 0.20 but was removed since 0.21 to avoid bloating and surprising dependency update.
 
 The minimum supported `rustc` is 1.51. You may use older versions of the crate (>=0.6) in order to use `rustc` versions that do not support const-generics.
 
