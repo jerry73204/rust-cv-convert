@@ -12,7 +12,7 @@
 //! version = 'x.y.z'
 //! features = [
 //!     'image_0-24',
-//!     'opencv_0-66',
+//!     'opencv_0-68',
 //!     'tch_0-8',
 //!     'nalgebra_0-31',
 //!     'ndarray_0-15',
@@ -163,61 +163,16 @@
 //! Other versions are named accordingly.
 
 mod common;
+
 mod traits;
-mod utils;
+pub use traits::*;
 
 pub mod prelude {
     pub use crate::traits::{FromCv, IntoCv, TryFromCv, TryIntoCv};
 }
 
-pub use traits::*;
-
-use utils::*;
-
-#[cfg(feature = "image_0-23")]
-pub use image_0_23 as image;
-
-#[cfg(feature = "image_0-24")]
-pub use image_0_24 as image;
-
-#[cfg(feature = "nalgebra_0-26")]
-pub use nalgebra_0_26 as nalgebra;
-
-#[cfg(feature = "nalgebra_0-27")]
-pub use nalgebra_0_27 as nalgebra;
-
-#[cfg(feature = "nalgebra_0-28")]
-pub use nalgebra_0_28 as nalgebra;
-
-#[cfg(feature = "nalgebra_0-29")]
-pub use nalgebra_0_29 as nalgebra;
-
-#[cfg(feature = "nalgebra_0-30")]
-pub use nalgebra_0_30 as nalgebra;
-
-#[cfg(feature = "nalgebra_0-31")]
-pub use nalgebra_0_31 as nalgebra;
-
-#[cfg(feature = "opencv_0-63")]
-pub use opencv_0_63 as opencv;
-
-#[cfg(feature = "opencv_0-64")]
-pub use opencv_0_64 as opencv;
-
-#[cfg(feature = "opencv_0-65")]
-pub use opencv_0_65 as opencv;
-
-#[cfg(feature = "opencv_0-66")]
-pub use opencv_0_66 as opencv;
-
-#[cfg(feature = "ndarray_0-15")]
-pub use ndarray_0_15 as ndarray;
-
-#[cfg(feature = "tch_0-8")]
-pub use tch_0_8 as tch;
-
-#[cfg(feature = "imageproc_0-23")]
-pub use imageproc_0_23 as imageproc;
+mod macros;
+use macros::*;
 
 // modules
 has_opencv! {
@@ -278,3 +233,58 @@ has_opencv! {
         pub use with_opencv_ndarray::*;
     }
 }
+
+/* Start of generated code */
+
+#[cfg(feature = "image_0-23")]
+pub use image_0_23 as image;
+
+#[cfg(feature = "image_0-24")]
+pub use image_0_24 as image;
+
+#[cfg(feature = "nalgebra_0-26")]
+pub use nalgebra_0_26 as nalgebra;
+
+#[cfg(feature = "nalgebra_0-27")]
+pub use nalgebra_0_27 as nalgebra;
+
+#[cfg(feature = "nalgebra_0-28")]
+pub use nalgebra_0_28 as nalgebra;
+
+#[cfg(feature = "nalgebra_0-29")]
+pub use nalgebra_0_29 as nalgebra;
+
+#[cfg(feature = "nalgebra_0-30")]
+pub use nalgebra_0_30 as nalgebra;
+
+#[cfg(feature = "nalgebra_0-31")]
+pub use nalgebra_0_31 as nalgebra;
+
+#[cfg(feature = "opencv_0-63")]
+pub use opencv_0_63 as opencv;
+
+#[cfg(feature = "opencv_0-64")]
+pub use opencv_0_64 as opencv;
+
+#[cfg(feature = "opencv_0-65")]
+pub use opencv_0_65 as opencv;
+
+#[cfg(feature = "opencv_0-66")]
+pub use opencv_0_66 as opencv;
+
+#[cfg(feature = "opencv_0-67")]
+pub use opencv_0_67 as opencv;
+
+#[cfg(feature = "opencv_0-68")]
+pub use opencv_0_68 as opencv;
+
+#[cfg(feature = "ndarray_0-15")]
+pub use ndarray_0_15 as ndarray;
+
+#[cfg(feature = "tch_0-8")]
+pub use tch_0_8 as tch;
+
+#[cfg(feature = "imageproc_0-23")]
+pub use imageproc_0_23 as imageproc;
+
+/* End of generated code */

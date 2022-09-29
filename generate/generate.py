@@ -34,7 +34,7 @@ pub(crate) use if_{};
 
 macro_rules! has_{} {{
     ($($item:item)*) => {{
-        crate::utils::if_{}! {{
+        crate::macros::if_{}! {{
             #[allow(unused_imports)]
             use crate::{} as _;
             $($item)*
@@ -81,7 +81,9 @@ class PkgVer:
 VERSION_GROUPS = {
     "image": VerGroup(["0.23", "0.24"], True, []),
     "nalgebra": VerGroup(["0.26", "0.27", "0.28", "0.29", "0.30", "0.31"], True, []),
-    "opencv": VerGroup(["0.63", "0.64", "0.65", "0.66"], False, ["calib3d"]),
+    "opencv": VerGroup(
+        ["0.63", "0.64", "0.65", "0.66", "0.67", "0.68"], False, ["calib3d"]
+    ),
     "ndarray": VerGroup(["0.15"], True, []),
     "tch": VerGroup(["0.8"], True, []),
     "imageproc": VerGroup(["0.23"], True, []),
@@ -89,6 +91,10 @@ VERSION_GROUPS = {
 
 
 def main():
+    if len(sys.argv) != 2:
+        print("Usage: generate.py test|generate")
+        exit(1)
+
     command = sys.argv[1]
 
     if command == "test":

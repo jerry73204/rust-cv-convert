@@ -13,11 +13,33 @@ license = 'MIT'
 [package.metadata.docs.rs]
 features = ['docs-only']
 
+[features]
+full = [
+    'image_0-24',
+    'imageproc_0-23',
+    'opencv_0-68',
+    'tch_0-8',
+    'nalgebra_0-31',
+    'ndarray_0-15',
+]
+docs-only = [
+    'full',
+    'opencv_0-68/docs-only',
+    'tch_0-8/doc-only',
+]
+
+[dev-dependencies]
+approx = '0.5.1'
+itertools = '0.10.3'
+rand = '0.8.4'
+
 [dependencies]
 anyhow = '1.0.53'
 num-traits = '0.2.15'
 slice-of-array = '0.3.1'
 half = '1.8.2'
+
+## Start of generated dependencies
 
 [dependencies.image_0-23]
 version = '0.23'
@@ -103,6 +125,20 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-67]
+version = '0.67'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-68]
+version = '0.68'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
@@ -124,22 +160,4 @@ default-features = true
 features = []
 optional = true
 
-[dev-dependencies]
-approx = '0.5.1'
-itertools = '0.10.3'
-rand = '0.8.4'
-
-[features]
-full = [
-    'image_0-24',
-    'imageproc_0-23',
-    'opencv_0-66',
-    'tch_0-8',
-    'nalgebra_0-31',
-    'ndarray_0-15',
-]
-docs-only = [
-    'full',
-    'opencv_0-66/docs-only',
-    'tch_0-8/doc-only',
-]
+## End of generated dependencies

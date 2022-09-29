@@ -1,3 +1,4 @@
+/* Start of generated code */
 #![allow(unused_macros)]
 #![allow(unused_imports)]
 
@@ -14,7 +15,7 @@ pub(crate) use if_image;
 
 macro_rules! has_image {
     ($($item:item)*) => {
-        crate::utils::if_image! {
+        crate::macros::if_image! {
             #[allow(unused_imports)]
             use crate::image as _;
             $($item)*
@@ -36,7 +37,7 @@ pub(crate) use if_nalgebra;
 
 macro_rules! has_nalgebra {
     ($($item:item)*) => {
-        crate::utils::if_nalgebra! {
+        crate::macros::if_nalgebra! {
             #[allow(unused_imports)]
             use crate::nalgebra as _;
             $($item)*
@@ -49,7 +50,7 @@ pub(crate) use has_nalgebra;
 macro_rules! if_opencv {
     ($($item:item)*) => {
         $(
-            #[cfg(any(feature = "opencv_0-63", feature = "opencv_0-64", feature = "opencv_0-65", feature = "opencv_0-66"))]
+            #[cfg(any(feature = "opencv_0-63", feature = "opencv_0-64", feature = "opencv_0-65", feature = "opencv_0-66", feature = "opencv_0-67", feature = "opencv_0-68"))]
             $item
         )*
     };
@@ -58,7 +59,7 @@ pub(crate) use if_opencv;
 
 macro_rules! has_opencv {
     ($($item:item)*) => {
-        crate::utils::if_opencv! {
+        crate::macros::if_opencv! {
             #[allow(unused_imports)]
             use crate::opencv as _;
             $($item)*
@@ -80,7 +81,7 @@ pub(crate) use if_ndarray;
 
 macro_rules! has_ndarray {
     ($($item:item)*) => {
-        crate::utils::if_ndarray! {
+        crate::macros::if_ndarray! {
             #[allow(unused_imports)]
             use crate::ndarray as _;
             $($item)*
@@ -102,7 +103,7 @@ pub(crate) use if_tch;
 
 macro_rules! has_tch {
     ($($item:item)*) => {
-        crate::utils::if_tch! {
+        crate::macros::if_tch! {
             #[allow(unused_imports)]
             use crate::tch as _;
             $($item)*
@@ -124,7 +125,7 @@ pub(crate) use if_imageproc;
 
 macro_rules! has_imageproc {
     ($($item:item)*) => {
-        crate::utils::if_imageproc! {
+        crate::macros::if_imageproc! {
             #[allow(unused_imports)]
             use crate::imageproc as _;
             $($item)*
@@ -132,3 +133,4 @@ macro_rules! has_imageproc {
     }
 }
 pub(crate) use has_imageproc;
+/* End of generated code */
