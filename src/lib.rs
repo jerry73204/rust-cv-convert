@@ -12,7 +12,7 @@
 //! version = 'x.y.z'
 //! features = [
 //!     'image_0-24',
-//!     'opencv_0-68',
+//!     'opencv_0-69',
 //!     'tch_0-8',
 //!     'nalgebra_0-31',
 //!     'ndarray_0-15',

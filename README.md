@@ -19,7 +19,7 @@ For example, the feature `nalgebra_0-30` enables nalgebra 0.30.x.
 version = 'x.y.z'
 features = [
     'image_0-24',
-    'opencv_0-66',
+    'opencv_0-69',
     'tch_0-8',
     'nalgebra_0-31',
     'ndarray_0-15',
@@ -38,6 +38,7 @@ The minimum supported `rustc` is 1.51. You may use older versions of the crate (
 
 ### opencv
 
+- `opencv_0-69`
 - `opencv_0-68`
 - `opencv_0-67`
 - `opencv_0-66`
