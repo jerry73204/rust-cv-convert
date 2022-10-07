@@ -136,6 +136,13 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-69]
+version = '0.69'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
