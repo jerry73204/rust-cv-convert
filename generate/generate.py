@@ -82,7 +82,7 @@ VERSION_GROUPS = {
     "image": VerGroup(["0.23", "0.24"], True, []),
     "nalgebra": VerGroup(["0.26", "0.27", "0.28", "0.29", "0.30", "0.31"], True, []),
     "opencv": VerGroup(
-        ["0.63", "0.64", "0.65", "0.66", "0.67", "0.68", "0.69"], False, ["calib3d"]
+        ["0.63", "0.64", "0.65", "0.66", "0.67", "0.68", "0.69", "0.70"], False, ["calib3d"]
     ),
     "ndarray": VerGroup(["0.15"], True, []),
     "tch": VerGroup(["0.8"], True, []),

@@ -281,6 +281,9 @@ pub use opencv_0_68 as opencv;
 #[cfg(feature = "opencv_0-69")]
 pub use opencv_0_69 as opencv;
 
+#[cfg(feature = "opencv_0-70")]
+pub use opencv_0_70 as opencv;
+
 #[cfg(feature = "ndarray_0-15")]
 pub use ndarray_0_15 as ndarray;
 

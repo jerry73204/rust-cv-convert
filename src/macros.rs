@@ -50,7 +50,7 @@ pub(crate) use has_nalgebra;
 macro_rules! if_opencv {
     ($($item:item)*) => {
         $(
-            #[cfg(any(feature = "opencv_0-63", feature = "opencv_0-64", feature = "opencv_0-65", feature = "opencv_0-66", feature = "opencv_0-67", feature = "opencv_0-68", feature = "opencv_0-69"))]
+            #[cfg(any(feature = "opencv_0-63", feature = "opencv_0-64", feature = "opencv_0-65", feature = "opencv_0-66", feature = "opencv_0-67", feature = "opencv_0-68", feature = "opencv_0-69", feature = "opencv_0-70"))]
             $item
         )*
     };
@@ -133,4 +133,5 @@ macro_rules! has_imageproc {
     }
 }
 pub(crate) use has_imageproc;
+
 /* End of generated code */
