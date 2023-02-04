@@ -1,0 +1,174 @@
+[package]
+name = 'cv-convert'
+description = 'Type conversions among famous Rust computer vision libraries'
+version = '0.21.2'
+authors = ['jerry73204 <jerry73204@gmail.com>']
+edition = '2021'
+documentation = 'https://docs.rs/cv-convert/'
+repository = 'https://github.com/jerry73204/rust-cv-convert.git'
+homepage = 'https://github.com/jerry73204/rust-cv-convert/'
+readme = 'README.md'
+license = 'MIT'
+
+[package.metadata.docs.rs]
+features = ['docs-only']
+
+[features]
+docs-only = [
+    'image_0-24',
+    'imageproc_0-23',
+    'opencv_0-68',
+    'tch_0-8',
+    'nalgebra_0-31',
+    'ndarray_0-15',
+    'opencv_0-68/docs-only',
+    'tch_0-8/doc-only',
+]
+
+[dev-dependencies]
+approx = '0.5.1'
+itertools = '0.10.3'
+rand = '0.8.4'
+
+[dependencies]
+anyhow = '1.0.53'
+num-traits = '0.2.15'
+slice-of-array = '0.3.1'
+half = '1.8.2'
+
+## Start of generated dependencies
+
+[dependencies.image_0-23]
+version = '0.23'
+package = 'image'
+default-features = true
+features = []
+optional = true
+
+[dependencies.image_0-24]
+version = '0.24'
+package = 'image'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-26]
+version = '0.26'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-27]
+version = '0.27'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-28]
+version = '0.28'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-29]
+version = '0.29'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-30]
+version = '0.30'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-31]
+version = '0.31'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.opencv_0-63]
+version = '0.63'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-64]
+version = '0.64'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-65]
+version = '0.65'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-66]
+version = '0.66'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-67]
+version = '0.67'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-68]
+version = '0.68'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-69]
+version = '0.69'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-70]
+version = '0.70'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.ndarray_0-15]
+version = '0.15'
+package = 'ndarray'
+default-features = true
+features = []
+optional = true
+
+[dependencies.tch_0-8]
+version = '0.8'
+package = 'tch'
+default-features = true
+features = []
+optional = true
+
+[dependencies.imageproc_0-23]
+version = '0.23'
+package = 'imageproc'
+default-features = true
+features = []
+optional = true
+
+## End of generated dependencies
