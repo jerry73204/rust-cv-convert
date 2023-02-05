@@ -1,0 +1,29 @@
+[package.image]
+versions = ["0.23", "0.24"]
+use_default_features = true
+features = []
+
+[package.nalgebra]
+versions = ["0.26", "0.27", "0.28", "0.29", "0.30", "0.31"]
+use_default_features = true
+features = []
+
+[package.opencv]
+versions = ["0.63", "0.64", "0.65", "0.66", "0.67", "0.68", "0.69", "0.70"]
+use_default_features = false
+features = ["calib3d"]
+
+[package.ndarray]
+versions = ["0.15"]
+use_default_features = true
+features = []
+
+[package.tch]
+versions = ["0.8"]
+use_default_features = true
+features = []
+
+[package.imageproc]
+versions = ["0.23"]
+use_default_features = true
+features = []
