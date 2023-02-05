@@ -1,42 +1,3 @@
-[package]
-name = 'cv-convert'
-description = 'Type conversions among famous Rust computer vision libraries'
-version = '0.21.2'
-authors = ['jerry73204 <jerry73204@gmail.com>']
-edition = '2021'
-documentation = 'https://docs.rs/cv-convert/'
-repository = 'https://github.com/jerry73204/rust-cv-convert.git'
-homepage = 'https://github.com/jerry73204/rust-cv-convert/'
-readme = 'README.md'
-license = 'MIT'
-
-[package.metadata.docs.rs]
-features = ['docs-only']
-
-[features]
-docs-only = [
-    'image_0-24',
-    'imageproc_0-23',
-    'opencv_0-76',
-    'tch_0-10',
-    'nalgebra_0-32',
-    'ndarray_0-15',
-    'tch_0-10/doc-only',
-]
-
-[dev-dependencies]
-approx = '0.5.1'
-itertools = '0.10.3'
-rand = '0.8.4'
-
-[dependencies]
-anyhow = '1.0.53'
-num-traits = '0.2.15'
-slice-of-array = '0.3.1'
-half = '1.8.2'
-
-## Start of generated dependencies
-
 [dependencies.image_0-23]
 version = '0.23'
 package = 'image'
@@ -218,5 +179,3 @@ package = 'imageproc'
 default-features = true
 features = []
 optional = true
-
-## End of generated dependencies
