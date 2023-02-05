@@ -17,12 +17,11 @@ features = ['docs-only']
 docs-only = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-68',
-    'tch_0-8',
-    'nalgebra_0-31',
+    'opencv_0-76',
+    'tch_0-10',
+    'nalgebra_0-32',
     'ndarray_0-15',
-    'opencv_0-68/docs-only',
-    'tch_0-8/doc-only',
+    'tch_0-10/doc-only',
 ]
 
 [dev-dependencies]
@@ -37,20 +36,6 @@ slice-of-array = '0.3.1'
 half = '1.8.2'
 
 ## Start of generated dependencies
-
-[dependencies.image_0-23]
-version = '0.23'
-package = 'image'
-default-features = true
-features = []
-optional = true
-
-[dependencies.image_0-24]
-version = '0.24'
-package = 'image'
-default-features = true
-features = []
-optional = true
 
 [dependencies.nalgebra_0-26]
 version = '0.26'
@@ -89,6 +74,13 @@ optional = true
 
 [dependencies.nalgebra_0-31]
 version = '0.31'
+package = 'nalgebra'
+default-features = true
+features = []
+optional = true
+
+[dependencies.nalgebra_0-32]
+version = '0.32'
 package = 'nalgebra'
 default-features = true
 features = []
@@ -150,6 +142,48 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-71]
+version = '0.71'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-72]
+version = '0.72'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-73]
+version = '0.73'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-74]
+version = '0.74'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-75]
+version = '0.75'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-76]
+version = '0.76'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
@@ -157,8 +191,22 @@ default-features = true
 features = []
 optional = true
 
-[dependencies.tch_0-8]
-version = '0.8'
+[dependencies.image_0-23]
+version = '0.23'
+package = 'image'
+default-features = true
+features = []
+optional = true
+
+[dependencies.image_0-24]
+version = '0.24'
+package = 'image'
+default-features = true
+features = []
+optional = true
+
+[dependencies.tch_0-10]
+version = '0.10'
 package = 'tch'
 default-features = true
 features = []
