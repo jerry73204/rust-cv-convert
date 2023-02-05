@@ -2,24 +2,32 @@
 //!
 //! # Version Selection
 //!
-//! This crate supports multiple dependency versions to choose from.
-//! The choices of dependency versions are named accordingly as Cargo features.
-//! For example, the feature `nalgebra_0-31` enables nalgebra 0.31.x.
-//! It allows to list crate version selections in `Cargo.toml`.
+//! In the default setting, up-to-date dependencies are used. The
+//! default dependency versions are listed in `[features]` in
+//! cv-convert `Cargo.toml`.
+//!
+//! You can manually select desired dependency versions. The choices
+//! of dependency versions are named accordingly as Cargo
+//! features. For example, the feature `nalgebra_0-31` enables
+//! nalgebra 0.31.x.  It allows to list crate version selections in
+//! `Cargo.toml`.
 //!
 //! ```toml
 //! [dependencies.cv-convert]
 //! version = 'x.y.z'
+//! default-features = false
 //! features = [
 //!     'image_0-24',
-//!     'opencv_0-70',
-//!     'tch_0-8',
-//!     'nalgebra_0-31',
+//!     'opencv_0-76',
+//!     'tch_0-10',
+//!     'nalgebra_0-32',
 //!     'ndarray_0-15',
 //! ]
 //! ```
 //!
-//! Enable `full` feature if you wish to enable all crates with up-to-date versions.
+//! It's impossible to enable two or more versions for a
+//! dependency. For example, `nalgebra_0-31` and `nalgebra_0-32` are
+//! incompatible.
 //!
 //! # Traits
 //!
@@ -158,9 +166,23 @@
 //!
 //! - [&Mat](opencv::core::Mat) ->? [ArrayView](ndarray::ArrayView)
 //!
-//! # OpenCV
-//! If your system requires `opencv/clang-runtime` to build, enable the `opencv_0-62-clang-runtime` feature to solve.
-//! Other versions are named accordingly.
+//!
+//! # Notes for OpenCV
+//!
+//! For opencv older than 0.66, some systems requires `clang-runtime`
+//! feature to build successfully. Otherwise you will get `libclang
+//! shared library is not loaded on this thread!` panic. Add `opencv`
+//! dependency along side `cv-convert` in your project Cargo.toml to
+//! enable this feature.
+//!
+//! ```toml
+//! cv-convert = { version = "0.22.0", default-features = false, features = ["opencv_0-65"] }
+//! opencv = { version = "0.65", features = ["clang-runtime"] }
+//! ```
+//!
+//! Most opencv modules, such as `videoio` and `aruco`, are disabled
+//! by default to avoid bloating. Add opencv dependency to your
+//! project Cargo.toml to enable default modules in your project.
 
 mod common;
 
