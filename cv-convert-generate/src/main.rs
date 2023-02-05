@@ -156,6 +156,7 @@ fn run_test() -> Result<()> {
             stderr,
         } = Command::new("cargo")
             .arg("test")
+            .arg("--no-default-features")
             .arg("--release")
             .arg("--features")
             .arg(feature_arg)
