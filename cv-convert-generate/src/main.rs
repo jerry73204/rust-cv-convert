@@ -8,27 +8,34 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{
     fs,
+    path::{Path, PathBuf},
     process::{Command, Output},
 };
 use unzip_n::unzip_n;
 
 unzip_n!(3);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Parser)]
+#[derive(Debug, Clone, Parser)]
 enum Opts {
     /// Generate snipplets.
-    Generate,
+    Generate(GenerateOpts),
 
     /// Test all combinations of package versions.
     Test,
+}
+
+#[derive(Debug, Clone, Parser)]
+struct GenerateOpts {
+    #[clap(long)]
+    pub manifest_dir: PathBuf,
 }
 
 fn main() -> Result<()> {
     let opts = Opts::parse();
 
     match opts {
-        Opts::Generate => {
-            run_generate()?;
+        Opts::Generate(opts) => {
+            run_generate(&opts.manifest_dir)?;
         }
         Opts::Test => {
             run_test()?;
@@ -38,7 +45,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run_generate() -> Result<()> {
+fn run_generate(manifest_dir: &Path) -> Result<()> {
     let (cargo_dep_groups, lib_export_groups, macro_snipplets) = CONFIG
         .package
         .iter()
@@ -60,6 +67,7 @@ fn run_generate() -> Result<()> {
                 })
                 .unzip_n_vec();
 
+            let pkg_name = format_ident!("{pkg_name}");
             let if_pkg_macro = format_ident!("if_{pkg_name}");
             let has_pkg_macro = format_ident!("has_{pkg_name}");
 
@@ -96,16 +104,27 @@ fn run_generate() -> Result<()> {
         let iter = lib_export_groups.into_iter().flatten();
         quote! { #(#iter)* }
     };
-    let macro_rs_snipplet = quote! {
-        #![allow(unused_macros)]
-        #![allow(unused_imports)]
+    let macro_rs_snipplet = quote! { #(#macro_snipplets)* };
 
-        #(#macro_snipplets)*
-    };
+    let generated_dir = manifest_dir.join("generated");
+    fs::create_dir_all(&generated_dir)?;
+    fs::write(
+        generated_dir.join("Cargo.toml.snipplet"),
+        cargo_dep_snipplet,
+    )?;
+    fs::write(
+        generated_dir.join("lib.rs.snipplet"),
+        lib_rs_snipplet.to_string(),
+    )?;
+    fs::write(
+        generated_dir.join("macros.rs.snipplet"),
+        macro_rs_snipplet.to_string(),
+    )?;
 
-    fs::write("Cargo.toml.snipplet", cargo_dep_snipplet)?;
-    fs::write("lib.rs.snipplet", lib_rs_snipplet.to_string())?;
-    fs::write("macro.rs.snipplet", macro_rs_snipplet.to_string())?;
+    eprintln!(
+        "Please copy the content of generated/Cargo.toml.snipplet to \
+         Cargo.toml manually in the cv-convert directory."
+    );
 
     Ok(())
 }
