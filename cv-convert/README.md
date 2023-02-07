@@ -22,7 +22,7 @@ features. For example, the feature `nalgebra_0-30` enables nalgebra
 
 ```toml
 [dependencies.cv-convert]
-version = 'x.y.z'
+version = 'x.y.z'  # Please look up the recent version on crates.io
 default-features = false
 features = [
     'image_0-24',
