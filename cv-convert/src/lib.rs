@@ -111,6 +111,15 @@
 //! - [(&)ImageBuffer](image::ImageBuffer) ->? [Mat](opencv::core::Mat)
 //! - [(&)DynamicImage](image::DynamicImage) ->? [Mat](opencv::core::Mat)
 //!
+//! ## opencv -> image 0.23
+//!
+//! - [Mat](opencv::core::Mat) ->? [(&)ImageBuffer](image::ImageBuffer)
+//!
+//! ## opencv -> image 0.24
+//!
+//! - [Mat](opencv::core::Mat) ->? [(&)ImageBuffer](image::ImageBuffer)
+//! - [Mat](opencv::core::Mat) ->? [(&)DynamicImage](image::DynamicImage)
+//!
 //! ## opencv -> imageproc
 //! - [(&)Point_<T>](opencv::core::Point_) -> [Point<T>](imageproc::point::Point)
 //!
