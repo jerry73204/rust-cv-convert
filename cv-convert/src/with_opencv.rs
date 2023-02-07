@@ -57,7 +57,12 @@ mod mat_ext {
         fn type_name(&self) -> String;
 
         #[cfg(test)]
-        fn new_randn<T>(shape: &[usize]) -> Result<Self>
+        fn new_randn_2d(rows: i32, cols: i32, typ: i32) -> Result<Self>
+        where
+            Self: Sized;
+
+        #[cfg(test)]
+        fn new_randn_nd<T>(shape: &[usize]) -> Result<Self>
         where
             Self: Sized,
             T: OpenCvElement;
@@ -91,7 +96,17 @@ mod mat_ext {
         }
 
         #[cfg(test)]
-        fn new_randn<T>(shape: &[usize]) -> Result<Self>
+        fn new_randn_2d(rows: i32, cols: i32, typ: i32) -> Result<Self>
+        where
+            Self: Sized,
+        {
+            let mut mat = Self::zeros(rows, cols, typ)?.to_mat()?;
+            core_cv::randn(&mut mat, &0.0, &1.0)?;
+            Ok(mat)
+        }
+
+        #[cfg(test)]
+        fn new_randn_nd<T>(shape: &[usize]) -> Result<Self>
         where
             T: OpenCvElement,
         {

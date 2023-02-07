@@ -36,7 +36,7 @@ mod tests {
             let ndim: usize = rng.gen_range(2..=4);
             let shape: Vec<usize> = (0..ndim).map(|_| rng.gen_range(1..=32)).collect();
 
-            let mat = cv::Mat::new_randn::<f32>(&shape)?;
+            let mat = cv::Mat::new_randn_nd::<f32>(&shape)?;
             let array: nd::ArrayViewD<f32> = (&mat).try_into_cv()?;
 
             shape
