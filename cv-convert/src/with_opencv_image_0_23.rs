@@ -83,7 +83,7 @@ where
 
     fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
         let rows = from.rows();
-        let cols = from.rows();
+        let cols = from.cols();
         ensure!(
             rows != -1 && cols != -1,
             "Mat with more than 2 dimensions is not supported."
@@ -128,7 +128,7 @@ where
 
     fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
         let rows = from.rows();
-        let cols = from.rows();
+        let cols = from.cols();
         ensure!(
             rows != -1 && cols != -1,
             "Mat with more than 2 dimensions is not supported."
@@ -201,5 +201,62 @@ where
             let cv::Point3_::<T> { x, y, z } = *mat.at_2d(row as i32, col as i32).unwrap();
             image::Rgb([x, y, z])
         }),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::image;
+    use crate::opencv::{core as cv, prelude::*};
+    use crate::with_opencv::MatExt;
+    use crate::TryIntoCv;
+    use anyhow::ensure;
+    use anyhow::Result;
+    use itertools::iproduct;
+
+    #[test]
+    fn convert_opencv_image() -> Result<()> {
+        const WIDTH: usize = 250;
+        const HEIGHT: usize = 100;
+
+        // gray
+        {
+            let mat = Mat::new_randn_2d(HEIGHT as i32, WIDTH as i32, cv::CV_8UC1)?;
+            let image: image::GrayImage = (&mat).try_into_cv()?;
+            let mat2: Mat = (&image).try_into_cv()?;
+
+            iproduct!(0..HEIGHT, 0..WIDTH).try_for_each(|(row, col)| {
+                let p1: u8 = *mat.at_2d(row as i32, col as i32)?;
+                let p2 = image[(col as u32, row as u32)].0[0];
+                let p3: u8 = *mat2.at_2d(row as i32, col as i32)?;
+                ensure!(p1 == p2 && p1 == p3);
+                anyhow::Ok(())
+            })?;
+        }
+
+        // rgb
+        {
+            let mat = Mat::new_randn_2d(HEIGHT as i32, WIDTH as i32, cv::CV_8UC3)?;
+            let image: image::RgbImage = (&mat).try_into_cv()?;
+            let mat2: Mat = (&image).try_into_cv()?;
+
+            iproduct!(0..HEIGHT, 0..WIDTH).try_for_each(|(row, col)| {
+                let p1: cv::Point3_<u8> = *mat.at_2d(row as i32, col as i32)?;
+                let p2: image::Rgb<u8> = image[(col as u32, row as u32)];
+                let p3: cv::Point3_<u8> = *mat2.at_2d(row as i32, col as i32)?;
+                ensure!(p1 == p3);
+                ensure!({
+                    let a1 = {
+                        let cv::Point3_ { x, y, z } = p1;
+                        [x, y, z]
+                    };
+                    let a2 = p2.0;
+                    a1 == a2
+                });
+                anyhow::Ok(())
+            })?;
+        }
+
+        Ok(())
     }
 }
