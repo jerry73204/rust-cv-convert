@@ -54,6 +54,8 @@ mod mat_ext {
         where
             T: OpenCvElement;
 
+        fn type_name(&self) -> String;
+
         #[cfg(test)]
         fn new_randn<T>(shape: &[usize]) -> Result<Self>
         where
@@ -82,6 +84,10 @@ mod mat_ext {
 
             let slice = unsafe { slice::from_raw_parts(ptr, numel) };
             Ok(slice)
+        }
+
+        fn type_name(&self) -> String {
+            core_cv::type_to_string(self.typ()).unwrap()
         }
 
         #[cfg(test)]
