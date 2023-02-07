@@ -174,6 +174,7 @@
 //! ## opencv -> ndarray
 //!
 //! - [&Mat](opencv::core::Mat) ->? [ArrayView](ndarray::ArrayView)
+//! - [(&)Mat](opencv::core::Mat) ->? [Array](ndarray::Array)
 //!
 //!
 //! # Notes for OpenCV

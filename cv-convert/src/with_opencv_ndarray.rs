@@ -2,7 +2,7 @@ use crate::ndarray as nd;
 use crate::opencv::core as cv;
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
-use crate::{common::*, TryFromCv};
+use crate::{common::*, TryFromCv, TryIntoCv};
 
 impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
 where
@@ -19,17 +19,44 @@ where
     }
 }
 
+impl<A, D> TryFromCv<&cv::Mat> for nd::Array<A, D>
+where
+    A: OpenCvElement + Clone,
+    D: nd::Dimension,
+{
+    type Error = anyhow::Error;
+
+    fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
+        let src_shape = from.shape();
+        let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
+        let array = array.into_dimensionality()?;
+        let array = array.into_owned();
+        Ok(array)
+    }
+}
+
+impl<A, D> TryFromCv<cv::Mat> for nd::Array<A, D>
+where
+    A: OpenCvElement + Clone,
+    D: nd::Dimension,
+{
+    type Error = anyhow::Error;
+
+    fn try_from_cv(from: cv::Mat) -> Result<Self, Self::Error> {
+        (&from).try_into_cv()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::opencv::prelude::*;
-    use crate::TryIntoCv as _;
     use itertools::chain;
     use itertools::Itertools as _;
     use rand::prelude::*;
 
     #[test]
-    fn mat_ref_to_array_view_conversion() -> Result<()> {
+    fn opencv_ndarray_conversion() -> Result<()> {
         let mut rng = rand::thread_rng();
 
         for _ in 0..5 {
@@ -37,7 +64,8 @@ mod tests {
             let shape: Vec<usize> = (0..ndim).map(|_| rng.gen_range(1..=32)).collect();
 
             let mat = cv::Mat::new_randn_nd::<f32>(&shape)?;
-            let array: nd::ArrayViewD<f32> = (&mat).try_into_cv()?;
+            let view: nd::ArrayViewD<f32> = (&mat).try_into_cv()?;
+            let array: nd::ArrayD<f32> = (&mat).try_into_cv()?;
 
             shape
                 .iter()
@@ -46,13 +74,16 @@ mod tests {
                 .try_for_each(|index| {
                     // opencv expects &[i32] index
                     let index_cv: Vec<_> = index.iter().map(|&size| size as i32).collect();
-                    let lhs: f32 = *mat.at_nd(&index_cv)?;
+                    let e1: f32 = *mat.at_nd(&index_cv)?;
 
                     // converting to ndarray adds an extra dimension for channels.
                     let index_nd: Vec<_> = chain!(index, [0]).collect();
-                    let rhs = array[index_nd.as_slice()];
+                    let e2 = view[index_nd.as_slice()];
 
-                    ensure!(lhs == rhs);
+                    // converting to ndarray adds an extra dimension for channels.
+                    let e3 = array[index_nd.as_slice()];
+
+                    ensure!(e1 == e2 && e1 == e3);
                     anyhow::Ok(())
                 })?;
         }
