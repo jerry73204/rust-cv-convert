@@ -223,8 +223,16 @@ has_tch! {
 
 has_image! {
     has_opencv! {
-        mod with_opencv_image;
-        pub use with_opencv_image::*;
+        #[cfg(feature = "image_0-23")]
+        mod with_opencv_image_0_23;
+        #[cfg(feature = "image_0-23")]
+        pub use with_opencv_image_0_23::*;
+
+        #[cfg(feature = "image_0-24")]
+        mod with_opencv_image_0_24;
+        #[cfg(feature = "image_0-24")]
+        pub use with_opencv_image_0_24::*;
+
     }
 }
 
