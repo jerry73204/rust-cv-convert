@@ -17,7 +17,7 @@ features = ['docs-only']
 default = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-76',
+    'opencv_0-83',
     'tch_0-10',
     'nalgebra_0-32',
     'ndarray_0-15',
@@ -25,7 +25,7 @@ default = [
 docs-only = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-76',
+    'opencv_0-83',
     'tch_0-10',
     'nalgebra_0-32',
     'ndarray_0-15',
@@ -201,6 +201,55 @@ optional = true
 
 [dependencies.opencv_0-76]
 version = '0.76'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-77]
+version = '0.77'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-78]
+version = '0.78'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-79]
+version = '0.79'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-80]
+version = '0.80'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-81]
+version = '0.81'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-82]
+version = '0.82'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-83]
+version = '0.83'
 package = 'opencv'
 default-features = false
 features = ['calib3d']
