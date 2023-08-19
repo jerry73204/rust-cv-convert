@@ -140,7 +140,7 @@ impl<'a> TryFromCv<&'a cv::Mat> for OpenCvMatAsTchTensor<'a> {
 
         let tensor = unsafe {
             let ptr = from.ptr(0)? as *const u8;
-            tch::Tensor::f_of_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
+            tch::Tensor::f_from_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
         };
 
         Ok(Self {
@@ -172,7 +172,7 @@ impl TryFromCv<&cv::Mat> for TchTensorAsImage {
             let ptr = from.ptr(0)? as *const u8;
             let slice_size = (height * width * channels) as usize * kind.elt_size_in_bytes();
             let slice = slice::from_raw_parts(ptr, slice_size);
-            tch::Tensor::f_of_data_size(slice, &[height, width, channels], kind)?
+            tch::Tensor::f_from_data_size(slice, &[height, width, channels], kind)?
         };
 
         Ok(TchTensorAsImage {
@@ -208,7 +208,7 @@ impl TryFromCv<&cv::Mat> for tch::Tensor {
             let slice_size =
                 shape.iter().cloned().product::<i64>() as usize * kind.elt_size_in_bytes();
             let slice = slice::from_raw_parts(ptr, slice_size);
-            tch::Tensor::f_of_data_size(slice, shape.as_ref(), kind)?
+            tch::Tensor::f_from_data_size(slice, shape.as_ref(), kind)?
         };
 
         Ok(tensor)

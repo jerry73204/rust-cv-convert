@@ -208,6 +208,13 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-84]
+version = '0.84'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
@@ -215,8 +222,8 @@ default-features = true
 features = []
 optional = true
 
-[dependencies.tch_0-10]
-version = '0.10'
+[dependencies.tch_0-13]
+version = '0.13'
 package = 'tch'
 default-features = true
 features = []

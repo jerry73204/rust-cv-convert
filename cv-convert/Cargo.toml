@@ -17,19 +17,19 @@ features = ['docs-only']
 default = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-83',
-    'tch_0-10',
+    'opencv_0-84',
+    'tch_0-13',
     'nalgebra_0-32',
     'ndarray_0-15',
 ]
 docs-only = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-83',
-    'tch_0-10',
+    'opencv_0-84',
+    'tch_0-13',
     'nalgebra_0-32',
     'ndarray_0-15',
-    'tch_0-10/doc-only',
+    'tch_0-13/doc-only',
 ]
 
 [dev-dependencies]
@@ -41,10 +41,9 @@ rand = '0.8.4'
 anyhow = '1.0.53'
 num-traits = '0.2.15'
 slice-of-array = '0.3.1'
-half = '1.8.2'
+half = '2.3.1'
 
 ## Start of generated dependencies
-
 [dependencies.image_0-23]
 version = '0.23'
 package = 'image'
@@ -255,6 +254,13 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-84]
+version = '0.84'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
@@ -262,8 +268,8 @@ default-features = true
 features = []
 optional = true
 
-[dependencies.tch_0-10]
-version = '0.10'
+[dependencies.tch_0-13]
+version = '0.13'
 package = 'tch'
 default-features = true
 features = []
@@ -275,5 +281,4 @@ package = 'imageproc'
 default-features = true
 features = []
 optional = true
-
 ## End of generated dependencies

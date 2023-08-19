@@ -183,10 +183,10 @@ where
         let shape: Vec<_> = from.shape().iter().map(|&s| s as i64).collect();
 
         match from.as_slice() {
-            Some(slice) => tch::Tensor::of_slice(slice).view(shape.as_slice()),
+            Some(slice) => tch::Tensor::from_slice(slice).view(shape.as_slice()),
             None => {
                 let elems: Vec<_> = from.iter().cloned().collect();
-                tch::Tensor::of_slice(&elems).view(shape.as_slice())
+                tch::Tensor::from_slice(&elems).view(shape.as_slice())
             }
         }
     }
