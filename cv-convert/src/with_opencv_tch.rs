@@ -341,7 +341,7 @@ mod tests {
                             .cloned()
                             .map(|val| Some(Tensor::from(val)))
                             .collect();
-                        let tch_val: f32 = before.f_index(&tch_index)?.into();
+                        let tch_val: f32 = before.f_index(&tch_index)?.try_into().unwrap();
                         let mat_val: f32 = *mat.at_nd(&cv_index)?;
                         ensure!(tch_val == mat_val, "value mismatch");
                         Ok(())
@@ -373,12 +373,12 @@ mod tests {
                 for col in 0..width {
                     let pixel: &cv::Vec3f = mat.at_2d(row as i32, col as i32)?;
                     let [red, green, blue] = **pixel;
-                    ensure!(f32::from(before.i((0, row, col))) == red, "value mismatch");
+                    ensure!(f32::try_from(before.i((0, row, col))).unwrap() == red, "value mismatch");
                     ensure!(
-                        f32::from(before.i((1, row, col))) == green,
+                        f32::try_from(before.i((1, row, col))).unwrap() == green,
                         "value mismatch"
                     );
-                    ensure!(f32::from(before.i((2, row, col))) == blue, "value mismatch");
+                    ensure!(f32::try_from(before.i((2, row, col))).unwrap() == blue, "value mismatch");
                 }
             }
 

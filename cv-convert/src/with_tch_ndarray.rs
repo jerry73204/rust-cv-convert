@@ -137,7 +137,7 @@ impl<A, D> TryFromCv<tch::Tensor> for nd::Array<A, D>
 where
     D: nd::Dimension,
     A: tch::kind::Element,
-    Vec<A>: From<tch::Tensor>,
+    Vec<A>: TryFrom<tch::Tensor, Error = tch::TchError>,
     Vec<i64>: ToNdArrayShape<D, Error = Error>,
 {
     type Error = Error;
@@ -152,7 +152,7 @@ where
         );
 
         let shape = from.size();
-        let elems = Vec::<A>::from(from);
+        let elems = Vec::<A>::try_from(from.flatten(0, -1))?;
         let array_shape = shape.to_ndarray_shape()?;
         let array = Self::from_shape_vec(array_shape, elems)?;
         Ok(array)
@@ -163,7 +163,7 @@ impl<A, D> TryFromCv<&tch::Tensor> for nd::Array<A, D>
 where
     D: nd::Dimension,
     A: tch::kind::Element,
-    Vec<A>: From<tch::Tensor>,
+    Vec<A>: TryFrom<tch::Tensor, Error = tch::TchError>,
     Vec<i64>: ToNdArrayShape<D, Error = Error>,
 {
     type Error = Error;
@@ -219,11 +219,11 @@ mod tests {
             let s1 = 4;
             let s2 = 5;
 
-            let tensor = tch::Tensor::randn(&[s0, s1, s2], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1, s2], tch::kind::FLOAT_CPU);
             let array: nd::ArrayD<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
-                let lhs = f32::from(tensor.i((i0, i1, i2)));
+                let lhs: f32 = tensor.i((i0, i1, i2)).try_into().unwrap();
                 let rhs = array[[i0 as usize, i1 as usize, i2 as usize]];
                 lhs == rhs
             });
@@ -233,9 +233,9 @@ mod tests {
 
         // Array0
         {
-            let tensor = tch::Tensor::randn(&[], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([], tch::kind::FLOAT_CPU);
             let array: nd::Array0<f32> = (&tensor).try_into_cv()?;
-            let lhs = f32::from(tensor);
+            let lhs: f32 = tensor.try_into().unwrap();
             let rhs = array[()];
             ensure!(lhs == rhs, "value mismatch");
         }
@@ -243,11 +243,11 @@ mod tests {
         // Array1
         {
             let s0 = 10;
-            let tensor = tch::Tensor::randn(&[s0], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0], tch::kind::FLOAT_CPU);
             let array: nd::Array1<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = (0..s0).all(|ind| {
-                let lhs = f32::from(tensor.i((ind,)));
+                let lhs: f32 = tensor.i((ind,)).try_into().unwrap();
                 let rhs = array[ind as usize];
                 lhs == rhs
             });
@@ -260,11 +260,11 @@ mod tests {
             let s0 = 3;
             let s1 = 5;
 
-            let tensor = tch::Tensor::randn(&[s0, s1], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1], tch::kind::FLOAT_CPU);
             let array: nd::Array2<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1).all(|(i0, i1)| {
-                let lhs = f32::from(tensor.i((i0, i1)));
+                let lhs: f32 = tensor.i((i0, i1)).try_into().unwrap();
                 let rhs = array[[i0 as usize, i1 as usize]];
                 lhs == rhs
             });
@@ -278,11 +278,11 @@ mod tests {
             let s1 = 5;
             let s2 = 7;
 
-            let tensor = tch::Tensor::randn(&[s0, s1, s2], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1, s2], tch::kind::FLOAT_CPU);
             let array: nd::Array3<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
-                let lhs = f32::from(tensor.i((i0, i1, i2)));
+                let lhs: f32 = tensor.i((i0, i1, i2)).try_into().unwrap();
                 let rhs = array[[i0 as usize, i1 as usize, i2 as usize]];
                 lhs == rhs
             });
@@ -297,12 +297,12 @@ mod tests {
             let s2 = 7;
             let s3 = 11;
 
-            let tensor = tch::Tensor::randn(&[s0, s1, s2, s3], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1, s2, s3], tch::kind::FLOAT_CPU);
             let array: nd::Array4<f32> = (&tensor).try_into_cv()?;
 
             let is_correct =
                 itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3).all(|(i0, i1, i2, i3)| {
-                    let lhs = f32::from(tensor.i((i0, i1, i2, i3)));
+                    let lhs: f32 = tensor.i((i0, i1, i2, i3)).try_into().unwrap();
                     let rhs = array[[i0 as usize, i1 as usize, i2 as usize, i3 as usize]];
                     lhs == rhs
                 });
@@ -318,12 +318,12 @@ mod tests {
             let s3 = 11;
             let s4 = 13;
 
-            let tensor = tch::Tensor::randn(&[s0, s1, s2, s3, s4], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1, s2, s3, s4], tch::kind::FLOAT_CPU);
             let array: nd::Array5<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3, 0..s4).all(
                 |(i0, i1, i2, i3, i4)| {
-                    let lhs = f32::from(tensor.i((i0, i1, i2, i3, i4)));
+                    let lhs: f32 = tensor.i((i0, i1, i2, i3, i4)).try_into().unwrap();
                     let rhs = array[[
                         i0 as usize,
                         i1 as usize,
@@ -347,12 +347,12 @@ mod tests {
             let s4 = 13;
             let s5 = 17;
 
-            let tensor = tch::Tensor::randn(&[s0, s1, s2, s3, s4, s5], tch::kind::FLOAT_CPU);
+            let tensor = tch::Tensor::randn([s0, s1, s2, s3, s4, s5], tch::kind::FLOAT_CPU);
             let array: nd::Array6<f32> = (&tensor).try_into_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3, 0..s4, 0..s5).all(
                 |(i0, i1, i2, i3, i4, i5)| {
-                    let lhs = f32::from(tensor.i((i0, i1, i2, i3, i4, i5)));
+                    let lhs: f32 = tensor.i((i0, i1, i2, i3, i4, i5)).try_into().unwrap();
                     let rhs = array[[
                         i0 as usize,
                         i1 as usize,
@@ -392,7 +392,10 @@ mod tests {
 
         let is_value_correct = iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
             let lhs = array[(i2, i1, i0)];
-            let rhs = f32::from(tensor.i((i2 as i64, i1 as i64, i0 as i64)));
+            let rhs: f32 = tensor
+                .i((i2 as i64, i1 as i64, i0 as i64))
+                .try_into()
+                .unwrap();
             lhs == rhs
         });
         ensure!(is_value_correct, "value mismatch");
