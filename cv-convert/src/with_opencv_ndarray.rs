@@ -12,7 +12,7 @@ where
     type Error = anyhow::Error;
 
     fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
-        let src_shape = from.shape();
+        let src_shape = from.size_with_depth();
         let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
         let array = array.into_dimensionality()?;
         Ok(array)
@@ -27,7 +27,7 @@ where
     type Error = anyhow::Error;
 
     fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
-        let src_shape = from.shape();
+        let src_shape = from.size_with_depth();
         let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
         let array = array.into_dimensionality()?;
         let array = array.into_owned();

@@ -48,7 +48,11 @@ mod mat_ext {
     use super::*;
 
     pub trait MatExt {
-        fn shape(&self) -> Vec<usize>;
+        fn size_with_depth(&self) -> Vec<usize>;
+
+        fn numel(&self) -> usize {
+            self.size_with_depth().iter().product()
+        }
 
         fn as_slice<T>(&self) -> Result<&[T]>
         where
@@ -69,12 +73,11 @@ mod mat_ext {
     }
 
     impl MatExt for core_cv::Mat {
-        fn shape(&self) -> Vec<usize> {
-            self.mat_size()
-                .iter()
-                .map(|&dim| dim as usize)
-                .chain([self.channels() as usize])
-                .collect()
+        fn size_with_depth(&self) -> Vec<usize> {
+            let size = self.mat_size();
+            let size = size.iter().map(|&dim| dim as usize);
+            let channels = self.channels() as usize;
+            size.chain([channels]).collect()
         }
 
         fn as_slice<T>(&self) -> Result<&[T]>
@@ -84,7 +87,7 @@ mod mat_ext {
             ensure!(self.depth() == T::DEPTH, "element type mismatch");
             ensure!(self.is_continuous(), "Mat data must be continuous");
 
-            let numel = self.shape().iter().product();
+            let numel = self.numel();
             let ptr = self.ptr(0)? as *const T;
 
             let slice = unsafe { slice::from_raw_parts(ptr, numel) };
