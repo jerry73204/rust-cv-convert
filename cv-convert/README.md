@@ -26,15 +26,12 @@ version = 'x.y.z'  # Please look up the recent version on crates.io
 default-features = false
 features = [
     'image_0-24',
-    'opencv_0-70',
-    'tch_0-8',
-    'nalgebra_0-31',
+    'opencv_0-84',
+    'tch_0-13',
+    'nalgebra_0-32',
     'ndarray_0-15',
 ]
 ```
-
-The `full` feature was available before 0.20 but was removed since
-0.21 to avoid bloating and surprising dependency update.
 
 The minimum supported `rustc` is 1.51. You may use older versions of
 the crate (>=0.6) in order to use `rustc` versions that do not support
@@ -44,6 +41,14 @@ const-generics.
 
 ### opencv
 
+- `opencv_0-84`
+- `opencv_0-83`
+- `opencv_0-82`
+- `opencv_0-81`
+- `opencv_0-80`
+- `opencv_0-79`
+- `opencv_0-78`
+- `opencv_0-77`
 - `opencv_0-76`
 - `opencv_0-75`
 - `opencv_0-74`
@@ -84,7 +89,7 @@ const-generics.
 
 ### tch
 
-- `tch_0-10`
+- `tch_0-13`
 
 ## Usage
 
