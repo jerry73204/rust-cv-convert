@@ -101,6 +101,10 @@
 //!
 //! - &[Array](ndarray::Array) ->? [Tensor](tch::Tensor)
 //!
+//! ## ndarray -> opencv
+//!
+//! - &[Array](ndarray::Array) ->? [Mat](opencv::core::Mat)
+//!
 //! ## image -> tch
 //!
 //! - [(&)ImageBuffer](image::ImageBuffer) ->? [TchTensorAsImage]
