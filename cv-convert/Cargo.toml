@@ -17,25 +17,25 @@ features = ['docs-only']
 default = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-84',
-    'tch_0-13',
+    'opencv_0-85',
+    'tch_0-14',
     'nalgebra_0-32',
     'ndarray_0-15',
 ]
 docs-only = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-84',
-    'tch_0-13',
+    'opencv_0-85',
+    'tch_0-14',
     'nalgebra_0-32',
     'ndarray_0-15',
-    'tch_0-13/doc-only',
+    'tch_0-14/doc-only',
 ]
 
 [dev-dependencies]
 approx = '0.5.1'
-itertools = '0.10.3'
-rand = '0.8.4'
+itertools = '0.11.0'
+rand = '0.8.5'
 
 [dependencies]
 anyhow = '1.0.53'
@@ -261,6 +261,13 @@ default-features = false
 features = ['calib3d']
 optional = true
 
+[dependencies.opencv_0-85]
+version = '0.85'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
 [dependencies.ndarray_0-15]
 version = '0.15'
 package = 'ndarray'
@@ -268,8 +275,8 @@ default-features = true
 features = []
 optional = true
 
-[dependencies.tch_0-13]
-version = '0.13'
+[dependencies.tch_0-14]
+version = '0.14'
 package = 'tch'
 default-features = true
 features = []
