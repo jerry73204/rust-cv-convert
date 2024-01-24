@@ -17,7 +17,7 @@ features = ['docs-only']
 default = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-85',
+    'opencv_0-88',
     'tch_0-14',
     'nalgebra_0-32',
     'ndarray_0-15',
@@ -25,7 +25,7 @@ default = [
 docs-only = [
     'image_0-24',
     'imageproc_0-23',
-    'opencv_0-85',
+    'opencv_0-88',
     'tch_0-14',
     'nalgebra_0-32',
     'ndarray_0-15',
@@ -263,6 +263,13 @@ optional = true
 
 [dependencies.opencv_0-85]
 version = '0.85'
+package = 'opencv'
+default-features = false
+features = ['calib3d']
+optional = true
+
+[dependencies.opencv_0-88]
+version = '0.88'
 package = 'opencv'
 default-features = false
 features = ['calib3d']

@@ -26,7 +26,7 @@ version = 'x.y.z'  # Please look up the recent version on crates.io
 default-features = false
 features = [
     'image_0-24',
-    'opencv_0-84',
+    'opencv_0-88',
     'tch_0-13',
     'nalgebra_0-32',
     'ndarray_0-15',
@@ -41,6 +41,8 @@ const-generics.
 
 ### opencv
 
+- `opencv_0-88`
+- `opencv_0-85`
 - `opencv_0-84`
 - `opencv_0-83`
 - `opencv_0-82`
