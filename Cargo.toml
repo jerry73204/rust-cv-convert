@@ -2,5 +2,4 @@
 resolver = "2"
 members = [
     "cv-convert",
-    "cv-convert-generate",
 ]
