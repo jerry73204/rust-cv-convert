@@ -39,7 +39,12 @@ slice-of-array = '0.3.1'
 half = '2.3.1'
 image = { version = "0.24", optional = true }
 imageproc = { version = "0.23", optional = true }
-opencv = { version = "0.85", optional = true }
 tch = { version = "0.14", optional = true }
 nalgebra = { version = "0.32", optional = true }
 ndarray = { version = "0.15", optional = true }
+
+[dependencies.opencv]
+version = "0.85"
+default-features = false
+features = ["calib3d"]
+optional = true
