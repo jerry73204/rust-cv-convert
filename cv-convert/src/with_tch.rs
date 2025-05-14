@@ -1,4 +1,3 @@
-use crate::tch;
 use crate::{common::*, FromCv, TryFromCv};
 use slice_of_array::prelude::*;
 

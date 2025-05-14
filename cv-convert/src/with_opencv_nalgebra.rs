@@ -1,5 +1,5 @@
-use crate::nalgebra::{self as na, geometry as geo};
-use crate::opencv::{calib3d, core as core_cv, prelude::*};
+use nalgebra::{self as na, geometry as geo};
+use opencv::{calib3d, core as core_cv, prelude::*};
 use crate::{common::*, FromCv, TryFromCv, TryIntoCv};
 
 // Note for future maintainers: Since the matrixes need to accommodate any size Matrix, we are using na::OMatrix instead of SMatrix.

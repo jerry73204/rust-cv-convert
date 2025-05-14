@@ -1,5 +1,4 @@
-use crate::opencv::{core as cv, prelude::*};
-use crate::tch;
+use opencv::{core as cv, prelude::*};
 use crate::{common::*, TchTensorAsImage, TchTensorImageShape, TryFromCv, TryIntoCv};
 use std::borrow::Cow;
 

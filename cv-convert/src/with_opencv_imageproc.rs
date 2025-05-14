@@ -1,5 +1,4 @@
-use crate::imageproc;
-use crate::opencv::core as core_cv;
+use opencv::core as core_cv;
 use crate::FromCv;
 
 impl<T> FromCv<&imageproc::point::Point<T>> for core_cv::Point_<T>

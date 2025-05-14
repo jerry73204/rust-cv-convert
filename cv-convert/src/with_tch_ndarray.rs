@@ -1,5 +1,4 @@
-use crate::ndarray as nd;
-use crate::tch;
+use ndarray as nd;
 use crate::{common::*, FromCv, TryFromCv};
 
 use to_ndarray_shape::*;

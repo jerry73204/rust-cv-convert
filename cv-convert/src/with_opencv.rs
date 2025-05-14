@@ -1,4 +1,4 @@
-use crate::opencv::{core as core_cv, prelude::*};
+use opencv::{core as core_cv, prelude::*};
 use crate::{common::*, TryFromCv};
 use half::f16;
 

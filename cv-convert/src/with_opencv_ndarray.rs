@@ -1,5 +1,5 @@
-use crate::ndarray as nd;
-use crate::opencv::{core as cv, prelude::*};
+use ndarray as nd;
+use opencv::{core as cv, prelude::*};
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
 use crate::{common::*, TryFromCv, TryIntoCv};

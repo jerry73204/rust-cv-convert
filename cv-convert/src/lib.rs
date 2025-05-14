@@ -211,32 +211,32 @@ mod macros;
 use macros::*;
 
 // modules
-has_opencv! {
+if_opencv! {
     mod with_opencv;
     pub use with_opencv::*;
 }
 
-has_tch! {
+if_tch! {
     mod with_tch;
     pub use with_tch::*;
 }
 
-has_tch! {
-    has_image! {
+if_tch! {
+    if_image! {
         mod with_tch_image;
         pub use with_tch_image::*;
     }
 }
 
-has_tch! {
-    has_ndarray! {
+if_tch! {
+    if_ndarray! {
         mod with_tch_ndarray;
         pub use with_tch_ndarray::*;
     }
 }
 
-has_image! {
-    has_opencv! {
+if_image! {
+    if_opencv! {
         #[cfg(feature = "image_0-23")]
         mod with_opencv_image_0_23;
         #[cfg(feature = "image_0-23")]
@@ -250,33 +250,30 @@ has_image! {
     }
 }
 
-has_imageproc! {
-    has_opencv! {
+if_imageproc! {
+    if_opencv! {
         mod with_opencv_imageproc;
         pub use with_opencv_imageproc::*;
     }
 }
 
-has_nalgebra! {
-    has_opencv! {
+if_nalgebra! {
+    if_opencv! {
         mod with_opencv_nalgebra;
         pub use with_opencv_nalgebra::*;
     }
 }
 
-has_tch! {
-    has_opencv! {
+if_tch! {
+    if_opencv! {
         mod with_opencv_tch;
         pub use with_opencv_tch::*;
     }
 }
 
-has_opencv! {
-    has_ndarray! {
+if_opencv! {
+    if_ndarray! {
         mod with_opencv_ndarray;
         pub use with_opencv_ndarray::*;
     }
 }
-
-/* Include generated code */
-include!("../generated/lib.rs.snipplet");
