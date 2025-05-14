@@ -2,8 +2,16 @@
 mod with_image_0_23 {
     use crate::image;
     use crate::tch;
-    use crate::{common::*, FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
+    use crate::{FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
+    use anyhow::{bail, ensure, Error, Result};
     use std::ops::Deref;
+    use std::{
+        borrow::Borrow,
+        iter, mem,
+        mem::ManuallyDrop,
+        ops::{Deref, DerefMut},
+        ptr, slice,
+    };
 
     impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
@@ -14,8 +22,11 @@ mod with_image_0_23 {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
             let channels = P::CHANNEL_COUNT;
-            let tensor =
-                tch::Tensor::from_slice(&*from).view([width as i64, height as i64, channels as i64]);
+            let tensor = tch::Tensor::from_slice(&*from).view([
+                width as i64,
+                height as i64,
+                channels as i64,
+            ]);
             TchTensorAsImage {
                 tensor,
                 kind: TchTensorImageShape::Whc,
@@ -66,8 +77,16 @@ mod with_image_0_23 {
 mod with_image_0_24 {
     use crate::image;
     use crate::tch;
-    use crate::{common::*, FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
+    use crate::{FromCv, IntoCv, TchTensorAsImage, TchTensorImageShape, TryFromCv};
     use std::ops::Deref;
+    use anyhow::{bail, ensure, Error, Result};
+    use std::{
+	borrow::Borrow,
+	iter, mem,
+	mem::ManuallyDrop,
+	ops::{Deref, DerefMut},
+	ptr, slice,
+    };
 
     impl<P, Container> FromCv<&image::ImageBuffer<P, Container>> for TchTensorAsImage
     where
@@ -78,8 +97,11 @@ mod with_image_0_24 {
         fn from_cv(from: &image::ImageBuffer<P, Container>) -> Self {
             let (width, height) = from.dimensions();
             let channels = P::CHANNEL_COUNT;
-            let tensor =
-                tch::Tensor::from_slice(&*from).view([width as i64, height as i64, channels as i64]);
+            let tensor = tch::Tensor::from_slice(&*from).view([
+                width as i64,
+                height as i64,
+                channels as i64,
+            ]);
             TchTensorAsImage {
                 tensor,
                 kind: TchTensorImageShape::Whc,

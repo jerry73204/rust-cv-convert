@@ -1,6 +1,12 @@
+use crate::{TchTensorAsImage, TchTensorImageShape, TryFromCv, TryIntoCv};
+use anyhow::{bail, ensure, Error, Result};
 use opencv::{core as cv, prelude::*};
-use crate::{common::*, TchTensorAsImage, TchTensorImageShape, TryFromCv, TryIntoCv};
 use std::borrow::Cow;
+use std::{
+    mem::ManuallyDrop,
+    ops::{Deref, DerefMut},
+    slice,
+};
 
 use utils::*;
 mod utils {
@@ -372,12 +378,18 @@ mod tests {
                 for col in 0..width {
                     let pixel: &cv::Vec3f = mat.at_2d(row as i32, col as i32)?;
                     let [red, green, blue] = **pixel;
-                    ensure!(f32::try_from(before.i((0, row, col))).unwrap() == red, "value mismatch");
+                    ensure!(
+                        f32::try_from(before.i((0, row, col))).unwrap() == red,
+                        "value mismatch"
+                    );
                     ensure!(
                         f32::try_from(before.i((1, row, col))).unwrap() == green,
                         "value mismatch"
                     );
-                    ensure!(f32::try_from(before.i((2, row, col))).unwrap() == blue, "value mismatch");
+                    ensure!(
+                        f32::try_from(before.i((2, row, col))).unwrap() == blue,
+                        "value mismatch"
+                    );
                 }
             }
 

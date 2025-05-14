@@ -26,6 +26,8 @@ default = [
 docs-only = [
     'tch/doc-only',
 ]
+image_0-23 = []
+image_0-24 = []
 
 [dev-dependencies]
 approx = '0.5.1'

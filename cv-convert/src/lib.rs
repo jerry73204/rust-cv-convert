@@ -198,8 +198,6 @@
 //! by default to avoid bloating. Add opencv dependency to your
 //! project Cargo.toml to enable default modules in your project.
 
-mod common;
-
 mod traits;
 pub use traits::*;
 
@@ -213,17 +211,20 @@ use macros::*;
 // modules
 if_opencv! {
     mod with_opencv;
+    #[allow(unused)]
     pub use with_opencv::*;
 }
 
 if_tch! {
     mod with_tch;
+    #[allow(unused)]
     pub use with_tch::*;
 }
 
 if_tch! {
     if_image! {
         mod with_tch_image;
+    #[allow(unused)]
         pub use with_tch_image::*;
     }
 }
@@ -231,6 +232,7 @@ if_tch! {
 if_tch! {
     if_ndarray! {
         mod with_tch_ndarray;
+    #[allow(unused)]
         pub use with_tch_ndarray::*;
     }
 }
@@ -240,11 +242,13 @@ if_image! {
         #[cfg(feature = "image_0-23")]
         mod with_opencv_image_0_23;
         #[cfg(feature = "image_0-23")]
+    #[allow(unused)]
         pub use with_opencv_image_0_23::*;
 
         #[cfg(feature = "image_0-24")]
         mod with_opencv_image_0_24;
         #[cfg(feature = "image_0-24")]
+    #[allow(unused)]
         pub use with_opencv_image_0_24::*;
 
     }
@@ -253,6 +257,7 @@ if_image! {
 if_imageproc! {
     if_opencv! {
         mod with_opencv_imageproc;
+    #[allow(unused)]
         pub use with_opencv_imageproc::*;
     }
 }
@@ -260,6 +265,7 @@ if_imageproc! {
 if_nalgebra! {
     if_opencv! {
         mod with_opencv_nalgebra;
+    #[allow(unused)]
         pub use with_opencv_nalgebra::*;
     }
 }
@@ -267,6 +273,7 @@ if_nalgebra! {
 if_tch! {
     if_opencv! {
         mod with_opencv_tch;
+    #[allow(unused)]
         pub use with_opencv_tch::*;
     }
 }
@@ -274,6 +281,7 @@ if_tch! {
 if_opencv! {
     if_ndarray! {
         mod with_opencv_ndarray;
+    #[allow(unused)]
         pub use with_opencv_ndarray::*;
     }
 }
