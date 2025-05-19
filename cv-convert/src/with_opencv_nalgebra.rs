@@ -393,8 +393,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::nalgebra::{U2, U3};
-    use crate::opencv::core as core_cv;
+    use nalgebra::{U2, U3};
+    use opencv::core as core_cv;
     use crate::{IntoCv, TryIntoCv};
     use anyhow::Result;
     use approx::abs_diff_eq;

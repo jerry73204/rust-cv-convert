@@ -206,7 +206,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tch::{self, IndexOp};
+    use tch::{self, IndexOp};
     use crate::TryIntoCv;
     use itertools::{iproduct, izip};
     use rand::prelude::*;

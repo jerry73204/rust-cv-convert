@@ -39,8 +39,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::imageproc;
-    use crate::opencv::core as core_cv;
+    use opencv::core as core_cv;
     use crate::{FromCv, IntoCv};
     use anyhow::{ensure, Result};
     use approx::abs_diff_eq;

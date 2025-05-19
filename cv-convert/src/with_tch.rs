@@ -462,7 +462,6 @@ mod tensor_as_image {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tch;
     use crate::TryIntoCv;
     use rand::prelude::*;
 

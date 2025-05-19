@@ -1,9 +1,9 @@
-use anyhow::{Error, Result};
-use ndarray as nd;
-use opencv::{core as cv, prelude::*};
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
 use crate::{TryFromCv, TryIntoCv};
+use anyhow::{Error, Result};
+use ndarray as nd;
+use opencv::{core as cv, prelude::*};
 
 impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
 where
@@ -87,6 +87,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::ensure;
     use itertools::chain;
     use itertools::Itertools as _;
     use rand::prelude::*;

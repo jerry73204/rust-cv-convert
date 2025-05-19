@@ -296,7 +296,7 @@ impl TryFromCv<tch::Tensor> for cv::Mat {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tch::{self, IndexOp, Tensor};
+    use tch::{self, IndexOp, Tensor};
 
     // const EPSILON: f64 = 1e-8;
     const ROUNDS: usize = 1000;
