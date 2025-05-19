@@ -202,7 +202,7 @@ mod traits;
 pub use traits::*;
 
 pub mod prelude {
-    pub use crate::traits::{FromCv, IntoCv, TryFromCv, TryIntoCv};
+    pub use crate::traits::{FromCv, ToCv, TryFromCv, TryToCv};
 }
 
 mod macros;
@@ -260,15 +260,7 @@ if_tch! {
 
 if_image! {
     if_opencv! {
-        #[cfg(feature = "image_0-23")]
-        mod with_opencv_image_0_23;
-        #[cfg(feature = "image_0-23")]
-    #[allow(unused)]
-        pub use with_opencv_image_0_23::*;
-
-        #[cfg(feature = "image_0-24")]
         mod with_opencv_image_0_24;
-        #[cfg(feature = "image_0-24")]
     #[allow(unused)]
         pub use with_opencv_image_0_24::*;
 

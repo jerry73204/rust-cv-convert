@@ -1,26 +1,26 @@
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
-use crate::{TryFromCv, TryIntoCv};
+use crate::TryFromCv;
 use anyhow::{Error, Result};
 use ndarray as nd;
 use opencv::{core as cv, prelude::*};
 
-impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
-where
-    A: OpenCvElement,
-    D: nd::Dimension,
-{
-    type Error = anyhow::Error;
+// impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
+// where
+//     A: OpenCvElement,
+//     D: nd::Dimension,
+// {
+//     type Error = anyhow::Error;
 
-    fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
-        let src_shape = from.size_with_depth();
-        let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
-        let array = array.into_dimensionality()?;
-        Ok(array)
-    }
-}
+//     fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
+//         let src_shape = from.size_with_depth();
+//         let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
+//         let array = array.into_dimensionality()?;
+//         Ok(array)
+//     }
+// }
 
-impl<A, D> TryFromCv<&cv::Mat> for nd::Array<A, D>
+impl<A, D> TryFromCv<cv::Mat> for nd::Array<A, D>
 where
     A: OpenCvElement + Clone,
     D: nd::Dimension,
@@ -36,19 +36,7 @@ where
     }
 }
 
-impl<A, D> TryFromCv<cv::Mat> for nd::Array<A, D>
-where
-    A: OpenCvElement + Clone,
-    D: nd::Dimension,
-{
-    type Error = anyhow::Error;
-
-    fn try_from_cv(from: cv::Mat) -> Result<Self, Self::Error> {
-        (&from).try_into_cv()
-    }
-}
-
-impl<A, S, D> TryFromCv<&nd::ArrayBase<S, D>> for cv::Mat
+impl<A, S, D> TryFromCv<nd::ArrayBase<S, D>> for cv::Mat
 where
     A: cv::DataType,
     S: nd::RawData<Elem = A> + nd::Data,
@@ -71,21 +59,10 @@ where
     }
 }
 
-impl<A, S, D> TryFromCv<nd::ArrayBase<S, D>> for cv::Mat
-where
-    A: cv::DataType,
-    S: nd::RawData<Elem = A> + nd::Data,
-    D: nd::Dimension,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: nd::ArrayBase<S, D>) -> Result<Self> {
-        (&from).try_into_cv()
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::TryToCv;
+
     use super::*;
     use anyhow::ensure;
     use itertools::chain;
@@ -102,9 +79,9 @@ mod tests {
             let shape: Vec<usize> = (0..ndim).map(|_| rng.gen_range(1..=32)).collect();
 
             let in_mat = cv::Mat::new_randn_nd::<f32>(&shape)?;
-            let view: nd::ArrayViewD<f32> = (&in_mat).try_into_cv()?;
-            let array: nd::ArrayD<f32> = (&in_mat).try_into_cv()?;
-            let out_mat: cv::Mat = (&array).try_into_cv()?;
+            let view: nd::ArrayViewD<f32> = in_mat.try_as_ref_cv()?;
+            let array: nd::ArrayD<f32> = in_mat.try_to_cv()?;
+            let out_mat: cv::Mat = array.try_to_cv()?;
 
             shape
                 .iter()

@@ -123,7 +123,7 @@ mod mat_ext {
     }
 }
 
-impl<T> TryFromCv<&core_cv::Mat> for core_cv::Point_<T>
+impl<T> TryFromCv<core_cv::Mat> for core_cv::Point_<T>
 where
     T: core_cv::DataType,
 {
@@ -140,18 +140,7 @@ where
     }
 }
 
-impl<T> TryFromCv<core_cv::Mat> for core_cv::Point_<T>
-where
-    T: core_cv::DataType,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: core_cv::Mat) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<T> TryFromCv<&core_cv::Mat> for core_cv::Point3_<T>
+impl<T> TryFromCv<core_cv::Mat> for core_cv::Point3_<T>
 where
     T: core_cv::DataType,
 {
@@ -169,18 +158,7 @@ where
     }
 }
 
-impl<T> TryFromCv<core_cv::Mat> for core_cv::Point3_<T>
-where
-    T: core_cv::DataType,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: core_cv::Mat) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<T> TryFromCv<&core_cv::Point_<T>> for core_cv::Mat
+impl<T> TryFromCv<core_cv::Point_<T>> for core_cv::Mat
 where
     T: core_cv::DataType,
 {
@@ -193,18 +171,7 @@ where
     }
 }
 
-impl<T> TryFromCv<core_cv::Point_<T>> for core_cv::Mat
-where
-    T: core_cv::DataType,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: core_cv::Point_<T>) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<T> TryFromCv<&core_cv::Point3_<T>> for core_cv::Mat
+impl<T> TryFromCv<core_cv::Point3_<T>> for core_cv::Mat
 where
     T: core_cv::DataType,
 {
@@ -214,16 +181,5 @@ where
         let core_cv::Point3_ { x, y, z, .. } = *from;
         let mat = core_cv::Mat::from_slice(&[x, y, z])?;
         Ok(mat)
-    }
-}
-
-impl<T> TryFromCv<core_cv::Point3_<T>> for core_cv::Mat
-where
-    T: core_cv::DataType,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: core_cv::Point3_<T>) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
     }
 }

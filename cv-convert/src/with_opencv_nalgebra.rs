@@ -1,4 +1,4 @@
-use crate::{FromCv, TryFromCv, TryIntoCv};
+use crate::{FromCv, TryFromCv, TryToCv};
 use anyhow::{ensure, Error, Result};
 use nalgebra::{self as na, geometry as geo};
 use opencv::{calib3d, core as core_cv, prelude::*};
@@ -15,14 +15,6 @@ pub struct OpenCvPose<T> {
 impl TryFromCv<OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
     type Error = Error;
 
-    fn try_from_cv(pose: OpenCvPose<&core_cv::Point3d>) -> Result<Self> {
-        (&pose).try_into_cv()
-    }
-}
-
-impl TryFromCv<&OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
-    type Error = Error;
-
     fn try_from_cv(pose: &OpenCvPose<&core_cv::Point3d>) -> Result<Self> {
         let OpenCvPose { rvec, tvec } = *pose;
         let rotation = {
@@ -32,7 +24,7 @@ impl TryFromCv<&OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
             };
             let mut rotation_mat = core_cv::Mat::zeros(3, 3, core_cv::CV_64FC1)?.to_mat()?;
             calib3d::rodrigues(&rvec_mat, &mut rotation_mat, &mut core_cv::Mat::default())?;
-            let rotation_matrix: na::Matrix3<f64> = TryFromCv::try_from_cv(rotation_mat)?;
+            let rotation_matrix: na::Matrix3<f64> = TryFromCv::try_from_cv(&rotation_mat)?;
             geo::UnitQuaternion::from_matrix(&rotation_matrix)
         };
 
@@ -46,32 +38,16 @@ impl TryFromCv<&OpenCvPose<&core_cv::Point3d>> for geo::Isometry3<f64> {
     }
 }
 
-impl TryFromCv<&OpenCvPose<core_cv::Point3d>> for geo::Isometry3<f64> {
-    type Error = Error;
-
-    fn try_from_cv(from: &OpenCvPose<core_cv::Point3d>) -> Result<Self> {
-        let OpenCvPose { rvec, tvec } = from;
-        TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
-    }
-}
-
 impl TryFromCv<OpenCvPose<core_cv::Point3d>> for geo::Isometry3<f64> {
     type Error = Error;
 
-    fn try_from_cv(from: OpenCvPose<core_cv::Point3d>) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
+    fn try_from_cv(pose: &OpenCvPose<core_cv::Point3d>) -> Result<Self> {
+        let OpenCvPose { rvec, tvec } = pose;
+        OpenCvPose { rvec, tvec }.try_to_cv()
     }
 }
 
 impl TryFromCv<OpenCvPose<&core_cv::Mat>> for geo::Isometry3<f64> {
-    type Error = Error;
-
-    fn try_from_cv(from: OpenCvPose<&core_cv::Mat>) -> Result<Self> {
-        (&from).try_into_cv()
-    }
-}
-
-impl TryFromCv<&OpenCvPose<&core_cv::Mat>> for geo::Isometry3<f64> {
     type Error = Error;
 
     fn try_from_cv(from: &OpenCvPose<&core_cv::Mat>) -> Result<Self> {
@@ -81,30 +57,21 @@ impl TryFromCv<&OpenCvPose<&core_cv::Mat>> for geo::Isometry3<f64> {
         } = *from;
         let rvec = core_cv::Point3d::try_from_cv(rvec_mat)?;
         let tvec = core_cv::Point3d::try_from_cv(tvec_mat)?;
-        let isometry = TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })?;
+        let isometry = TryFromCv::try_from_cv(&OpenCvPose { rvec, tvec })?;
         Ok(isometry)
-    }
-}
-
-impl TryFromCv<&OpenCvPose<core_cv::Mat>> for geo::Isometry3<f64> {
-    type Error = Error;
-
-    fn try_from_cv(from: &OpenCvPose<core_cv::Mat>) -> Result<Self> {
-        let OpenCvPose { rvec, tvec } = from;
-        TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
     }
 }
 
 impl TryFromCv<OpenCvPose<core_cv::Mat>> for geo::Isometry3<f64> {
     type Error = Error;
 
-    fn try_from_cv(from: OpenCvPose<core_cv::Mat>) -> Result<Self> {
-        let OpenCvPose { rvec, tvec } = &from;
-        TryFromCv::try_from_cv(OpenCvPose { rvec, tvec })
+    fn try_from_cv(from: &OpenCvPose<core_cv::Mat>) -> Result<Self> {
+        let OpenCvPose { rvec, tvec } = from;
+        TryFromCv::try_from_cv(&OpenCvPose { rvec, tvec })
     }
 }
 
-impl<T> TryFromCv<&geo::Isometry3<T>> for OpenCvPose<core_cv::Point3_<T>>
+impl<T> TryFromCv<geo::Isometry3<T>> for OpenCvPose<core_cv::Point3_<T>>
 where
     T: core_cv::DataType + na::RealField,
 {
@@ -119,7 +86,7 @@ where
 
         let rvec = {
             let rotation_mat =
-                core_cv::Mat::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
+                core_cv::Mat::try_from_cv(&rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = core_cv::Mat::zeros(3, 1, core_cv::CV_64FC1)?.to_mat()?;
             calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             let rvec = core_cv::Point3_::new(
@@ -135,18 +102,7 @@ where
     }
 }
 
-impl<T> TryFromCv<geo::Isometry3<T>> for OpenCvPose<core_cv::Point3_<T>>
-where
-    T: core_cv::DataType + na::RealField,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: geo::Isometry3<T>) -> Result<OpenCvPose<core_cv::Point3_<T>>> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl TryFromCv<&geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
+impl TryFromCv<geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
     type Error = Error;
 
     fn try_from_cv(from: &geo::Isometry3<f64>) -> Result<OpenCvPose<core_cv::Mat>> {
@@ -158,7 +114,7 @@ impl TryFromCv<&geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
 
         let rvec = {
             let rotation_mat: Mat =
-                TryFromCv::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
+                TryFromCv::try_from_cv(&rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = core_cv::Mat::zeros(3, 1, core_cv::CV_64FC1)?.to_mat()?;
             calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             rvec_mat
@@ -169,15 +125,7 @@ impl TryFromCv<&geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
     }
 }
 
-impl TryFromCv<geo::Isometry3<f64>> for OpenCvPose<core_cv::Mat> {
-    type Error = Error;
-
-    fn try_from_cv(from: geo::Isometry3<f64>) -> Result<OpenCvPose<core_cv::Mat>> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
+impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
     type Error = Error;
 
     fn try_from_cv(from: &geo::Isometry3<f32>) -> Result<OpenCvPose<core_cv::Mat>> {
@@ -188,7 +136,7 @@ impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
         } = from;
 
         let rvec = {
-            let rotation_mat = Mat::try_from_cv(rotation.to_rotation_matrix().into_inner())?;
+            let rotation_mat = Mat::try_from_cv(&rotation.to_rotation_matrix().into_inner())?;
             let mut rvec_mat = Mat::zeros(3, 1, core_cv::CV_32FC1)?.to_mat()?;
             calib3d::rodrigues(&rotation_mat, &mut rvec_mat, &mut core_cv::Mat::default())?;
             rvec_mat
@@ -201,15 +149,7 @@ impl TryFromCv<&geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
     }
 }
 
-impl TryFromCv<geo::Isometry3<f32>> for OpenCvPose<core_cv::Mat> {
-    type Error = Error;
-
-    fn try_from_cv(from: geo::Isometry3<f32>) -> Result<OpenCvPose<core_cv::Mat>> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<N, R, C> TryFromCv<&core_cv::Mat> for na::OMatrix<N, R, C>
+impl<N, R, C> TryFromCv<core_cv::Mat> for na::OMatrix<N, R, C>
 where
     N: na::Scalar + core_cv::DataType,
     R: na::Dim,
@@ -248,21 +188,7 @@ where
     }
 }
 
-impl<N, R, C> TryFromCv<core_cv::Mat> for na::OMatrix<N, R, C>
-where
-    N: na::Scalar + core_cv::DataType,
-    R: na::Dim,
-    C: na::Dim,
-    na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, R, C>,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: core_cv::Mat) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<N, R, C, S> TryFromCv<&na::Matrix<N, R, C, S>> for core_cv::Mat
+impl<N, R, C, S> TryFromCv<na::Matrix<N, R, C, S>> for core_cv::Mat
 where
     N: na::Scalar + core_cv::DataType,
     R: na::Dim,
@@ -280,22 +206,7 @@ where
     }
 }
 
-impl<N, R, C, S> TryFromCv<na::Matrix<N, R, C, S>> for core_cv::Mat
-where
-    N: na::Scalar + core_cv::DataType,
-    R: na::Dim,
-    C: na::Dim,
-    S: na::base::storage::Storage<N, R, C>,
-    na::base::default_allocator::DefaultAllocator: na::base::allocator::Allocator<N, C, R>,
-{
-    type Error = Error;
-
-    fn try_from_cv(from: na::Matrix<N, R, C, S>) -> Result<Self> {
-        TryFromCv::try_from_cv(&from)
-    }
-}
-
-impl<T> FromCv<&na::Point2<T>> for core_cv::Point_<T>
+impl<T> FromCv<na::Point2<T>> for core_cv::Point_<T>
 where
     T: na::Scalar + Copy,
 {
@@ -304,16 +215,7 @@ where
     }
 }
 
-impl<T> FromCv<na::Point2<T>> for core_cv::Point_<T>
-where
-    T: na::Scalar + Copy,
-{
-    fn from_cv(from: na::Point2<T>) -> Self {
-        FromCv::from_cv(&from)
-    }
-}
-
-impl<T> FromCv<&core_cv::Point_<T>> for na::Point2<T>
+impl<T> FromCv<core_cv::Point_<T>> for na::Point2<T>
 where
     T: na::Scalar + Copy,
 {
@@ -322,16 +224,7 @@ where
     }
 }
 
-impl<T> FromCv<core_cv::Point_<T>> for na::Point2<T>
-where
-    T: na::Scalar + Copy,
-{
-    fn from_cv(from: core_cv::Point_<T>) -> Self {
-        FromCv::from_cv(&from)
-    }
-}
-
-impl<T> FromCv<&na::Point3<T>> for core_cv::Point3_<T>
+impl<T> FromCv<na::Point3<T>> for core_cv::Point3_<T>
 where
     T: na::Scalar + Copy,
 {
@@ -340,16 +233,7 @@ where
     }
 }
 
-impl<T> FromCv<na::Point3<T>> for core_cv::Point3_<T>
-where
-    T: na::Scalar + Copy,
-{
-    fn from_cv(from: na::Point3<T>) -> Self {
-        FromCv::from_cv(&from)
-    }
-}
-
-impl<T> FromCv<&core_cv::Point3_<T>> for na::Point3<T>
+impl<T> FromCv<core_cv::Point3_<T>> for na::Point3<T>
 where
     T: na::Scalar + Copy,
 {
@@ -358,16 +242,7 @@ where
     }
 }
 
-impl<T> FromCv<core_cv::Point3_<T>> for na::Point3<T>
-where
-    T: na::Scalar + Copy,
-{
-    fn from_cv(from: core_cv::Point3_<T>) -> Self {
-        FromCv::from_cv(&from)
-    }
-}
-
-impl<N, const D: usize> TryFromCv<&geo::Translation<N, D>> for core_cv::Mat
+impl<N, const D: usize> TryFromCv<geo::Translation<N, D>> for core_cv::Mat
 where
     N: na::Scalar + core_cv::DataType,
 {
@@ -379,25 +254,14 @@ where
     }
 }
 
-impl<N, const D: usize> TryFromCv<geo::Translation<N, D>> for core_cv::Mat
-where
-    N: na::Scalar + core_cv::DataType,
-{
-    type Error = Error;
-
-    fn try_from_cv(translation: geo::Translation<N, D>) -> Result<Self> {
-        TryFromCv::try_from_cv(&translation)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nalgebra::{U2, U3};
-    use opencv::core as core_cv;
-    use crate::{IntoCv, TryIntoCv};
+    use crate::{ToCv, TryToCv};
     use anyhow::Result;
     use approx::abs_diff_eq;
+    use nalgebra::{U2, U3};
+    use opencv::core as core_cv;
     use rand::prelude::*;
     use std::f64;
 
@@ -466,7 +330,7 @@ mod tests {
                         rng.gen(),
                     ],
                 );
-                let cv_mat: core_cv::Mat = (&na_mat).try_into_cv()?;
+                let cv_mat: core_cv::Mat = (&na_mat).try_to_cv()?;
                 ensure!(
                     abs_diff_eq!(cv_mat.at_2d(0, 0)?, na_mat.get((0, 0)).unwrap())
                         && abs_diff_eq!(cv_mat.at_2d(0, 1)?, na_mat.get((0, 1)).unwrap())
@@ -485,7 +349,7 @@ mod tests {
     fn matrix_nalgebra_to_opencv_test() -> Result<()> {
         let input = na::OMatrix::<i32, U3, U2>::from_row_slice(&[1, 2, 3, 4, 5, 6]);
         let (nrows, ncols) = input.shape();
-        let output = core_cv::Mat::try_from_cv(input)?;
+        let output: Mat = core_cv::Mat::try_from_cv(&input)?;
         let output_shape = output.size()?;
         ensure!(
             output.channels() == 1
@@ -500,7 +364,7 @@ mod tests {
     fn matrix_opencv_to_nalgebra_test() -> Result<()> {
         let input = Mat::from_slice_2d(&[&[1, 2, 3], &[4, 5, 6]])?;
         let input_shape = input.size()?;
-        let output = na::OMatrix::<i32, U2, U3>::try_from_cv(input)?;
+        let output = na::OMatrix::<i32, U2, U3>::try_from_cv(&input)?;
         ensure!(
             output.nrows() == input_shape.height as usize
                 && output.ncols() == input_shape.width as usize,
@@ -523,8 +387,8 @@ mod tests {
                 let translation = na::Translation3::new(rng.gen(), rng.gen(), rng.gen());
                 na::Isometry3::from_parts(translation, rotation)
             };
-            let pose = OpenCvPose::<Mat>::try_from_cv(orig_isometry)?;
-            let recovered_isometry = na::Isometry3::<f64>::try_from_cv(pose)?;
+            let pose = OpenCvPose::<Mat>::try_from_cv(&orig_isometry)?;
+            let recovered_isometry = na::Isometry3::<f64>::try_from_cv(&pose)?;
 
             ensure!(
                 (orig_isometry.to_homogeneous() - recovered_isometry.to_homogeneous()).norm()

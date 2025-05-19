@@ -1,5 +1,5 @@
-use crate::{TchTensorAsImage, TchTensorImageShape, TryFromCv, TryIntoCv};
-use anyhow::{bail, ensure, Error, Result};
+use crate::{TchTensorAsImage, TchTensorImageShape, TryFromCv};
+use anyhow::{bail, Error, Result};
 use opencv::{core as cv, prelude::*};
 use std::borrow::Cow;
 use std::{
@@ -121,41 +121,41 @@ mod tensor_from_mat {
     }
 }
 
-impl<'a> TryFromCv<&'a cv::Mat> for OpenCvMatAsTchTensor<'a> {
-    type Error = Error;
+// impl<'a> TryFromCv<&'a cv::Mat> for OpenCvMatAsTchTensor<'a> {
+//     type Error = Error;
 
-    fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
-        ensure!(from.is_continuous(), "non-continuous Mat is not supported");
+//     fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
+//         ensure!(from.is_continuous(), "non-continuous Mat is not supported");
 
-        let TchTensorMeta { kind, shape } = opencv_mat_to_tch_meta_nd(&from)?;
-        let strides = {
-            let mut strides: Vec<_> = shape
-                .iter()
-                .rev()
-                .cloned()
-                .scan(1, |prev, dim| {
-                    let stride = *prev;
-                    *prev *= dim;
-                    Some(stride)
-                })
-                .collect();
-            strides.reverse();
-            strides
-        };
+//         let TchTensorMeta { kind, shape } = opencv_mat_to_tch_meta_nd(&from)?;
+//         let strides = {
+//             let mut strides: Vec<_> = shape
+//                 .iter()
+//                 .rev()
+//                 .cloned()
+//                 .scan(1, |prev, dim| {
+//                     let stride = *prev;
+//                     *prev *= dim;
+//                     Some(stride)
+//                 })
+//                 .collect();
+//             strides.reverse();
+//             strides
+//         };
 
-        let tensor = unsafe {
-            let ptr = from.ptr(0)? as *const u8;
-            tch::Tensor::f_from_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
-        };
+//         let tensor = unsafe {
+//             let ptr = from.ptr(0)? as *const u8;
+//             tch::Tensor::f_from_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
+//         };
 
-        Ok(Self {
-            tensor: ManuallyDrop::new(tensor),
-            _mat: from,
-        })
-    }
-}
+//         Ok(Self {
+//             tensor: ManuallyDrop::new(tensor),
+//             _mat: from,
+//         })
+//     }
+// }
 
-impl TryFromCv<&cv::Mat> for TchTensorAsImage {
+impl TryFromCv<cv::Mat> for TchTensorAsImage {
     type Error = Error;
 
     fn try_from_cv(mat: &cv::Mat) -> Result<Self, Self::Error> {
@@ -187,15 +187,7 @@ impl TryFromCv<&cv::Mat> for TchTensorAsImage {
     }
 }
 
-impl TryFromCv<cv::Mat> for TchTensorAsImage {
-    type Error = Error;
-
-    fn try_from_cv(from: cv::Mat) -> Result<Self, Self::Error> {
-        (&from).try_into_cv()
-    }
-}
-
-impl TryFromCv<&cv::Mat> for tch::Tensor {
+impl TryFromCv<cv::Mat> for tch::Tensor {
     type Error = Error;
 
     fn try_from_cv(mat: &cv::Mat) -> Result<Self, Self::Error> {
@@ -220,15 +212,7 @@ impl TryFromCv<&cv::Mat> for tch::Tensor {
     }
 }
 
-impl TryFromCv<cv::Mat> for tch::Tensor {
-    type Error = Error;
-
-    fn try_from_cv(from: cv::Mat) -> Result<Self, Self::Error> {
-        (&from).try_into_cv()
-    }
-}
-
-impl TryFromCv<&TchTensorAsImage> for cv::Mat {
+impl TryFromCv<TchTensorAsImage> for cv::Mat {
     type Error = Error;
 
     fn try_from_cv(from: &TchTensorAsImage) -> Result<Self, Self::Error> {
@@ -264,15 +248,7 @@ impl TryFromCv<&TchTensorAsImage> for cv::Mat {
     }
 }
 
-impl TryFromCv<TchTensorAsImage> for cv::Mat {
-    type Error = Error;
-
-    fn try_from_cv(from: TchTensorAsImage) -> Result<Self, Self::Error> {
-        (&from).try_into_cv()
-    }
-}
-
-impl TryFromCv<&tch::Tensor> for cv::Mat {
+impl TryFromCv<tch::Tensor> for cv::Mat {
     type Error = Error;
 
     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
@@ -282,14 +258,6 @@ impl TryFromCv<&tch::Tensor> for cv::Mat {
         let typ = cv::CV_MAKETYPE(depth, 1);
         let mat = unsafe { cv::Mat::new_nd_with_data(&size, typ, tensor.data_ptr(), None)? };
         Ok(mat)
-    }
-}
-
-impl TryFromCv<tch::Tensor> for cv::Mat {
-    type Error = Error;
-
-    fn try_from_cv(from: tch::Tensor) -> Result<Self, Self::Error> {
-        (&from).try_into_cv()
     }
 }
 
