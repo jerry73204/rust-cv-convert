@@ -209,13 +209,34 @@ mod macros;
 use macros::*;
 
 // modules
+
+if_image! {
+    pub use image;
+}
+
+if_imageproc! {
+    pub use imageproc;
+}
+
+if_nalgebra! {
+    pub use nalgebra;
+}
+
+if_ndarray! {
+    pub use ndarray;
+}
+
 if_opencv! {
+    pub use opencv;
+
     mod with_opencv;
     #[allow(unused)]
     pub use with_opencv::*;
 }
 
 if_tch! {
+    pub use tch;
+
     mod with_tch;
     #[allow(unused)]
     pub use with_tch::*;
