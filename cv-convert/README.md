@@ -93,28 +93,28 @@ const-generics.
 
 ## Usage
 
-The crate provides `FromCv`, `TryFromCv`, `IntoCv`, `TryIntoCv` traits, which are similar to standard library's `From` and `Into`.
+The crate provides `ToCv`, `TryToCv`, `AsRefCv`, `TryAsRefCv` traits, which are similar to standard library's `Into` and `TryInto`.
 
 ```rust
-use cv_convert::{FromCv, IntoCv, TryFromCv, TryIntoCv};
+use cv_convert::{ToCv, TryToCv};
 use nalgebra as na;
 use opencv as cv;
 
-// FromCv
+// ToCv - infallible conversion
 let cv_point = cv::core::Point2d::new(1.0, 3.0);
-let na_points = na::Point2::<f64>::from_cv(&cv_point);
+let na_point: na::Point2<f64> = cv_point.to_cv();
 
-// IntoCv
-let cv_point = cv::core::Point2d::new(1.0, 3.0);
-let na_points: na::Point2<f64> = cv_point.into_cv();
+// ToCv - the other direction
+let na_point = na::Point2::<f64>::new(1.0, 3.0);
+let cv_point: cv::core::Point2d = na_point.to_cv();
 
-// TryFromCv
+// TryToCv - fallible conversion
 let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-let cv_mat = cv::core::Mat::try_from_cv(&na_mat)?;
+let cv_mat = na_mat.try_to_cv()?;
 
-// TryIntoCv
-let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-let cv_mat: cv::core::Mat = na_mat.try_into_cv()?;
+// TryToCv - the other direction
+let cv_mat = cv::core::Mat::from_slice_2d(&[&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]])?;
+let na_mat: na::DMatrix<f64> = cv_mat.try_to_cv()?;
 ```
 
 ## Contribute to this Project
@@ -146,19 +146,25 @@ the code in `with_opencv_image.rs` because it is a conversion among
 opencv and image crates.
 
 
-Choose `FromCv` or `TryFromCv` trait and add the trait implementation
+Choose `ToCv` or `TryToCv` trait and add the trait implementation
 on `image::DynamicImage` and `opencv::Mat` types. The choice of
-`FromCv` or `TryFromCv` depends on whether the conversion is fallible
+`ToCv` or `TryToCv` depends on whether the conversion is fallible
 or not.
 
 ```rust
-impl FromCv<&image::DynamicImage> for opencv::Mat { /* omit */ }
-impl FromCv<&opencv::Mat> for image::DynamicImage { /* omit */ }
+impl ToCv<opencv::Mat> for image::DynamicImage { /* omit */ }
+impl ToCv<image::DynamicImage> for opencv::Mat { /* omit */ }
 
 // or
 
-impl TryFromCv<&image::DynamicImage> for opencv::Mat { /* omit */ }
-impl TryFromCv<&opencv::Mat> for image::DynamicImage { /* omit */ }
+impl TryToCv<opencv::Mat> for image::DynamicImage { 
+    type Error = SomeError;
+    fn try_to_cv(&self) -> Result<opencv::Mat, Self::Error> { /* omit */ }
+}
+impl TryToCv<image::DynamicImage> for opencv::Mat { 
+    type Error = SomeError;
+    fn try_to_cv(&self) -> Result<image::DynamicImage, Self::Error> { /* omit */ }
+}
 
 #[cfg(test)]
 mod tests {

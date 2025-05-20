@@ -31,31 +31,31 @@
 //!
 //! # Traits
 //!
-//! The traits [FromCv] and [IntoCv] provide `.from_cv()` and `.into_cv()`, and
-//! traits [TryFromCv] and [TryIntoCv] provide `.try_from_cv()` and `.try_into_cv()` methods respectively.
-//! Just like std's [From], [Into], [TryFromCv] and [TryIntoCv].
+//! The trait [ToCv] provides `.to_cv()` method for infallible conversions, and
+//! [TryToCv] provides `.try_to_cv()` method for fallible conversions.
+//! Just like std's [Into] and [TryInto] traits.
 //!
 //! ```rust
 //! # use cv_convert::{nalgebra, opencv};
-//! use cv_convert::{FromCv, IntoCv, TryFromCv, TryIntoCv};
+//! use cv_convert::{ToCv, TryToCv};
 //! use nalgebra as na;
 //! use opencv as cv;
 //!
-//! // FromCv
+//! // ToCv - infallible conversion
 //! let cv_point = cv::core::Point2d::new(1.0, 3.0);
-//! let na_points = na::Point2::<f64>::from_cv(&cv_point);
+//! let na_point: na::Point2<f64> = cv_point.to_cv();
 //!
-//! // IntoCv
-//! let cv_point = cv::core::Point2d::new(1.0, 3.0);
-//! let na_points: na::Point2<f64> = cv_point.into_cv();
+//! // ToCv - the other direction
+//! let na_point = na::Point2::<f64>::new(1.0, 3.0);
+//! let cv_point: cv::core::Point2d = na_point.to_cv();
 //!
-//! // TryFromCv
+//! // TryToCv - fallible conversion
 //! let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-//! let cv_mat = cv::core::Mat::try_from_cv(&na_mat).unwrap();
+//! let cv_mat = na_mat.try_to_cv().unwrap();
 //!
-//! // TryIntoCv
-//! let na_mat = na::DMatrix::from_vec(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-//! let cv_mat: cv::core::Mat = na_mat.try_into_cv().unwrap();
+//! // TryToCv - the other direction
+//! let cv_mat = cv::core::Mat::from_slice_2d(&[&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]]).unwrap();
+//! let na_mat: na::DMatrix<f64> = cv_mat.try_to_cv().unwrap();
 //! ```
 //!
 //!
@@ -63,8 +63,8 @@
 //!
 //! The notations are used for simplicity.
 //!
-//! - `S -> T` suggests the conversion is defined by non-fallible [FromCv].
-//! - `S ->? T` suggests the conversion is defined by fallible [TryFromCv].
+//! - `S -> T` suggests the conversion is defined by non-fallible [ToCv].
+//! - `S ->? T` suggests the conversion is defined by fallible [TryToCv].
 //! - `(&)T` means the type can be either owned or borrowed.
 //! - `&'a S -> &'a T` suggests that the target type borrows the source type.
 //!
