@@ -1,7 +1,6 @@
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
-use crate::TryAsRefCv;
-use crate::TryFromCv;
+use crate::{TryAsRefCv, TryToCv};
 use anyhow::{Error, Result};
 use ndarray as nd;
 use opencv::{core as cv, prelude::*};
@@ -21,23 +20,23 @@ where
     }
 }
 
-impl<A, D> TryFromCv<cv::Mat> for nd::Array<A, D>
+impl<A, D> TryToCv<nd::Array<A, D>> for cv::Mat
 where
     A: OpenCvElement + Clone,
     D: nd::Dimension,
 {
     type Error = anyhow::Error;
 
-    fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
-        let src_shape = from.size_with_depth();
-        let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
+    fn try_to_cv(&self) -> Result<nd::Array<A, D>, Self::Error> {
+        let src_shape = self.size_with_depth();
+        let array = nd::ArrayViewD::from_shape(src_shape, self.as_slice()?)?;
         let array = array.into_dimensionality()?;
         let array = array.into_owned();
         Ok(array)
     }
 }
 
-impl<A, S, D> TryFromCv<nd::ArrayBase<S, D>> for cv::Mat
+impl<A, S, D> TryToCv<cv::Mat> for nd::ArrayBase<S, D>
 where
     A: cv::DataType,
     S: nd::RawData<Elem = A> + nd::Data,
@@ -45,15 +44,15 @@ where
 {
     type Error = Error;
 
-    fn try_from_cv(from: &nd::ArrayBase<S, D>) -> Result<Self> {
-        let shape_with_channels: Vec<i32> = from.shape().iter().map(|&sz| sz as i32).collect();
+    fn try_to_cv(&self) -> Result<cv::Mat, Self::Error> {
+        let shape_with_channels: Vec<i32> = self.shape().iter().map(|&sz| sz as i32).collect();
         let (channels, shape) = match shape_with_channels.split_last() {
             Some(split) => split,
             None => {
                 return Ok(Mat::default());
             }
         };
-        let array = from.as_standard_layout();
+        let array = self.as_standard_layout();
         let slice = array.as_slice().unwrap();
         let mat = cv::Mat::from_slice(slice)?.reshape_nd(*channels, shape)?;
         Ok(mat)

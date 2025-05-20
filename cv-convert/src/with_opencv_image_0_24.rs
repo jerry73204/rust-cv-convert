@@ -1,12 +1,13 @@
 use crate::image;
 use crate::opencv::{core as cv, prelude::*};
 use crate::with_opencv::MatExt;
-use crate::{OpenCvElement, TryFromCv, TryToCv};
+use crate::{OpenCvElement, TryToCv};
 use anyhow::{bail, ensure, Error, Result};
 use std::ops::Deref;
+use cv::DataType;
 
 // &ImageBuffer -> Mat
-impl<P, Container> TryFromCv<image::ImageBuffer<P, Container>> for cv::Mat
+impl<P, Container> TryToCv<cv::Mat> for image::ImageBuffer<P, Container>
 where
     P: image::Pixel,
     P::Subpixel: OpenCvElement,
@@ -14,15 +15,15 @@ where
 {
     type Error = Error;
 
-    fn try_from_cv(from: &image::ImageBuffer<P, Container>) -> Result<Self, Self::Error> {
-        let (width, height) = from.dimensions();
+    fn try_to_cv(&self) -> Result<cv::Mat, Self::Error> {
+        let (width, height) = self.dimensions();
         let cv_type = cv::CV_MAKETYPE(P::Subpixel::DEPTH, P::CHANNEL_COUNT as i32);
         let mat = unsafe {
             cv::Mat::new_rows_cols_with_data(
                 height as i32,
                 width as i32,
                 cv_type,
-                from.as_ptr() as *mut _,
+                self.as_ptr() as *mut _,
                 cv::Mat_AUTO_STEP,
             )?
             .try_clone()?
@@ -32,13 +33,13 @@ where
 }
 
 // &DynamicImage -> Mat
-impl TryFromCv<image::DynamicImage> for cv::Mat {
+impl TryToCv<cv::Mat> for image::DynamicImage {
     type Error = Error;
 
-    fn try_from_cv(from: &image::DynamicImage) -> Result<Self, Self::Error> {
+    fn try_to_cv(&self) -> Result<cv::Mat, Self::Error> {
         use image::DynamicImage as D;
 
-        let mat = match from {
+        let mat = match self {
             D::ImageLuma8(image) => image.try_to_cv()?,
             D::ImageLumaA8(image) => image.try_to_cv()?,
             D::ImageRgb8(image) => image.try_to_cv()?,
@@ -56,29 +57,29 @@ impl TryFromCv<image::DynamicImage> for cv::Mat {
 }
 
 // &Mat -> DynamicImage
-impl TryFromCv<cv::Mat> for image::DynamicImage {
+impl TryToCv<image::DynamicImage> for cv::Mat {
     type Error = Error;
 
-    fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
-        let rows = from.rows();
-        let cols = from.cols();
+    fn try_to_cv(&self) -> Result<image::DynamicImage, Self::Error> {
+        let rows = self.rows();
+        let cols = self.cols();
         ensure!(
             rows != -1 && cols != -1,
             "Mat with more than 2 dimensions is not supported."
         );
 
-        let depth = from.depth();
-        let n_channels = from.channels();
+        let depth = self.depth();
+        let n_channels = self.channels();
         let width = cols as u32;
         let height = rows as u32;
 
         let image: image::DynamicImage = match (depth, n_channels) {
-            (cv::CV_8U, 1) => mat_to_image_buffer_gray::<u8>(from, width, height).into(),
-            (cv::CV_16U, 1) => mat_to_image_buffer_gray::<u16>(from, width, height).into(),
-            (cv::CV_8U, 3) => mat_to_image_buffer_rgb::<u8>(from, width, height).into(),
-            (cv::CV_16U, 3) => mat_to_image_buffer_rgb::<u16>(from, width, height).into(),
-            (cv::CV_32F, 3) => mat_to_image_buffer_rgb::<f32>(from, width, height).into(),
-            _ => bail!("Mat of type {} is not supported", from.type_name()),
+            (cv::CV_8U, 1) => mat_to_image_buffer_gray::<u8>(self, width, height).into(),
+            (cv::CV_16U, 1) => mat_to_image_buffer_gray::<u16>(self, width, height).into(),
+            (cv::CV_8U, 3) => mat_to_image_buffer_rgb::<u8>(self, width, height).into(),
+            (cv::CV_16U, 3) => mat_to_image_buffer_rgb::<u16>(self, width, height).into(),
+            (cv::CV_32F, 3) => mat_to_image_buffer_rgb::<f32>(self, width, height).into(),
+            _ => bail!("Mat of type {} is not supported", self.type_name()),
         };
 
         Ok(image)
@@ -86,23 +87,23 @@ impl TryFromCv<cv::Mat> for image::DynamicImage {
 }
 
 // &Mat -> gray ImageBuffer
-impl<T> TryFromCv<cv::Mat> for image::ImageBuffer<image::Luma<T>, Vec<T>>
+impl<T> TryToCv<image::ImageBuffer<image::Luma<T>, Vec<T>>> for cv::Mat
 where
     image::Luma<T>: image::Pixel,
     T: OpenCvElement + image::Primitive + DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
-        let rows = from.rows();
-        let cols = from.cols();
+    fn try_to_cv(&self) -> Result<image::ImageBuffer<image::Luma<T>, Vec<T>>, Self::Error> {
+        let rows = self.rows();
+        let cols = self.cols();
         ensure!(
             rows != -1 && cols != -1,
             "Mat with more than 2 dimensions is not supported."
         );
 
-        let depth = from.depth();
-        let n_channels = from.channels();
+        let depth = self.depth();
+        let n_channels = self.channels();
         let width = cols as u32;
         let height = rows as u32;
 
@@ -112,29 +113,29 @@ where
         );
         ensure!(depth == T::DEPTH, "Subpixel type is not supported");
 
-        let image = mat_to_image_buffer_gray::<T>(from, width, height);
+        let image = mat_to_image_buffer_gray::<T>(self, width, height);
         Ok(image)
     }
 }
 
 // &Mat -> rgb ImageBuffer
-impl<T> TryFromCv<cv::Mat> for image::ImageBuffer<image::Rgb<T>, Vec<T>>
+impl<T> TryToCv<image::ImageBuffer<image::Rgb<T>, Vec<T>>> for cv::Mat
 where
     image::Rgb<T>: image::Pixel<Subpixel = T>,
     T: OpenCvElement + image::Primitive + DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &cv::Mat) -> Result<Self, Self::Error> {
-        let rows = from.rows();
-        let cols = from.cols();
+    fn try_to_cv(&self) -> Result<image::ImageBuffer<image::Rgb<T>, Vec<T>>, Self::Error> {
+        let rows = self.rows();
+        let cols = self.cols();
         ensure!(
             rows != -1 && cols != -1,
             "Mat with more than 2 dimensions is not supported."
         );
 
-        let depth = from.depth();
-        let n_channels = from.channels();
+        let depth = self.depth();
+        let n_channels = self.channels();
         let width = cols as u32;
         let height = rows as u32;
 
@@ -144,7 +145,7 @@ where
         );
         ensure!(depth == T::DEPTH, "Subpixel type is not supported");
 
-        let image = mat_to_image_buffer_rgb::<T>(from, width, height);
+        let image = mat_to_image_buffer_rgb::<T>(self, width, height);
         Ok(image)
     }
 }
@@ -196,8 +197,7 @@ mod tests {
     use crate::opencv::{core as cv, prelude::*};
     use crate::with_opencv::MatExt;
     use crate::TryToCv;
-    use anyhow::ensure;
-    use anyhow::Result;
+    use anyhow::{ensure, Result};
     use itertools::iproduct;
 
     #[test]
@@ -208,8 +208,8 @@ mod tests {
         // gray
         {
             let mat = Mat::new_randn_2d(HEIGHT as i32, WIDTH as i32, cv::CV_8UC1)?;
-            let image: image::GrayImage = (&mat).try_to_cv()?;
-            let mat2: Mat = (&image).try_to_cv()?;
+            let image: image::GrayImage = mat.try_to_cv()?;
+            let mat2: Mat = image.try_to_cv()?;
 
             iproduct!(0..HEIGHT, 0..WIDTH).try_for_each(|(row, col)| {
                 let p1: u8 = *mat.at_2d(row as i32, col as i32)?;
@@ -223,8 +223,8 @@ mod tests {
         // rgb
         {
             let mat = Mat::new_randn_2d(HEIGHT as i32, WIDTH as i32, cv::CV_8UC3)?;
-            let image: image::RgbImage = (&mat).try_to_cv()?;
-            let mat2: Mat = (&image).try_to_cv()?;
+            let image: image::RgbImage = mat.try_to_cv()?;
+            let mat2: Mat = image.try_to_cv()?;
 
             iproduct!(0..HEIGHT, 0..WIDTH).try_for_each(|(row, col)| {
                 let p1: cv::Point3_<u8> = *mat.at_2d(row as i32, col as i32)?;

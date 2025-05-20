@@ -202,7 +202,7 @@ mod traits;
 pub use traits::*;
 
 pub mod prelude {
-    pub use crate::traits::{FromCv, ToCv, TryFromCv, TryToCv};
+    pub use crate::traits::{ToCv, TryToCv};
 }
 
 mod macros;

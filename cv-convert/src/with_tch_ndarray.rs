@@ -1,4 +1,4 @@
-use crate::{FromCv, TryFromCv};
+use crate::{ToCv, TryToCv};
 use anyhow::{bail, ensure, Error, Result};
 use ndarray as nd;
 
@@ -133,7 +133,7 @@ mod to_ndarray_shape {
     }
 }
 
-impl<A, D> TryFromCv<tch::Tensor> for nd::Array<A, D>
+impl<A, D> TryToCv<nd::Array<A, D>> for tch::Tensor
 where
     D: nd::Dimension,
     A: tch::kind::Element,
@@ -142,36 +142,36 @@ where
 {
     type Error = Error;
 
-    fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
+    fn try_to_cv(&self) -> Result<nd::Array<A, D>, Self::Error> {
         // check element type consistency
         ensure!(
-            from.kind() == A::KIND,
+            self.kind() == A::KIND,
             "tensor with kind {:?} cannot converted to array with type {:?}",
-            from.kind(),
+            self.kind(),
             A::KIND
         );
 
-        let shape = from.size();
-        let elems = Vec::<A>::try_from(from.flatten(0, -1))?;
+        let shape = self.size();
+        let elems = Vec::<A>::try_from(self.flatten(0, -1))?;
         let array_shape = shape.to_ndarray_shape()?;
-        let array = Self::from_shape_vec(array_shape, elems)?;
+        let array = nd::Array::<A, D>::from_shape_vec(array_shape, elems)?;
         Ok(array)
     }
 }
 
-impl<A, S, D> FromCv<nd::ArrayBase<S, D>> for tch::Tensor
+impl<A, S, D> ToCv<tch::Tensor> for nd::ArrayBase<S, D>
 where
     A: tch::kind::Element + Clone,
     S: nd::RawData<Elem = A> + nd::Data,
     D: nd::Dimension,
 {
-    fn from_cv(from: &nd::ArrayBase<S, D>) -> Self {
-        let shape: Vec<_> = from.shape().iter().map(|&s| s as i64).collect();
+    fn to_cv(&self) -> tch::Tensor {
+        let shape: Vec<_> = self.shape().iter().map(|&s| s as i64).collect();
 
-        match from.as_slice() {
+        match self.as_slice() {
             Some(slice) => tch::Tensor::from_slice(slice).view(shape.as_slice()),
             None => {
-                let elems: Vec<_> = from.iter().cloned().collect();
+                let elems: Vec<_> = self.iter().cloned().collect();
                 tch::Tensor::from_slice(&elems).view(shape.as_slice())
             }
         }
@@ -181,7 +181,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::TryToCv;
+    use crate::{ToCv, TryToCv};
     use itertools::{iproduct, izip};
     use rand::prelude::*;
     use tch::{self, IndexOp};
@@ -195,7 +195,7 @@ mod tests {
             let s2 = 5;
 
             let tensor = tch::Tensor::randn([s0, s1, s2], tch::kind::FLOAT_CPU);
-            let array: nd::ArrayD<f32> = (&tensor).try_to_cv()?;
+            let array: nd::ArrayD<f32> = tensor.try_to_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
                 let lhs: f32 = tensor.i((i0, i1, i2)).try_into().unwrap();
@@ -209,7 +209,7 @@ mod tests {
         // Array0
         {
             let tensor = tch::Tensor::randn([], tch::kind::FLOAT_CPU);
-            let array: nd::Array0<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array0<f32> = tensor.try_to_cv()?;
             let lhs: f32 = tensor.try_into().unwrap();
             let rhs = array[()];
             ensure!(lhs == rhs, "value mismatch");
@@ -219,7 +219,7 @@ mod tests {
         {
             let s0 = 10;
             let tensor = tch::Tensor::randn([s0], tch::kind::FLOAT_CPU);
-            let array: nd::Array1<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array1<f32> = tensor.try_to_cv()?;
 
             let is_correct = (0..s0).all(|ind| {
                 let lhs: f32 = tensor.i((ind,)).try_into().unwrap();
@@ -236,7 +236,7 @@ mod tests {
             let s1 = 5;
 
             let tensor = tch::Tensor::randn([s0, s1], tch::kind::FLOAT_CPU);
-            let array: nd::Array2<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array2<f32> = tensor.try_to_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1).all(|(i0, i1)| {
                 let lhs: f32 = tensor.i((i0, i1)).try_into().unwrap();
@@ -254,7 +254,7 @@ mod tests {
             let s2 = 7;
 
             let tensor = tch::Tensor::randn([s0, s1, s2], tch::kind::FLOAT_CPU);
-            let array: nd::Array3<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array3<f32> = tensor.try_to_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2).all(|(i0, i1, i2)| {
                 let lhs: f32 = tensor.i((i0, i1, i2)).try_into().unwrap();
@@ -273,7 +273,7 @@ mod tests {
             let s3 = 11;
 
             let tensor = tch::Tensor::randn([s0, s1, s2, s3], tch::kind::FLOAT_CPU);
-            let array: nd::Array4<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array4<f32> = tensor.try_to_cv()?;
 
             let is_correct =
                 itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3).all(|(i0, i1, i2, i3)| {
@@ -294,7 +294,7 @@ mod tests {
             let s4 = 13;
 
             let tensor = tch::Tensor::randn([s0, s1, s2, s3, s4], tch::kind::FLOAT_CPU);
-            let array: nd::Array5<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array5<f32> = tensor.try_to_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3, 0..s4).all(
                 |(i0, i1, i2, i3, i4)| {
@@ -323,7 +323,7 @@ mod tests {
             let s5 = 17;
 
             let tensor = tch::Tensor::randn([s0, s1, s2, s3, s4, s5], tch::kind::FLOAT_CPU);
-            let array: nd::Array6<f32> = (&tensor).try_to_cv()?;
+            let array: nd::Array6<f32> = tensor.try_to_cv()?;
 
             let is_correct = itertools::iproduct!(0..s0, 0..s1, 0..s2, 0..s3, 0..s4, 0..s5).all(
                 |(i0, i1, i2, i3, i4, i5)| {
@@ -357,7 +357,7 @@ mod tests {
         let array = nd::Array3::<f32>::from_shape_simple_fn([s0, s1, s2], || rng.gen());
         let array = array.reversed_axes();
 
-        let tensor = tch::Tensor::from_cv(&array);
+        let tensor: tch::Tensor = array.to_cv();
 
         let is_shape_correct = array.shape().len() == tensor.size().len()
             && izip!(array.shape().iter().cloned(), tensor.size().iter().cloned())

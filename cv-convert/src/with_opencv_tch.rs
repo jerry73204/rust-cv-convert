@@ -1,4 +1,4 @@
-use crate::{TchTensorAsImage, TchTensorImageShape, TryAsRefCv, TryFromCv};
+use crate::{TchTensorAsImage, TchTensorImageShape, TryAsRefCv, TryToCv};
 use anyhow::{bail, ensure, Error, Result};
 use opencv::{core as cv, prelude::*};
 use std::borrow::Cow;
@@ -155,15 +155,15 @@ impl<'a> TryAsRefCv<'a, OpenCvMatAsTchTensor<'a>> for cv::Mat {
     }
 }
 
-impl TryFromCv<cv::Mat> for TchTensorAsImage {
+impl TryToCv<TchTensorAsImage> for cv::Mat {
     type Error = Error;
 
-    fn try_from_cv(mat: &cv::Mat) -> Result<Self, Self::Error> {
-        let from = if mat.is_continuous() {
-            Cow::Borrowed(mat)
+    fn try_to_cv(&self) -> Result<TchTensorAsImage, Self::Error> {
+        let from = if self.is_continuous() {
+            Cow::Borrowed(self)
         } else {
             // Mat created from clone() is implicitly continuous
-            Cow::Owned(mat.try_clone()?)
+            Cow::Owned(self.try_clone()?)
         };
 
         let TchImageMeta {
@@ -187,15 +187,15 @@ impl TryFromCv<cv::Mat> for TchTensorAsImage {
     }
 }
 
-impl TryFromCv<cv::Mat> for tch::Tensor {
+impl TryToCv<tch::Tensor> for cv::Mat {
     type Error = Error;
 
-    fn try_from_cv(mat: &cv::Mat) -> Result<Self, Self::Error> {
-        let from = if mat.is_continuous() {
-            Cow::Borrowed(mat)
+    fn try_to_cv(&self) -> Result<tch::Tensor, Self::Error> {
+        let from = if self.is_continuous() {
+            Cow::Borrowed(self)
         } else {
             // Mat created from clone() is implicitly continuous
-            Cow::Owned(mat.try_clone()?)
+            Cow::Owned(self.try_clone()?)
         };
 
         let TchTensorMeta { kind, shape } = opencv_mat_to_tch_meta_nd(&*from)?;
@@ -212,14 +212,14 @@ impl TryFromCv<cv::Mat> for tch::Tensor {
     }
 }
 
-impl TryFromCv<TchTensorAsImage> for cv::Mat {
+impl TryToCv<cv::Mat> for TchTensorAsImage {
     type Error = Error;
 
-    fn try_from_cv(from: &TchTensorAsImage) -> Result<Self, Self::Error> {
+    fn try_to_cv(&self) -> Result<cv::Mat, Self::Error> {
         let TchTensorAsImage {
             ref tensor,
             kind: convention,
-        } = *from;
+        } = *self;
 
         use TchTensorImageShape as S;
         let (tensor, [channels, rows, cols]) = match (tensor.size3()?, convention) {
@@ -248,11 +248,11 @@ impl TryFromCv<TchTensorAsImage> for cv::Mat {
     }
 }
 
-impl TryFromCv<tch::Tensor> for cv::Mat {
+impl TryToCv<cv::Mat> for tch::Tensor {
     type Error = Error;
 
-    fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        let tensor = from.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
+    fn try_to_cv(&self) -> Result<cv::Mat, Self::Error> {
+        let tensor = self.f_contiguous()?.f_to_device(tch::Device::Cpu)?;
         let size: Vec<_> = tensor.size().into_iter().map(|dim| dim as i32).collect();
         let depth = tch_kind_to_opencv_depth(tensor.f_kind()?)?;
         let typ = cv::CV_MAKETYPE(depth, 1);
@@ -275,8 +275,9 @@ mod tests {
 
         for _ in 0..ROUNDS {
             let before = Tensor::randn(size.as_ref(), tch::kind::FLOAT_CPU);
-            let mat = cv::Mat::try_from_cv(&before)?;
-            let after = Tensor::try_from_cv(&mat)?.f_view(size)?;
+            let mat: cv::Mat = before.try_to_cv()?;
+            let after: tch::Tensor = mat.try_to_cv()?;
+            let after = after.f_view(size)?;
 
             // compare Tensor and Mat values
             {
@@ -338,8 +339,9 @@ mod tests {
             let before = Tensor::randn(&[channels, height, width], tch::kind::FLOAT_CPU);
             let mat: cv::Mat =
                 TchTensorAsImage::new(before.shallow_clone(), TchTensorImageShape::Chw)?
-                    .try_into_cv()?;
-            let after = Tensor::try_from_cv(&mat)?.f_permute(&[2, 0, 1])?; // hwc -> chw
+                    .try_to_cv()?;
+            let after: tch::Tensor = mat.try_to_cv()?;
+            let after = after.f_permute(&[2, 0, 1])?; // hwc -> chw
 
             // compare Tensor and Mat values
             for row in 0..height {
@@ -387,7 +389,7 @@ mod tests {
             let before = Tensor::randn(&[channel, height, width], tch::kind::FLOAT_CPU);
             let mat: cv::Mat =
                 TchTensorAsImage::new(before.shallow_clone(), TchTensorImageShape::Chw)?
-                    .try_into_cv()?;
+                    .try_to_cv()?;
             let after: OpenCvMatAsTchTensor<'_> = mat.try_as_ref_cv()?; // in hwc
 
             // compare original and recovered Tensor values

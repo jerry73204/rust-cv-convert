@@ -1,4 +1,4 @@
-use crate::{FromCv, TryAsRefCv, TryFromCv};
+use crate::{ToCv, TryAsRefCv, TryToCv};
 use anyhow::{ensure, Error, Result};
 use slice_of_array::prelude::*;
 use std::{mem::ManuallyDrop, ops::Deref, slice};
@@ -28,21 +28,21 @@ macro_rules! impl_from_array {
         }
 
         // Borrowed tensor to owned array
-        impl<const N: usize> TryFromCv<tch::Tensor> for [$elem; N] {
+        impl<const N: usize> TryToCv<[$elem; N]> for tch::Tensor {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-                ensure!(from.size() == &[N as i64]);
+            fn try_to_cv(&self) -> Result<[$elem; N], Self::Error> {
+                ensure!(self.size() == &[N as i64]);
                 let mut array = [Default::default(); N];
-                from.f_copy_data(array.as_mut(), N)?;
+                self.f_copy_data(array.as_mut(), N)?;
                 Ok(array)
             }
         }
 
         // Borrowed array to tensor
-        impl<const N: usize> FromCv<[$elem; N]> for tch::Tensor {
-            fn from_cv(from: &[$elem; N]) -> Self {
-                Self::from_slice(from.as_ref())
+        impl<const N: usize> ToCv<tch::Tensor> for [$elem; N] {
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.as_ref())
             }
         }
     };
@@ -72,21 +72,21 @@ macro_rules! impl_from_array {
         }
 
         // Borrowed tensor to owned array
-        impl<const N1: usize, const N2: usize> TryFromCv<tch::Tensor> for [[$elem; N2]; N1] {
+        impl<const N1: usize, const N2: usize> TryToCv<[[$elem; N2]; N1]> for tch::Tensor {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-                ensure!(from.size() == &[N1 as i64, N2 as i64]);
+            fn try_to_cv(&self) -> Result<[[$elem; N2]; N1], Self::Error> {
+                ensure!(self.size() == &[N1 as i64, N2 as i64]);
                 let mut array = [[Default::default(); N2]; N1];
-                from.f_copy_data(array.flat_mut(), N1 * N2)?;
+                self.f_copy_data(array.flat_mut(), N1 * N2)?;
                 Ok(array)
             }
         }
 
         // Borrowed array to tensor
-        impl<const N1: usize, const N2: usize> FromCv<[[$elem; N2]; N1]> for tch::Tensor {
-            fn from_cv(from: &[[$elem; N2]; N1]) -> Self {
-                Self::from_slice(from.flat()).view([N1 as i64, N2 as i64])
+        impl<const N1: usize, const N2: usize> ToCv<tch::Tensor> for [[$elem; N2]; N1] {
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.flat()).view([N1 as i64, N2 as i64])
             }
         }
     };
@@ -116,25 +116,25 @@ macro_rules! impl_from_array {
         }
 
         // Borrowed tensor to owned array
-        impl<const N1: usize, const N2: usize, const N3: usize> TryFromCv<tch::Tensor>
-            for [[[$elem; N3]; N2]; N1]
+        impl<const N1: usize, const N2: usize, const N3: usize> TryToCv<[[[$elem; N3]; N2]; N1]>
+            for tch::Tensor
         {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-                ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64]);
+            fn try_to_cv(&self) -> Result<[[[$elem; N3]; N2]; N1], Self::Error> {
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64]);
                 let mut array = [[[Default::default(); N3]; N2]; N1];
-                from.f_copy_data(array.flat_mut().flat_mut(), N1 * N2 * N3)?;
+                self.f_copy_data(array.flat_mut().flat_mut(), N1 * N2 * N3)?;
                 Ok(array)
             }
         }
 
         // Borrowed array to tensor
-        impl<const N1: usize, const N2: usize, const N3: usize> FromCv<[[[$elem; N3]; N2]; N1]>
-            for tch::Tensor
+        impl<const N1: usize, const N2: usize, const N3: usize> ToCv<tch::Tensor>
+            for [[[$elem; N3]; N2]; N1]
         {
-            fn from_cv(from: &[[[$elem; N3]; N2]; N1]) -> Self {
-                Self::from_slice(from.flat().flat()).view([N1 as i64, N2 as i64, N3 as i64])
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.flat().flat()).view([N1 as i64, N2 as i64, N3 as i64])
             }
         }
     };
@@ -166,24 +166,24 @@ macro_rules! impl_from_array {
 
         // Borrowed tensor to owned array
         impl<const N1: usize, const N2: usize, const N3: usize, const N4: usize>
-            TryFromCv<tch::Tensor> for [[[[$elem; N4]; N3]; N2]; N1]
+            TryToCv<[[[[$elem; N4]; N3]; N2]; N1]> for tch::Tensor
         {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-                ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64]);
+            fn try_to_cv(&self) -> Result<[[[[$elem; N4]; N3]; N2]; N1], Self::Error> {
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64]);
                 let mut array = [[[[Default::default(); N4]; N3]; N2]; N1];
-                from.f_copy_data(array.flat_mut().flat_mut().flat_mut(), N1 * N2 * N3 * N4)?;
+                self.f_copy_data(array.flat_mut().flat_mut().flat_mut(), N1 * N2 * N3 * N4)?;
                 Ok(array)
             }
         }
 
         // Borrowed array to tensor
         impl<const N1: usize, const N2: usize, const N3: usize, const N4: usize>
-            FromCv<[[[[$elem; N4]; N3]; N2]; N1]> for tch::Tensor
+            ToCv<tch::Tensor> for [[[[$elem; N4]; N3]; N2]; N1]
         {
-            fn from_cv(from: &[[[[$elem; N4]; N3]; N2]; N1]) -> Self {
-                Self::from_slice(from.flat().flat().flat())
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.flat().flat().flat())
                     .view([N1 as i64, N2 as i64, N3 as i64, N4 as i64])
             }
         }
@@ -227,14 +227,14 @@ macro_rules! impl_from_array {
                 const N3: usize,
                 const N4: usize,
                 const N5: usize,
-            > TryFromCv<tch::Tensor> for [[[[[$elem; N5]; N4]; N3]; N2]; N1]
+            > TryToCv<[[[[[$elem; N5]; N4]; N3]; N2]; N1]> for tch::Tensor
         {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-                ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64]);
+            fn try_to_cv(&self) -> Result<[[[[[$elem; N5]; N4]; N3]; N2]; N1], Self::Error> {
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64]);
                 let mut array = [[[[[Default::default(); N5]; N4]; N3]; N2]; N1];
-                from.f_copy_data(
+                self.f_copy_data(
                     array.flat_mut().flat_mut().flat_mut().flat_mut(),
                     N1 * N2 * N3 * N4 * N5,
                 )?;
@@ -249,10 +249,10 @@ macro_rules! impl_from_array {
                 const N3: usize,
                 const N4: usize,
                 const N5: usize,
-            > FromCv<[[[[[$elem; N5]; N4]; N3]; N2]; N1]> for tch::Tensor
+            > ToCv<tch::Tensor> for [[[[[$elem; N5]; N4]; N3]; N2]; N1]
         {
-            fn from_cv(from: &[[[[[$elem; N5]; N4]; N3]; N2]; N1]) -> Self {
-                Self::from_slice(from.flat().flat().flat().flat())
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.flat().flat().flat().flat())
                     .view([N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64])
             }
         }
@@ -304,17 +304,17 @@ macro_rules! impl_from_array {
                 const N4: usize,
                 const N5: usize,
                 const N6: usize,
-            > TryFromCv<tch::Tensor> for [[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]
+            > TryToCv<[[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]> for tch::Tensor
         {
             type Error = Error;
 
-            fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
+            fn try_to_cv(&self) -> Result<[[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1], Self::Error> {
                 ensure!(
-                    from.size()
+                    self.size()
                         == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64, N6 as i64]
                 );
                 let mut array = [[[[[[Default::default(); N6]; N5]; N4]; N3]; N2]; N1];
-                from.f_copy_data(
+                self.f_copy_data(
                     array.flat_mut().flat_mut().flat_mut().flat_mut().flat_mut(),
                     N1 * N2 * N3 * N4 * N5 * N6,
                 )?;
@@ -330,10 +330,10 @@ macro_rules! impl_from_array {
                 const N4: usize,
                 const N5: usize,
                 const N6: usize,
-            > FromCv<[[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]> for tch::Tensor
+            > ToCv<tch::Tensor> for [[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]
         {
-            fn from_cv(from: &[[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]) -> Self {
-                Self::from_slice(from.flat().flat().flat().flat().flat()).view([
+            fn to_cv(&self) -> tch::Tensor {
+                tch::Tensor::from_slice(self.flat().flat().flat().flat().flat()).view([
                     N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64, N6 as i64,
                 ])
             }
@@ -473,11 +473,11 @@ mod tensors {
             self.kind
         }
 
-        pub fn try_into_cv<T>(&self) -> Result<T, T::Error>
+        pub fn try_to_cv<T>(&self) -> Result<T, <Self as TryToCv<T>>::Error>
         where
-            T: TryFromCv<Self>,
+            Self: TryToCv<T>,
         {
-            T::try_from_cv(self)
+            TryToCv::try_to_cv(self)
         }
     }
 }
@@ -485,7 +485,7 @@ mod tensors {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{TryAsRefCv, TryToCv};
+    use crate::{TryAsRefCv, TryToCv, ToCv};
     use rand::prelude::*;
 
     #[test]
@@ -497,9 +497,9 @@ mod tests {
             type T = [f32; 3];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
@@ -511,9 +511,9 @@ mod tests {
             type T = [[f32; 3]; 2];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
@@ -525,9 +525,9 @@ mod tests {
             type T = [[[f32; 4]; 3]; 2];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
@@ -539,9 +539,9 @@ mod tests {
             type T = [[[[f32; 2]; 4]; 3]; 2];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
@@ -553,9 +553,9 @@ mod tests {
             type T = [[[[[f32; 3]; 2]; 4]; 3]; 2];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
@@ -567,9 +567,9 @@ mod tests {
             type T = [[[[[[f32; 2]; 3]; 2]; 4]; 3]; 2];
 
             let input: T = rng.gen();
-            let tensor = tch::Tensor::from_cv(&input);
+            let tensor = input.to_cv();
 
-            let array: T = (&tensor).try_to_cv().unwrap();
+            let array: T = tensor.try_to_cv().unwrap();
             assert!(array == input);
 
             let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();

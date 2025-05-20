@@ -1,4 +1,4 @@
-use crate::TryFromCv;
+use crate::TryToCv;
 use anyhow::{ensure, Error, Result};
 use half::f16;
 use opencv::{core as core_cv, prelude::*};
@@ -123,16 +123,16 @@ mod mat_ext {
     }
 }
 
-impl<T> TryFromCv<core_cv::Mat> for core_cv::Point_<T>
+impl<T> TryToCv<core_cv::Point_<T>> for core_cv::Mat
 where
     T: core_cv::DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &core_cv::Mat) -> Result<Self> {
-        let slice = from.data_typed::<T>()?;
+    fn try_to_cv(&self) -> Result<core_cv::Point_<T>> {
+        let slice = self.data_typed::<T>()?;
         ensure!(slice.len() == 2, "invalid length");
-        let point = Self {
+        let point = core_cv::Point_::<T> {
             x: slice[0],
             y: slice[1],
         };
@@ -140,16 +140,16 @@ where
     }
 }
 
-impl<T> TryFromCv<core_cv::Mat> for core_cv::Point3_<T>
+impl<T> TryToCv<core_cv::Point3_<T>> for core_cv::Mat
 where
     T: core_cv::DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &core_cv::Mat) -> Result<Self> {
-        let slice = from.data_typed::<T>()?;
+    fn try_to_cv(&self) -> Result<core_cv::Point3_<T>> {
+        let slice = self.data_typed::<T>()?;
         ensure!(slice.len() == 3, "invalid length");
-        let point = Self {
+        let point = core_cv::Point3_::<T> {
             x: slice[0],
             y: slice[1],
             z: slice[2],
@@ -158,27 +158,27 @@ where
     }
 }
 
-impl<T> TryFromCv<core_cv::Point_<T>> for core_cv::Mat
+impl<T> TryToCv<core_cv::Mat> for core_cv::Point_<T>
 where
     T: core_cv::DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &core_cv::Point_<T>) -> Result<Self> {
-        let core_cv::Point_ { x, y, .. } = *from;
+    fn try_to_cv(&self) -> Result<core_cv::Mat> {
+        let core_cv::Point_ { x, y, .. } = *self;
         let mat = core_cv::Mat::from_slice(&[x, y])?;
         Ok(mat)
     }
 }
 
-impl<T> TryFromCv<core_cv::Point3_<T>> for core_cv::Mat
+impl<T> TryToCv<core_cv::Mat> for core_cv::Point3_<T>
 where
     T: core_cv::DataType,
 {
     type Error = Error;
 
-    fn try_from_cv(from: &core_cv::Point3_<T>) -> Result<Self> {
-        let core_cv::Point3_ { x, y, z, .. } = *from;
+    fn try_to_cv(&self) -> Result<core_cv::Mat> {
+        let core_cv::Point3_ { x, y, z, .. } = *self;
         let mat = core_cv::Mat::from_slice(&[x, y, z])?;
         Ok(mat)
     }
