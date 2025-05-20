@@ -205,94 +205,104 @@ pub mod prelude {
     pub use crate::traits::{ToCv, TryToCv};
 }
 
-mod macros;
-use macros::*;
+use cfg_if::cfg_if;
 
 // modules
 
-if_image! {
+cfg_if! {
+    if #[cfg(feature = "image")] {
     pub use image;
+    }
 }
 
-if_imageproc! {
+cfg_if! {
+    if #[cfg(feature = "imageproc")] {
     pub use imageproc;
+    }
 }
 
-if_nalgebra! {
+cfg_if! {
+    if #[cfg(feature = "nalgebra")] {
     pub use nalgebra;
+    }
 }
 
-if_ndarray! {
+cfg_if! {
+    if #[cfg(feature = "ndarray")] {
     pub use ndarray;
+    }
 }
 
-if_opencv! {
+cfg_if! {
+    if #[cfg(feature = "opencv")] {
     pub use opencv;
 
     mod with_opencv;
     #[allow(unused)]
     pub use with_opencv::*;
+    }
 }
 
-if_tch! {
+cfg_if! {
+    if #[cfg(feature = "tch")] {
     pub use tch;
 
     mod with_tch;
     #[allow(unused)]
     pub use with_tch::*;
+    }
 }
 
-if_tch! {
-    if_image! {
+cfg_if! {
+    if #[cfg(all(feature = "tch", feature = "image"))] {
         mod with_tch_image;
     #[allow(unused)]
         pub use with_tch_image::*;
     }
 }
 
-if_tch! {
-    if_ndarray! {
+cfg_if! {
+    if #[cfg(all(feature = "tch", feature = "ndarray"))] {
         mod with_tch_ndarray;
     #[allow(unused)]
         pub use with_tch_ndarray::*;
     }
 }
 
-if_image! {
-    if_opencv! {
-        mod with_opencv_image_0_24;
+cfg_if! {
+    if #[cfg(all(feature = "image", feature = "opencv"))] {
+        mod with_opencv_image;
     #[allow(unused)]
-        pub use with_opencv_image_0_24::*;
-
+        pub use with_opencv_image::*;
     }
 }
 
-if_imageproc! {
-    if_opencv! {
+cfg_if! {
+    if #[cfg(all(feature = "imageproc", feature = "opencv"))] {
         mod with_opencv_imageproc;
     #[allow(unused)]
         pub use with_opencv_imageproc::*;
     }
 }
 
-if_nalgebra! {
-    if_opencv! {
+cfg_if! {
+    if #[cfg(all(feature = "nalgebra", feature = "opencv"))] {
         mod with_opencv_nalgebra;
     #[allow(unused)]
         pub use with_opencv_nalgebra::*;
     }
 }
 
-if_tch! {
-    if_opencv! {
+cfg_if! {
+    if #[cfg(all(feature = "tch", feature = "opencv"))] {
         mod with_opencv_tch;
     #[allow(unused)]
         pub use with_opencv_tch::*;
     }
 }
 
-if_opencv! {
-    if_ndarray! {
+cfg_if! {
+    if #[cfg(all(feature = "ndarray", feature = "opencv"))] {
         mod with_opencv_ndarray;
     #[allow(unused)]
         pub use with_opencv_ndarray::*;

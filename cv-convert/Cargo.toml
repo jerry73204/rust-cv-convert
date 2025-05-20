@@ -44,6 +44,7 @@ imageproc = { version = "0.23", optional = true }
 tch = { version = "0.14", optional = true }
 nalgebra = { version = "0.32", optional = true }
 ndarray = { version = "0.15", optional = true }
+cfg-if = "1.0.0"
 
 [dependencies.opencv]
 version = "0.85"
