@@ -14,15 +14,6 @@ license = 'MIT'
 features = ['docs-only']
 
 [features]
-default = [
-    'opencv',
-    'image',
-    'tch',
-    'imageproc',
-    'tch',
-    'nalgebra',
-    'ndarray',
-]
 docs-only = [
     'tch/doc-only',
 ]
