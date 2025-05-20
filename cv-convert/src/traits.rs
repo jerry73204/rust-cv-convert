@@ -1,4 +1,6 @@
+pub use as_ref_cv::*;
 pub use from::*;
+pub use try_as_ref_cv::*;
 pub use try_from::*;
 
 mod try_from {
@@ -49,5 +51,25 @@ mod from {
         fn into_cv(&self) -> U {
             U::from_cv(self)
         }
+    }
+}
+
+mod as_ref_cv {
+    pub trait AsRefCv<'a, T>
+    where
+        T: 'a,
+    {
+        fn as_ref_cv(&'a self) -> T;
+    }
+}
+
+mod try_as_ref_cv {
+    pub trait TryAsRefCv<'a, T>
+    where
+        T: 'a,
+    {
+        type Error;
+
+        fn try_as_ref_cv(&'a self) -> Result<T, Self::Error>;
     }
 }

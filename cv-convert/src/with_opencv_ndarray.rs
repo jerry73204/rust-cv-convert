@@ -1,24 +1,25 @@
 use crate::with_opencv::MatExt as _;
 use crate::with_opencv::OpenCvElement;
+use crate::TryAsRefCv;
 use crate::TryFromCv;
 use anyhow::{Error, Result};
 use ndarray as nd;
 use opencv::{core as cv, prelude::*};
 
-// impl<'a, A, D> TryFromCv<&'a cv::Mat> for nd::ArrayView<'a, A, D>
-// where
-//     A: OpenCvElement,
-//     D: nd::Dimension,
-// {
-//     type Error = anyhow::Error;
+impl<'a, A, D> TryAsRefCv<'a, nd::ArrayView<'a, A, D>> for cv::Mat
+where
+    A: OpenCvElement,
+    D: nd::Dimension + 'a,
+{
+    type Error = anyhow::Error;
 
-//     fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
-//         let src_shape = from.size_with_depth();
-//         let array = nd::ArrayViewD::from_shape(src_shape, from.as_slice()?)?;
-//         let array = array.into_dimensionality()?;
-//         Ok(array)
-//     }
-// }
+    fn try_as_ref_cv(&'a self) -> Result<nd::ArrayView<'a, A, D>, Self::Error> {
+        let src_shape = self.size_with_depth();
+        let array = nd::ArrayViewD::from_shape(src_shape, self.as_slice()?)?;
+        let array = array.into_dimensionality()?;
+        Ok(array)
+    }
+}
 
 impl<A, D> TryFromCv<cv::Mat> for nd::Array<A, D>
 where

@@ -1,5 +1,5 @@
-use crate::{TchTensorAsImage, TchTensorImageShape, TryFromCv};
-use anyhow::{bail, Error, Result};
+use crate::{TchTensorAsImage, TchTensorImageShape, TryAsRefCv, TryFromCv};
+use anyhow::{bail, ensure, Error, Result};
 use opencv::{core as cv, prelude::*};
 use std::borrow::Cow;
 use std::{
@@ -121,39 +121,39 @@ mod tensor_from_mat {
     }
 }
 
-// impl<'a> TryFromCv<&'a cv::Mat> for OpenCvMatAsTchTensor<'a> {
-//     type Error = Error;
+impl<'a> TryAsRefCv<'a, OpenCvMatAsTchTensor<'a>> for cv::Mat {
+    type Error = Error;
 
-//     fn try_from_cv(from: &'a cv::Mat) -> Result<Self, Self::Error> {
-//         ensure!(from.is_continuous(), "non-continuous Mat is not supported");
+    fn try_as_ref_cv(&'a self) -> Result<OpenCvMatAsTchTensor<'a>, Self::Error> {
+        ensure!(self.is_continuous(), "non-continuous Mat is not supported");
 
-//         let TchTensorMeta { kind, shape } = opencv_mat_to_tch_meta_nd(&from)?;
-//         let strides = {
-//             let mut strides: Vec<_> = shape
-//                 .iter()
-//                 .rev()
-//                 .cloned()
-//                 .scan(1, |prev, dim| {
-//                     let stride = *prev;
-//                     *prev *= dim;
-//                     Some(stride)
-//                 })
-//                 .collect();
-//             strides.reverse();
-//             strides
-//         };
+        let TchTensorMeta { kind, shape } = opencv_mat_to_tch_meta_nd(self)?;
+        let strides = {
+            let mut strides: Vec<_> = shape
+                .iter()
+                .rev()
+                .cloned()
+                .scan(1, |prev, dim| {
+                    let stride = *prev;
+                    *prev *= dim;
+                    Some(stride)
+                })
+                .collect();
+            strides.reverse();
+            strides
+        };
 
-//         let tensor = unsafe {
-//             let ptr = from.ptr(0)? as *const u8;
-//             tch::Tensor::f_from_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
-//         };
+        let tensor = unsafe {
+            let ptr = self.ptr(0)? as *const u8;
+            tch::Tensor::f_from_blob(ptr, &shape, &strides, kind, tch::Device::Cpu)?
+        };
 
-//         Ok(Self {
-//             tensor: ManuallyDrop::new(tensor),
-//             _mat: from,
-//         })
-//     }
-// }
+        Ok(OpenCvMatAsTchTensor {
+            tensor: ManuallyDrop::new(tensor),
+            _mat: self,
+        })
+    }
+}
 
 impl TryFromCv<cv::Mat> for TchTensorAsImage {
     type Error = Error;
@@ -388,7 +388,7 @@ mod tests {
             let mat: cv::Mat =
                 TchTensorAsImage::new(before.shallow_clone(), TchTensorImageShape::Chw)?
                     .try_into_cv()?;
-            let after = OpenCvMatAsTchTensor::try_from_cv(&mat)?; // in hwc
+            let after: OpenCvMatAsTchTensor<'_> = mat.try_as_ref_cv()?; // in hwc
 
             // compare original and recovered Tensor values
             {

@@ -1,24 +1,31 @@
-use crate::{FromCv, TryFromCv};
+use crate::{FromCv, TryAsRefCv, TryFromCv};
 use anyhow::{ensure, Error, Result};
 use slice_of_array::prelude::*;
+use std::{mem::ManuallyDrop, ops::Deref, slice};
 
 // Helper macros for implementing conversions between tensors and different dimensioned arrays
 macro_rules! impl_from_array {
     ($elem:ty, 1) => {
         // Borrowed tensor to borrowed array
-        // impl<'a, const N: usize> TryFromCv<&'a tch::Tensor> for &'a [$elem; N] {
-        //     type Error = Error;
+        impl<'a, const N: usize> TryAsRefCv<'a, TensorAsArray<'a, [$elem; N]>> for tch::Tensor {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(from.size() == &[N as i64]);
-        //         let slice: &[$elem] =
-        //             unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N) };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [$elem; N]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(self.size() == &[N as i64]);
+
+                let slice: &[$elem] =
+                    unsafe { slice::from_raw_parts(self.data_ptr() as *mut $elem, N) };
+                #[allow(unstable_name_collisions)]
+                let array = slice.as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<const N: usize> TryFromCv<tch::Tensor> for [$elem; N] {
@@ -42,21 +49,27 @@ macro_rules! impl_from_array {
 
     ($elem:ty, 2) => {
         // Borrowed tensor to borrowed array
-        // impl<'a, const N1: usize, const N2: usize> TryFromCv<&'a tch::Tensor>
-        //     for &'a [[$elem; N2]; N1]
-        // {
-        //     type Error = Error;
+        impl<'a, const N1: usize, const N2: usize> TryAsRefCv<'a, TensorAsArray<'a, [[$elem; N2]; N1]>>
+            for tch::Tensor
+        {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(from.size() == &[N1 as i64, N2 as i64]);
-        //         let slice: &[$elem] =
-        //             unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2) };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.nest().as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [[$elem; N2]; N1]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(self.size() == &[N1 as i64, N2 as i64]);
+
+                let slice: &[$elem] =
+                    unsafe { slice::from_raw_parts(self.data_ptr() as *mut $elem, N1 * N2) };
+                #[allow(unstable_name_collisions)]
+                let array = slice.nest().as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<const N1: usize, const N2: usize> TryFromCv<tch::Tensor> for [[$elem; N2]; N1] {
@@ -80,21 +93,27 @@ macro_rules! impl_from_array {
 
     ($elem:ty, 3) => {
         // Borrowed tensor to borrowed array
-        // impl<'a, const N1: usize, const N2: usize, const N3: usize> TryFromCv<&'a tch::Tensor>
-        //     for &'a [[[$elem; N3]; N2]; N1]
-        // {
-        //     type Error = Error;
+        impl<'a, const N1: usize, const N2: usize, const N3: usize>
+            TryAsRefCv<'a, TensorAsArray<'a, [[[$elem; N3]; N2]; N1]>> for tch::Tensor
+        {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64]);
-        //         let slice: &[$elem] =
-        //             unsafe { slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3) };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.nest().nest().as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [[[$elem; N3]; N2]; N1]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64]);
+
+                let slice: &[$elem] =
+                    unsafe { slice::from_raw_parts(self.data_ptr() as *mut $elem, N1 * N2 * N3) };
+                #[allow(unstable_name_collisions)]
+                let array = slice.nest().nest().as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<const N1: usize, const N2: usize, const N3: usize> TryFromCv<tch::Tensor>
@@ -122,22 +141,28 @@ macro_rules! impl_from_array {
 
     ($elem:ty, 4) => {
         // Borrowed tensor to borrowed array
-        // impl<'a, const N1: usize, const N2: usize, const N3: usize, const N4: usize>
-        //     TryFromCv<&'a tch::Tensor> for &'a [[[[$elem; N4]; N3]; N2]; N1]
-        // {
-        //     type Error = Error;
+        impl<'a, const N1: usize, const N2: usize, const N3: usize, const N4: usize>
+            TryAsRefCv<'a, TensorAsArray<'a, [[[[$elem; N4]; N3]; N2]; N1]>> for tch::Tensor
+        {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64]);
-        //         let slice: &[$elem] = unsafe {
-        //             slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3 * N4)
-        //         };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.nest().nest().nest().as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [[[[$elem; N4]; N3]; N2]; N1]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64]);
+
+                let slice: &[$elem] = unsafe {
+                    slice::from_raw_parts(self.data_ptr() as *mut $elem, N1 * N2 * N3 * N4)
+                };
+                #[allow(unstable_name_collisions)]
+                let array = slice.nest().nest().nest().as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<const N1: usize, const N2: usize, const N3: usize, const N4: usize>
@@ -166,28 +191,34 @@ macro_rules! impl_from_array {
 
     ($elem:ty, 5) => {
         // Borrowed tensor to borrowed array
-        // impl<
-        //         'a,
-        //         const N1: usize,
-        //         const N2: usize,
-        //         const N3: usize,
-        //         const N4: usize,
-        //         const N5: usize,
-        //     > TryFromCv<&'a tch::Tensor> for &'a [[[[[$elem; N5]; N4]; N3]; N2]; N1]
-        // {
-        //     type Error = Error;
+        impl<
+                'a,
+                const N1: usize,
+                const N2: usize,
+                const N3: usize,
+                const N4: usize,
+                const N5: usize,
+            > TryAsRefCv<'a, TensorAsArray<'a, [[[[[$elem; N5]; N4]; N3]; N2]; N1]>> for tch::Tensor
+        {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(from.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64]);
-        //         let slice: &[$elem] = unsafe {
-        //             slice::from_raw_parts(from.data_ptr() as *mut $elem, N1 * N2 * N3 * N4 * N5)
-        //         };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.nest().nest().nest().nest().as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [[[[[$elem; N5]; N4]; N3]; N2]; N1]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(self.size() == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64]);
+
+                let slice: &[$elem] = unsafe {
+                    slice::from_raw_parts(self.data_ptr() as *mut $elem, N1 * N2 * N3 * N4 * N5)
+                };
+                #[allow(unstable_name_collisions)]
+                let array = slice.nest().nest().nest().nest().as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<
@@ -229,35 +260,41 @@ macro_rules! impl_from_array {
 
     ($elem:ty, 6) => {
         // Borrowed tensor to borrowed array
-        // impl<
-        //         'a,
-        //         const N1: usize,
-        //         const N2: usize,
-        //         const N3: usize,
-        //         const N4: usize,
-        //         const N5: usize,
-        //         const N6: usize,
-        //     > TryFromCv<&'a tch::Tensor> for &'a [[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]
-        // {
-        //     type Error = Error;
+        impl<
+                'a,
+                const N1: usize,
+                const N2: usize,
+                const N3: usize,
+                const N4: usize,
+                const N5: usize,
+                const N6: usize,
+            > TryAsRefCv<'a, TensorAsArray<'a, [[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]>> for tch::Tensor
+        {
+            type Error = Error;
 
-        //     fn try_from_cv(from: &tch::Tensor) -> Result<Self, Self::Error> {
-        //         ensure!(from.device() == tch::Device::Cpu);
-        //         ensure!(from.kind() == <$elem as tch::kind::Element>::KIND);
-        //         ensure!(
-        //             from.size()
-        //                 == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64, N6 as i64]
-        //         );
-        //         let slice: &[$elem] = unsafe {
-        //             slice::from_raw_parts(
-        //                 from.data_ptr() as *mut $elem,
-        //                 N1 * N2 * N3 * N4 * N5 * N6,
-        //             )
-        //         };
-        //         #[allow(unstable_name_collisions)]
-        //         Ok(slice.nest().nest().nest().nest().nest().as_array())
-        //     }
-        // }
+            fn try_as_ref_cv(&'a self) -> Result<TensorAsArray<'a, [[[[[[$elem; N6]; N5]; N4]; N3]; N2]; N1]>, Self::Error> {
+                ensure!(self.device() == tch::Device::Cpu);
+                ensure!(self.kind() == <$elem as tch::kind::Element>::KIND);
+                ensure!(
+                    self.size()
+                        == &[N1 as i64, N2 as i64, N3 as i64, N4 as i64, N5 as i64, N6 as i64]
+                );
+
+                let slice: &[$elem] = unsafe {
+                    slice::from_raw_parts(
+                        self.data_ptr() as *mut $elem,
+                        N1 * N2 * N3 * N4 * N5 * N6,
+                    )
+                };
+                #[allow(unstable_name_collisions)]
+                let array = slice.nest().nest().nest().nest().nest().as_array();
+
+                Ok(TensorAsArray {
+                    data: ManuallyDrop::new(*array),
+                    _tensor: self,
+                })
+            }
+        }
 
         // Borrowed tensor to owned array
         impl<
@@ -368,9 +405,38 @@ impl_from_array!(bool, 4);
 impl_from_array!(bool, 5);
 impl_from_array!(bool, 6);
 
-pub use tensor_as_image::*;
-mod tensor_as_image {
+pub use tensors::*;
+mod tensors {
     use super::*;
+
+    /// A wrapper for a borrowed array reference from a tensor.
+    #[derive(Debug)]
+    pub struct TensorAsArray<'a, T> {
+        pub(crate) data: ManuallyDrop<T>,
+        pub(crate) _tensor: &'a tch::Tensor,
+    }
+
+    impl<'a, T> Drop for TensorAsArray<'a, T> {
+        fn drop(&mut self) {
+            unsafe {
+                ManuallyDrop::drop(&mut self.data);
+            }
+        }
+    }
+
+    impl<'a, T> AsRef<T> for TensorAsArray<'a, T> {
+        fn as_ref(&self) -> &T {
+            &self.data
+        }
+    }
+
+    impl<'a, T> Deref for TensorAsArray<'a, T> {
+        type Target = T;
+
+        fn deref(&self) -> &Self::Target {
+            &self.data
+        }
+    }
 
     /// An 2D image [Tensor](tch::Tensor) with dimension order.
     #[derive(Debug)]
@@ -406,13 +472,20 @@ mod tensor_as_image {
         pub fn kind(&self) -> TchTensorImageShape {
             self.kind
         }
+
+        pub fn try_into_cv<T>(&self) -> Result<T, T::Error>
+        where
+            T: TryFromCv<Self>,
+        {
+            T::try_from_cv(self)
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::TryToCv;
+    use crate::{TryAsRefCv, TryToCv};
     use rand::prelude::*;
 
     #[test]
@@ -429,8 +502,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
 
         // 2 dim
@@ -443,8 +516,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
 
         // 3 dim
@@ -457,8 +530,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
 
         // 4 dim
@@ -471,8 +544,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
 
         // 5 dim
@@ -485,8 +558,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
 
         // 6 dim
@@ -499,8 +572,8 @@ mod tests {
             let array: T = (&tensor).try_to_cv().unwrap();
             assert!(array == input);
 
-            let array_ref: &T = (&tensor).try_to_cv().unwrap();
-            assert!(array_ref == input.as_ref());
+            let array_wrapper: TensorAsArray<T> = (&tensor).try_as_ref_cv().unwrap();
+            assert!(*array_wrapper == input);
         }
     }
 }
