@@ -29,9 +29,7 @@ features = [
 ]
 ```
 
-The basic features (`image`, `opencv`, etc.) enable the latest supported versions
-of the dependencies. If you need specific versions, you can use versioned features
-like `image_0-24`, `opencv_0-84`, etc.
+The basic features (`image`, `opencv`, etc.) enable support for the compatible version ranges of each dependency.
 
 The minimum supported `rustc` is 1.51. You may use older versions of
 the crate (>=0.6) in order to use `rustc` versions that do not support
@@ -48,25 +46,14 @@ const-generics.
 - `opencv` - Enable [opencv](https://crates.io/crates/opencv) crate support (latest version)
 - `tch` - Enable [tch](https://crates.io/crates/tch) crate support (latest version)
 
-### Version-specific features (if needed)
+### Supported version ranges
 
-#### opencv
-- `opencv_0-84` through `opencv_0-63` - Specific opencv versions
-
-#### image
-- `image_0-24`, `image_0-23` - Specific image versions
-
-#### imageproc
-- `imageproc_0-23` - Specific imageproc versions
-
-#### ndarray
-- `ndarray_0-15` - Specific ndarray versions
-
-#### nalgebra
-- `nalgebra_0-32` through `nalgebra_0-26` - Specific nalgebra versions
-
-#### tch
-- `tch_0-13` - Specific tch versions
+- `image` - Supports version >=0.24
+- `imageproc` - Supports version >=0.22
+- `nalgebra` - Supports versions >=0.26, <0.33
+- `ndarray` - Supports version >=0.13
+- `opencv` - Supports versions >=0.63, <0.89
+- `tch` - Supports version >=0.13
 
 ## Example Usage
 
