@@ -26,8 +26,6 @@ default = [
 docs-only = [
     'tch/doc-only',
 ]
-image_0-23 = []
-image_0-24 = []
 
 [dev-dependencies]
 approx = '0.5.1'
@@ -39,15 +37,15 @@ anyhow = '1.0.53'
 num-traits = '0.2.15'
 slice-of-array = '0.3.1'
 half = '2.3.1'
-image = { version = "0.24", optional = true }
-imageproc = { version = "0.23", optional = true }
-tch = { version = "0.14", optional = true }
-nalgebra = { version = "0.32", optional = true }
-ndarray = { version = "0.15", optional = true }
 cfg-if = "1.0.0"
+image = { version = ">=0.24", optional = true }
+imageproc = { version = ">=0.22", optional = true }
+tch = { version = ">=0.13", optional = true }
+nalgebra = { version = ">=0.26, <0.33", optional = true }
+ndarray = { version = ">=0.13", optional = true }
 
 [dependencies.opencv]
-version = "0.85"
+version = ">=0.63, <0.89"
 default-features = false
 features = ["calib3d"]
 optional = true
