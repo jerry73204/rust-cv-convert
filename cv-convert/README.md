@@ -12,86 +12,63 @@ supports the following crates:
 
 ## Usage
 
-Run `cargo add cv-convert` to add this crate to your project. In the
-default setting, up-to-date dependency versions are used.
-
-If you desire to enable specified dependency versions. Add
-`default-features = false` and select crate versions as Cargo
-features. For example, the feature `nalgebra_0-30` enables nalgebra
-0.30.x.
+**No crates are enabled by default.** You must specify which computer vision
+libraries you want to use as features when adding cv-convert to your project.
 
 ```toml
 [dependencies.cv-convert]
 version = 'x.y.z'  # Please look up the recent version on crates.io
 default-features = false
 features = [
-    'image_0-24',
-    'opencv_0-84',
-    'tch_0-13',
-    'nalgebra_0-32',
-    'ndarray_0-15',
+    'image',
+    'opencv',
+    'tch',
+    'nalgebra',
+    'ndarray',
+    'imageproc',
 ]
 ```
+
+The basic features (`image`, `opencv`, etc.) enable the latest supported versions
+of the dependencies. If you need specific versions, you can use versioned features
+like `image_0-24`, `opencv_0-84`, etc.
 
 The minimum supported `rustc` is 1.51. You may use older versions of
 the crate (>=0.6) in order to use `rustc` versions that do not support
 const-generics.
 
-## Cargo Features
+## Available Features
 
-### opencv
+### Core library features
 
-- `opencv_0-84`
-- `opencv_0-83`
-- `opencv_0-82`
-- `opencv_0-81`
-- `opencv_0-80`
-- `opencv_0-79`
-- `opencv_0-78`
-- `opencv_0-77`
-- `opencv_0-76`
-- `opencv_0-75`
-- `opencv_0-74`
-- `opencv_0-73`
-- `opencv_0-72`
-- `opencv_0-71`
-- `opencv_0-70`
-- `opencv_0-69`
-- `opencv_0-68`
-- `opencv_0-67`
-- `opencv_0-66`
-- `opencv_0-65`
-- `opencv_0-64`
-- `opencv_0-63`
+- `image` - Enable [image](https://crates.io/crates/image) crate support (latest version)
+- `imageproc` - Enable [imageproc](https://crates.io/crates/imageproc) crate support (latest version)
+- `nalgebra` - Enable [nalgebra](https://crates.io/crates/nalgebra) crate support (latest version)
+- `ndarray` - Enable [ndarray](https://crates.io/crates/ndarray) crate support (latest version)
+- `opencv` - Enable [opencv](https://crates.io/crates/opencv) crate support (latest version)
+- `tch` - Enable [tch](https://crates.io/crates/tch) crate support (latest version)
 
-### image
+### Version-specific features (if needed)
 
-- `image_0-24`
-- `image_0-23`
+#### opencv
+- `opencv_0-84` through `opencv_0-63` - Specific opencv versions
 
-### imageproc
+#### image
+- `image_0-24`, `image_0-23` - Specific image versions
 
-- `imageproc_0-23`
+#### imageproc
+- `imageproc_0-23` - Specific imageproc versions
 
-### ndarray
+#### ndarray
+- `ndarray_0-15` - Specific ndarray versions
 
-- `ndarray_0-15`
+#### nalgebra
+- `nalgebra_0-32` through `nalgebra_0-26` - Specific nalgebra versions
 
-### nalgebra
+#### tch
+- `tch_0-13` - Specific tch versions
 
-- `nalgebra_0-32`
-- `nalgebra_0-31`
-- `nalgebra_0-30`
-- `nalgebra_0-29`
-- `nalgebra_0-28`
-- `nalgebra_0-27`
-- `nalgebra_0-26`
-
-### tch
-
-- `tch_0-13`
-
-## Usage
+## Example Usage
 
 The crate provides `ToCv`, `TryToCv`, `AsRefCv`, `TryAsRefCv` traits, which are similar to standard library's `Into` and `TryInto`.
 
@@ -119,23 +96,20 @@ let na_mat: na::DMatrix<f64> = cv_mat.try_to_cv()?;
 
 ## Contribute to this Project
 
-### Add a new dependency version
+### Add support for new dependency versions
 
-To add the new version of nalgebra 0.32 for cv-convert for example,
-open `cv-convert-generate/packages.toml` in the source repository. Add
-a new version to the list like this.
+Dependencies are now specified using range-based version requirements in `cv-convert/Cargo.toml`.
+To support new versions of a dependency, simply update the version range in the `[dependencies]` section.
+
+For example, to add support for nalgebra 0.33, update the nalgebra dependency:
 
 ```toml
-[package.nalgebra]
-versions = ["0.26", "0.27", "0.28", "0.29", "0.30", "0.31", "0.32"]
-use_default_features = true
-features = []
+[dependencies]
+nalgebra = { version = ">=0.26, <0.34", optional = true }
 ```
 
-Run `make generate` at the top-level directory. It modifies Rust
-source files automatically. One extra step is to copy the snipplet in
-`cv-convert/generated/Cargo.toml.snipplet` and paste it to
-`cv-convert/Cargo.toml`.
+This approach automatically supports all compatible versions within the specified range without
+needing to generate code for each individual version.
 
 
 ### Add a new type conversion
@@ -157,11 +131,11 @@ impl ToCv<image::DynamicImage> for opencv::Mat { /* omit */ }
 
 // or
 
-impl TryToCv<opencv::Mat> for image::DynamicImage { 
+impl TryToCv<opencv::Mat> for image::DynamicImage {
     type Error = SomeError;
     fn try_to_cv(&self) -> Result<opencv::Mat, Self::Error> { /* omit */ }
 }
-impl TryToCv<image::DynamicImage> for opencv::Mat { 
+impl TryToCv<image::DynamicImage> for opencv::Mat {
     type Error = SomeError;
     fn try_to_cv(&self) -> Result<image::DynamicImage, Self::Error> { /* omit */ }
 }
