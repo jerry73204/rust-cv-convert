@@ -1,33 +1,36 @@
 //! Data conversion among computer vision libraries.
 //!
-//! # Version Selection
+//! # Usage
 //!
-//! In the default setting, up-to-date dependencies are used. The
-//! default dependency versions are listed in `[features]` in
-//! cv-convert `Cargo.toml`.
-//!
-//! You can manually select desired dependency versions. The choices
-//! of dependency versions are named accordingly as Cargo
-//! features. For example, the feature `nalgebra_0-31` enables
-//! nalgebra 0.31.x.  It allows to list crate version selections in
-//! `Cargo.toml`.
+//! **No crates are enabled by default.** You must specify which computer vision
+//! libraries you want to use as features when adding cv-convert to your project.
 //!
 //! ```toml
 //! [dependencies.cv-convert]
 //! version = 'x.y.z'
 //! default-features = false
 //! features = [
-//!     'image_0-24',
-//!     'opencv_0-76',
-//!     'tch_0-10',
-//!     'nalgebra_0-32',
-//!     'ndarray_0-15',
+//!     'image',
+//!     'opencv',
+//!     'tch',
+//!     'nalgebra',
+//!     'ndarray',
+//!     'imageproc',
 //! ]
 //! ```
 //!
-//! It's impossible to enable two or more versions for a
-//! dependency. For example, `nalgebra_0-31` and `nalgebra_0-32` are
-//! incompatible.
+//! ## Available Features
+//!
+//! Library features:
+//! - `image` - Enable [image](https://crates.io/crates/image) crate support
+//! - `imageproc` - Enable [imageproc](https://crates.io/crates/imageproc) crate support  
+//! - `nalgebra` - Enable [nalgebra](https://crates.io/crates/nalgebra) crate support
+//! - `ndarray` - Enable [ndarray](https://crates.io/crates/ndarray) crate support
+//! - `opencv` - Enable [opencv](https://crates.io/crates/opencv) crate support
+//! - `tch` - Enable [tch](https://crates.io/crates/tch) crate support
+//!
+//! Documentation feature:
+//! - `docs-only` - Used for documentation generation only
 //!
 //! # Traits
 //!
